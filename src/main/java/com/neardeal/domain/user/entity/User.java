@@ -5,6 +5,8 @@ import com.neardeal.security.oauth.OAuth2UserInfo;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
+
 @Entity
 @Getter
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
@@ -34,6 +36,12 @@ public class User extends BaseEntity {
     // 사용자 전화번호
     private String phoneNumber;
 
+    // 사용자 성별
+    private Gender gender;
+
+    // 사용자 나이
+    private LocalDate birthDate;
+
     // 권한 (USER, ADMIN)
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -47,13 +55,14 @@ public class User extends BaseEntity {
     private String socialId;
 
     @Builder
-    public User(String username, String email, String password, String name, String phoneNumber, Role role,
-            SocialType socialType, String socialId) {
+    public User(String username, String email, String password, String name, String phoneNumber, Gender gender, LocalDate birthDate, Role role, SocialType socialType, String socialId) {
         this.username = username;
         this.password = password;
         this.email = email;
         this.name = name;
         this.phoneNumber = phoneNumber;
+        this.gender = gender;
+        this.birthDate = birthDate;
         this.role = role;
         this.socialType = socialType;
         this.socialId = socialId;
@@ -65,6 +74,7 @@ public class User extends BaseEntity {
         this.phoneNumber = phoneNumber;
     }
 
+    // 이미 가입된 소셜 식벼자일 때 나머지 정보 최신화
     public User updateSocialInfo(OAuth2UserInfo userInfo) {
         if (userInfo.getName() != null && !userInfo.getName().isEmpty()) {
             this.name = userInfo.getName();

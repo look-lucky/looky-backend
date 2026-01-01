@@ -20,7 +20,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -36,7 +35,7 @@ public class CouponService {
     private final ItemRepository itemRepository;
     private final AffiliationRepository affiliationRepository;
 
-    // --- Owner Operations ---
+    // --- 점주용 ---
 
     @Transactional
     public Long createCoupon(Long storeId, User user, CreateCouponRequest request) {
@@ -60,7 +59,6 @@ public class CouponService {
                 .issueEndsAt(request.getIssueEndsAt())
                 .totalQuantity(request.getTotalQuantity())
                 .limitPerUser(request.getLimitPerUser())
-                .type(request.getType())
                 .status(request.getStatus() != null ? request.getStatus() : CouponStatus.ACTIVE)
                 .build();
 
@@ -111,7 +109,23 @@ public class CouponService {
         couponRepository.delete(coupon);
     }
 
-    // --- Public Operations ---
+    @Transactional
+    public void verifyAndUseCoupon(Long storeId, User owner, String verificationCode) {
+        Store store = storeRepository.findById(storeId)
+                .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "가게를 찾을 수 없습니다."));
+
+        validateStoreOwner(store, owner);
+
+        // 검증 코드로 우리 가게 활성화 쿠폰 조회
+        CustomerCoupon customerCoupon = customerCouponRepository.findForOwnerVerification(
+                storeId, verificationCode, CouponUsageStatus.ACTIVATED
+        ).orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "유효하지 않은 코드이거나 활성화되지 않은 쿠폰입니다."));
+
+        // 사용 처리
+        customerCoupon.use();
+    }
+
+    // --- 공통 ---
 
     public List<CouponResponse> getCouponsByStore(Long storeId) {
         return couponRepository.findByStoreId(storeId).stream()
@@ -129,7 +143,7 @@ public class CouponService {
                 .collect(Collectors.toList());
     }
 
-    // --- Customer Operations ---
+    // --- 학생용 ---
 
     @Transactional
     public IssueCouponResponse issueCoupon(Long couponId, User user) {
@@ -153,12 +167,9 @@ public class CouponService {
             throw new CustomException(ErrorCode.UNPROCESSABLE_ENTITY, "인당 발급 한도를 초과했습니다.");
         }
 
-        String code = UUID.randomUUID().toString().substring(0, 8).toUpperCase();
-
         CustomerCoupon customerCoupon = CustomerCoupon.builder()
                 .user(user)
                 .coupon(coupon)
-                .couponCode(code)
                 .status(CouponUsageStatus.UNUSED)
                 .expiresAt(now.plusDays(30))
                 .build();
@@ -169,7 +180,7 @@ public class CouponService {
     }
 
     @Transactional
-    public void useCoupon(Long customerCouponId, User user) {
+    public String activateCoupon(Long customerCouponId, User user) {
         CustomerCoupon customerCoupon = customerCouponRepository.findByIdAndUser(customerCouponId, user)
                 .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "쿠폰을 찾을 수 없습니다."));
 
@@ -181,7 +192,7 @@ public class CouponService {
             throw new CustomException(ErrorCode.UNPROCESSABLE_ENTITY, "만료된 쿠폰입니다.");
         }
 
-        customerCoupon.use();
+        return customerCoupon.activate();
     }
 
     public List<IssueCouponResponse> getMyCoupons(User user) {

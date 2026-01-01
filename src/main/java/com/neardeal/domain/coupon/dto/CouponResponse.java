@@ -2,7 +2,6 @@ package com.neardeal.domain.coupon.dto;
 
 import com.neardeal.domain.coupon.entity.Coupon;
 import com.neardeal.domain.coupon.entity.CouponStatus;
-import com.neardeal.domain.coupon.entity.CouponType;
 import lombok.Builder;
 import lombok.Getter;
 import java.time.LocalDateTime;
@@ -19,7 +18,6 @@ public class CouponResponse {
     private LocalDateTime issueEndsAt;
     private Integer totalQuantity;
     private Integer limitPerUser;
-    private CouponType type;
     private CouponStatus status;
 
     public static CouponResponse from(Coupon coupon) {
@@ -34,7 +32,6 @@ public class CouponResponse {
                 .issueEndsAt(coupon.getIssueEndsAt())
                 .totalQuantity(coupon.getTotalQuantity())
                 .limitPerUser(coupon.getLimitPerUser())
-                .type(coupon.getType())
                 .status(coupon.getStatus())
                 .build();
     }

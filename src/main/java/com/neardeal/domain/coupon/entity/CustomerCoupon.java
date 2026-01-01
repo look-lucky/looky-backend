@@ -1,16 +1,19 @@
 package com.neardeal.domain.coupon.entity;
 
+import com.neardeal.common.entity.BaseEntity;
+import com.neardeal.common.exception.CustomException;
+import com.neardeal.common.exception.ErrorCode;
 import com.neardeal.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.concurrent.ThreadLocalRandom;
 
 @Entity
 @Getter
-@AllArgsConstructor(access = AccessLevel.PROTECTED)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class CustomerCoupon {
+public class CustomerCoupon extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,8 +28,8 @@ public class CustomerCoupon {
     @JoinColumn(name = "coupon_id", nullable = false)
     private Coupon coupon;
 
-    @Column(nullable = false, unique = true)
-    private String couponCode; // 점주 확인용 고유 코드
+    @Column(length = 4)
+    private String verificationCode; // 점주 확인용 고유 코드 (쿠폰 사용 버튼 클릭 시 발급)
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -34,25 +37,50 @@ public class CustomerCoupon {
 
     private LocalDateTime issuedAt = LocalDateTime.now();
 
-    private LocalDateTime usedAt;
+    private LocalDateTime activatedAt; // 사용 버튼 누른 시점 (타이머용)
+
+    private LocalDateTime usedAt; // 사용 시점
 
     @Column(nullable = false)
     private LocalDateTime expiresAt; // 쿠폰 만료 시점
 
     @Builder
-    public CustomerCoupon(User user, Coupon coupon, String couponCode, CouponUsageStatus status, LocalDateTime issuedAt,
-            LocalDateTime usedAt, LocalDateTime expiresAt) {
+    public CustomerCoupon(User user, Coupon coupon, CouponUsageStatus status, LocalDateTime issuedAt, LocalDateTime expiresAt) {
         this.user = user;
         this.coupon = coupon;
-        this.couponCode = couponCode;
         this.status = status != null ? status : CouponUsageStatus.UNUSED;
         this.issuedAt = issuedAt != null ? issuedAt : LocalDateTime.now();
-        this.usedAt = usedAt;
         this.expiresAt = expiresAt;
     }
 
+    public String activate() {
+        if (this.status != CouponUsageStatus.UNUSED) {
+            throw new CustomException(ErrorCode.STATE_CONFLICT, "이미 사용 중이거나 사용된 쿠폰입니다.");
+        }
+
+        if (LocalDateTime.now().isAfter(this.expiresAt)) {
+            this.status = CouponUsageStatus.EXPIRED;
+            throw new CustomException(ErrorCode.STATE_CONFLICT, "만료된 쿠폰입니다.");
+        }
+
+        this.verificationCode = generateRandomCode();
+        this.status = CouponUsageStatus.ACTIVATED;
+        this.activatedAt = LocalDateTime.now();
+
+        return this.verificationCode;
+    }
+
     public void use() {
+        if (this.status != CouponUsageStatus.ACTIVATED) {
+            throw new CustomException(ErrorCode.STATE_CONFLICT, "만료된 쿠폰입니다.");
+        }
         this.status = CouponUsageStatus.USED;
         this.usedAt = LocalDateTime.now();
+    }
+
+    // 0000 ~ 9999 랜덤 생성
+    private String generateRandomCode() {
+        int number = ThreadLocalRandom.current().nextInt(0, 10000);
+        return String.format("%04d", number);
     }
 }

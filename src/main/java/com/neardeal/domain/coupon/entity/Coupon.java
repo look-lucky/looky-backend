@@ -44,16 +44,10 @@ public class Coupon extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private CouponType type;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     private CouponStatus status;
 
     @Builder
-    public Coupon(Store store, String title, String description, Affiliation targetAffiliation,
-            LocalDateTime issueStartsAt, LocalDateTime issueEndsAt, Integer totalQuantity, Integer limitPerUser,
-            CouponType type, CouponStatus status) {
+    public Coupon(Store store, String title, String description, Affiliation targetAffiliation, LocalDateTime issueStartsAt, LocalDateTime issueEndsAt, Integer totalQuantity, Integer limitPerUser, CouponStatus status) {
         this.store = store;
         this.title = title;
         this.description = description;
@@ -62,7 +56,6 @@ public class Coupon extends BaseEntity {
         this.issueEndsAt = issueEndsAt;
         this.totalQuantity = totalQuantity;
         this.limitPerUser = limitPerUser;
-        this.type = type;
         this.status = status;
     }
 
@@ -82,9 +75,5 @@ public class Coupon extends BaseEntity {
             this.limitPerUser = limitPerUser;
         if (status != null)
             this.status = status;
-    }
-
-    public void updateStatus(CouponStatus status) {
-        this.status = status;
     }
 }

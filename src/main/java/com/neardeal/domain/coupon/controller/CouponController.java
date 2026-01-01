@@ -2,10 +2,7 @@ package com.neardeal.domain.coupon.controller;
 
 import com.neardeal.common.response.CommonResponse;
 import com.neardeal.common.response.SwaggerErrorResponse;
-import com.neardeal.domain.coupon.dto.CouponResponse;
-import com.neardeal.domain.coupon.dto.CreateCouponRequest;
-import com.neardeal.domain.coupon.dto.IssueCouponResponse;
-import com.neardeal.domain.coupon.dto.UpdateCouponRequest;
+import com.neardeal.domain.coupon.dto.*;
 import com.neardeal.domain.coupon.service.CouponService;
 import com.neardeal.security.details.PrincipalDetails;
 import io.swagger.v3.oas.annotations.Operation;
@@ -32,7 +29,7 @@ public class CouponController {
 
         private final CouponService couponService;
 
-        // --- Owner ---
+        // --- 점주용 ---
         @Operation(summary = "[점주] 쿠폰 생성", description = "상점의 새로운 쿠폰을 생성합니다.")
         @ApiResponses(value = {
                         @ApiResponse(responseCode = "201", description = "쿠폰 생성 성공"),
@@ -78,7 +75,23 @@ public class CouponController {
                 return ResponseEntity.status(HttpStatus.NO_CONTENT).body(CommonResponse.success(null));
         }
 
-        // --- Public ---
+        @Operation(summary = "[점주] 쿠폰 사용 확인 (코드 검증)", description = "손님이 제시한 4자리 코드를 입력하여 사용 처리합니다.")
+        @ApiResponses(value = {
+                @ApiResponse(responseCode = "200", description = "쿠폰 사용 완료"),
+                @ApiResponse(responseCode = "404", description = "유효하지 않은 코드 또는 활성화되지 않은 쿠폰", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class)))
+        })
+        @PostMapping("/stores/{storeId}/coupons/verify")
+        public ResponseEntity<CommonResponse<Void>> verifyCoupon(
+                @Parameter(description = "상점 ID") @PathVariable Long storeId,
+                @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,
+                @RequestBody @Valid CouponVerifyRequest request) {
+
+                couponService.verifyAndUseCoupon(storeId, principalDetails.getUser(), request.getCode());
+                return ResponseEntity.ok(CommonResponse.success(null));
+        }
+
+
+        // --- 공통 ---
         @Operation(summary = "[공통] 상점별 쿠폰 목록 조회", description = "특정 상점의 모든 쿠폰을 조회합니다.")
         @ApiResponses(value = {
                         @ApiResponse(responseCode = "200", description = "성공"),
@@ -103,7 +116,7 @@ public class CouponController {
                 return ResponseEntity.ok(CommonResponse.success(response));
         }
 
-        // --- Customer ---
+        // --- 학생용 ---
         @Operation(summary = "[학생] 쿠폰 발급", description = "사용자가 쿠폰을 발급받습니다.")
         @ApiResponses(value = {
                         @ApiResponse(responseCode = "200", description = "쿠폰 발급 성공"),
@@ -118,19 +131,19 @@ public class CouponController {
                 return ResponseEntity.ok(CommonResponse.success(response));
         }
 
-        @Operation(summary = "[학생] 쿠폰 사용", description = "발급받은 쿠폰을 사용합니다.")
+        @Operation(summary = "[학생] 쿠폰 코드 발급", description = "매장에서 사용하기 위해 쿠폰을 활성화하고 4자리 코드를 발급받습니다.")
         @ApiResponses(value = {
-                        @ApiResponse(responseCode = "200", description = "쿠폰 사용 성공"),
+                        @ApiResponse(responseCode = "200", description = "쿠폰 활성화 성공 (코드 반환)"),
                         @ApiResponse(responseCode = "409", description = "이미 사용된 쿠폰", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class))),
                         @ApiResponse(responseCode = "422", description = "유효기간 만료", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class))),
                         @ApiResponse(responseCode = "404", description = "발급된 쿠폰 없음", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class)))
         })
-        @PostMapping("/my-coupons/{customerCouponId}/use")
-        public ResponseEntity<CommonResponse<Void>> useCoupon(
+        @PostMapping("/my-coupons/{customerCouponId}/activate")
+        public ResponseEntity<CommonResponse<String>> activateCoupon(
                         @Parameter(description = "사용자 쿠폰 ID (issue ID)") @PathVariable Long customerCouponId,
                         @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails) {
-                couponService.useCoupon(customerCouponId, principalDetails.getUser());
-                return ResponseEntity.ok(CommonResponse.success(null));
+                String verificationCode = couponService.activateCoupon(customerCouponId, principalDetails.getUser());
+                return ResponseEntity.ok(CommonResponse.success(verificationCode));
         }
 
         @Operation(summary = "[학생] 내 쿠폰 조회", description = "사용자가 발급받은 쿠폰 목록을 조회합니다.")

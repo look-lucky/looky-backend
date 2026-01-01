@@ -18,7 +18,7 @@ public class IssueCouponResponse {
     public static IssueCouponResponse from(CustomerCoupon customerCoupon) {
         return IssueCouponResponse.builder()
                 .customerCouponId(customerCoupon.getId())
-                .couponCode(customerCoupon.getCouponCode())
+                .couponCode(customerCoupon.getVerificationCode())
                 .status(customerCoupon.getStatus())
                 .issuedAt(customerCoupon.getIssuedAt())
                 .expiresAt(customerCoupon.getExpiresAt())

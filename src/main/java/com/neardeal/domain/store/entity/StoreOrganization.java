@@ -25,9 +25,15 @@ public class StoreOrganization {
     @JoinColumn(name = "organization_id", nullable = false)
     private Organization organization;
 
+    private String benefit;
+
     @Builder
     public StoreOrganization(Store store, Organization organization) {
         this.store = store;
         this.organization = organization;
+    }
+
+    public void updateBenefit(String benefit) {
+        this.benefit = benefit;
     }
 }

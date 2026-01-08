@@ -18,6 +18,11 @@ spring:
       ddl-auto: update
     show-sql: true
 
+  servlet:
+    multipart:
+      max-file-size: 50MB    # 개별 파일 용량
+      max-request-size: 50MB # 요청 전체 용량
+
   security:
     oauth2:
       client:
@@ -55,7 +60,8 @@ spring:
             user-info-uri: https://kapi.kakao.com/v2/user/me
             user-name-attribute: id
 
-          # Naver Provider Settings
+
+# Naver Provider Settings
 #          naver:
 #            authorization-uri: https://nid.naver.com/oauth2.0/authorize
 #            token-uri: https://nid.naver.com/oauth2.0/token

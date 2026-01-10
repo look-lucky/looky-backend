@@ -3,7 +3,7 @@ spring:
     name: neardeal
 
   datasource:
-    url: jdbc:mysql://${DB_HOST}:${DB_PORT}/neardeal?useSSL=false&allowPublicKeyRetrieval=true&characterEncoding=UTF-8&serverTimezone=Asia/Seoul
+    url: jdbc:mysql://${DB_HOST}:${DB_PORT}/neardeal?useSSL=false&allowPublicKeyRetrieval=true&characterEncoding=UTF-8&serverTimezone=Asia/Seoul&createDatabaseIfNotExist=true
     username: ${DB_USER}
     password: ${DB_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -22,6 +22,15 @@ spring:
     multipart:
       max-file-size: 50MB    # 개별 파일 용량
       max-request-size: 50MB # 요청 전체 용량
+
+  cloud:
+    aws:
+      credentials:
+        access-key: ${IAM_ACCESS_KEY}
+        secret-key: ${IAM_SECRET_KEY}
+      s3:
+        bucket: ${BUCKET_NAME}
+      region: ap-northeast-2
 
   security:
     oauth2:

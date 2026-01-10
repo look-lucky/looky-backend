@@ -9,6 +9,5 @@ public class UpdateItemRequest {
     private String name;
     private Integer price;
     private String description;
-    private String imageUrl;
     private Boolean isSoldOut;
 }

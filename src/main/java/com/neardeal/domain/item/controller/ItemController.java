@@ -20,7 +20,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 @Tag(name = "Item", description = "상품 관련 API")
@@ -33,7 +35,6 @@ public class ItemController {
 
         @Operation(summary = "[점주] 상품 등록", description = "상점에 새로운 상품을 등록합니다. (본인 상점만 가능)")
         @ApiResponses(value = {
-
                         @ApiResponse(responseCode = "201", description = "상품 등록 성공"),
                         @ApiResponse(responseCode = "400", description = "잘못된 요청 데이터", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class))),
                         @ApiResponse(responseCode = "403", description = "권한 없음 (본인 소유 상점 아님)", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class))),
@@ -41,10 +42,12 @@ public class ItemController {
         })
         @PostMapping("/stores/{storeId}/items")
         public ResponseEntity<CommonResponse<Long>> createItem(
-                        @Parameter(description = "상점 ID") @PathVariable Long storeId,
-                        @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,
-                        @RequestBody @Valid CreateItemRequest request) {
-                Long itemId = itemService.createItem(storeId, principalDetails.getUser(), request);
+                        @Parameter(description = "상품 ID") @PathVariable Long storeId,
+                        @Parameter(description = "상품 이미지") @RequestPart MultipartFile image,
+                        @RequestPart @Valid CreateItemRequest request,
+                        @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails
+        ) throws IOException {
+                Long itemId = itemService.createItem(storeId, principalDetails.getUser(), request, image);
                 return ResponseEntity.status(HttpStatus.CREATED).body(CommonResponse.success(itemId));
         }
 
@@ -80,10 +83,14 @@ public class ItemController {
         })
         @PatchMapping("/items/{itemId}")
         public ResponseEntity<CommonResponse<Void>> updateItem(
-                        @Parameter(description = "상품 ID") @PathVariable Long itemId,
-                        @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,
-                        @RequestBody @Valid UpdateItemRequest request) {
-                itemService.updateItem(itemId, principalDetails.getUser(), request);
+                @Parameter(description = "상품 ID") @PathVariable Long itemId,
+                @Parameter(description = "변경할 상품 이미지") @RequestPart MultipartFile image,
+                @RequestPart @Valid UpdateItemRequest request,
+                @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails
+        ) throws IOException {
+
+                itemService.updateItem(itemId, principalDetails.getUser(), request, image);
+
                 return ResponseEntity.ok(CommonResponse.success(null));
         }
 

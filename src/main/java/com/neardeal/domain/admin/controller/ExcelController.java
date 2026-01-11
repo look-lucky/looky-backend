@@ -53,7 +53,8 @@ public class ExcelController {
     })
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<CommonResponse<Void>> uploadExcel(
-            @Parameter(description = "업로드할 엑셀 파일 (.xlsx)") @RequestPart("file") MultipartFile file) throws IOException {
+            @Parameter(description = "업로드할 엑셀 파일 (.xlsx)") @RequestPart("file") MultipartFile file
+    ) throws IOException {
         excelService.uploadXlsx(file);
         return ResponseEntity.ok(CommonResponse.success(null));
     }

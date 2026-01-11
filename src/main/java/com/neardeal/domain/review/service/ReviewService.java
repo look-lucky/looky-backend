@@ -1,11 +1,13 @@
 package com.neardeal.domain.review.service;
 
+import com.neardeal.common.service.S3Service;
 import com.neardeal.common.exception.CustomException;
 import com.neardeal.common.exception.ErrorCode;
 import com.neardeal.domain.coupon.entity.CouponUsageStatus;
 import com.neardeal.domain.coupon.repository.CustomerCouponRepository;
 import com.neardeal.domain.review.dto.*;
 import com.neardeal.domain.review.entity.Review;
+import com.neardeal.domain.review.entity.ReviewImage;
 import com.neardeal.domain.review.entity.ReviewLike;
 import com.neardeal.domain.review.entity.ReviewReport;
 import com.neardeal.domain.review.repository.ReviewLikeRepository;
@@ -20,6 +22,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+import java.util.List;
+import java.io.IOException;
 
 @Service
 @RequiredArgsConstructor
@@ -32,9 +37,10 @@ public class ReviewService {
     private final CustomerCouponRepository customerCouponRepository;
     private final UserRepository userRepository;
     private final ReviewReportRepository reviewReportRepository;
+    private final S3Service s3Service;
 
     @Transactional
-    public Long createReview(User user, Long storeId, CreateReviewRequest request) {
+    public Long createReview(User user, Long storeId, CreateReviewRequest request, List<MultipartFile> images) throws IOException {
         Store store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new CustomException(ErrorCode.STORE_NOT_FOUND));
 
@@ -54,12 +60,15 @@ public class ReviewService {
                 .parentReview(null)
                 .build();
 
+        // 이미지 S3 업로드 및 저장
+        uploadAndSaveImages(review, images);
+
         reviewRepository.save(review);
         return review.getId();
     }
 
     @Transactional
-    public void updateReview(Long reviewId, User user, UpdateReviewRequest request) {
+    public void updateReview(Long reviewId, User user, UpdateReviewRequest request, List<MultipartFile> images) throws IOException {
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new CustomException(ErrorCode.REVIEW_NOT_FOUND, "리뷰를 찾을 수 없습니다."));
 
@@ -72,6 +81,21 @@ public class ReviewService {
                 CouponUsageStatus.USED);
 
         review.updateReview(request.getContent(), request.getRating(), isVerified);
+
+        // 새 이미지가 존재하면 기존 것 모두 삭제 후 새로 등록
+        if (images != null && !images.isEmpty()) {
+
+            // S3 파일 삭제
+            for (ReviewImage oldImage : review.getImages()) {
+                s3Service.deleteFile(oldImage.getImageUrl());
+            }
+
+            // DB 삭제 (orphanRemoval = true로 인해 리스트에서 제거하면 삭제됨)
+            review.getImages().clear();
+
+            // 새 이미지 업로드
+            uploadAndSaveImages(review, images);
+        }
     }
 
     @Transactional
@@ -81,6 +105,11 @@ public class ReviewService {
 
         if (!review.getUser().getId().equals(user.getId())) {
             throw new CustomException(ErrorCode.FORBIDDEN);
+        }
+
+        // S3 이미지 삭제
+        for (ReviewImage image : review.getImages()) {
+            s3Service.deleteFile(image.getImageUrl());
         }
 
         reviewRepository.delete(review);
@@ -167,5 +196,26 @@ public class ReviewService {
 
         reviewLikeRepository.deleteByUserAndReview(user, review);
         review.decreaseLikeCount();
+    }
+
+    private void uploadAndSaveImages(Review review, List<MultipartFile> images) throws IOException {
+        if (images == null || images.isEmpty()) {
+            return;
+        }
+
+        int currentOrderIndex = review.getImages().size();
+
+        for (MultipartFile file : images) {
+            if (file.isEmpty()) continue;
+
+            String imageUrl = s3Service.uploadFile(file);
+
+            ReviewImage reviewImage = ReviewImage.builder()
+                    .review(review)
+                    .imageUrl(imageUrl)
+                    .orderIndex(currentOrderIndex++)
+                    .build();
+            review.addImage(reviewImage);
+        }
     }
 }

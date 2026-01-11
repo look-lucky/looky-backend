@@ -5,6 +5,8 @@ import com.neardeal.domain.store.entity.Store;
 import com.neardeal.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -49,6 +51,9 @@ public class Review extends BaseEntity {
 
     @Column(nullable = false)
     private int likeCount;
+
+    @OneToMany(mappedBy = "review", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ReviewImage> images = new ArrayList<>();
 
     @Builder
     public Review(User user, Store store, Review parentReview, boolean isVerified, int rating, String content) {
@@ -97,6 +102,14 @@ public class Review extends BaseEntity {
         if (this.likeCount > 0) {
             this.likeCount--;
         }
+    }
+
+    public void addImage(ReviewImage image) {
+        this.images.add(image);
+    }
+
+    public void removeImage(ReviewImage image) {
+        this.images.remove(image);
     }
 
 }

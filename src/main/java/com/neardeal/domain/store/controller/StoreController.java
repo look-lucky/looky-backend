@@ -57,35 +57,39 @@ public class StoreController {
 
         @Operation(summary = "[공통] 상점 단건 조회", description = "상점 ID로 상점의 상세 정보를 조회합니다.")
         @ApiResponses(value = {
-                        @ApiResponse(responseCode = "200", description = "상점 조회 성공"),
-                        @ApiResponse(responseCode = "404", description = "상점 없음", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class)))
+                @ApiResponse(responseCode = "200", description = "상점 조회 성공"),
+                @ApiResponse(responseCode = "404", description = "상점 없음", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class)))
         })
         @GetMapping("/{storeId}")
         public ResponseEntity<CommonResponse<StoreResponse>> getStore(
-                        @Parameter(description = "상점 ID") @PathVariable Long storeId) {
+                @Parameter(description = "상점 ID") @PathVariable Long storeId
+        )
+        {
                 StoreResponse response = storeService.getStore(storeId);
                 return ResponseEntity.ok(CommonResponse.success(response));
         }
 
         @Operation(summary = "[공통] 상점 목록 조회", description = "전체 상점 목록을 페이징하여 조회합니다.")
         @ApiResponses(value = {
-                        @ApiResponse(responseCode = "200", description = "상점 목록 조회 성공")
+                @ApiResponse(responseCode = "200", description = "상점 목록 조회 성공")
         })
         @GetMapping
         public ResponseEntity<CommonResponse<PageResponse<StoreResponse>>> getStores(
-                        @Parameter(description = "검색 키워드 (상점 이름)") @RequestParam(required = false) String keyword,
-                        @Parameter(description = "카테고리 필터") @RequestParam(required = false) StoreCategory category,
-                        @Parameter(description = "페이징 정보 (page, size, sort)") @PageableDefault(size = 10) Pageable pageable) {
+                @Parameter(description = "검색 키워드 (상점 이름)") @RequestParam(required = false) String keyword,
+                @Parameter(description = "카테고리 필터") @RequestParam(required = false) StoreCategory category,
+                @Parameter(description = "페이징 정보 (page, size, sort)") @PageableDefault(size = 10) Pageable pageable
+        )
+        {
                 PageResponse<StoreResponse> response = storeService.getStores(keyword, category, pageable);
                 return ResponseEntity.ok(CommonResponse.success(response));
         }
 
         @Operation(summary = "[점주] 상점 정보 수정", description = "상점 정보를 수정합니다. (본인 상점만 가능)")
         @ApiResponses(value = {
-                        @ApiResponse(responseCode = "200", description = "상점 수정 성공"),
-                        @ApiResponse(responseCode = "403", description = "권한 없음 (본인 소유 상점 아님)", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class))),
-                        @ApiResponse(responseCode = "404", description = "상점 없음", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class))),
-                        @ApiResponse(responseCode = "409", description = "이미 존재하는 상점 이름", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class)))
+                @ApiResponse(responseCode = "200", description = "상점 수정 성공"),
+                @ApiResponse(responseCode = "403", description = "권한 없음 (본인 소유 상점 아님)", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class))),
+                @ApiResponse(responseCode = "404", description = "상점 없음", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class))),
+                @ApiResponse(responseCode = "409", description = "이미 존재하는 상점 이름", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class)))
         })
         @PatchMapping("/{storeId}")
         public ResponseEntity<CommonResponse<Void>> updateStore(
@@ -104,32 +108,37 @@ public class StoreController {
                 @PathVariable Long storeId,
                 @PathVariable Long imageId,
                 @AuthenticationPrincipal PrincipalDetails principalDetails
-        ) {
+        )
+        {
                 storeService.deleteStoreImage(storeId, imageId, principalDetails.getUser());
                 return ResponseEntity.status(HttpStatus.NO_CONTENT).body(CommonResponse.success(null));
         }
 
         @Operation(summary = "[점주] 상점 삭제", description = "상점을 삭제합니다. (본인 상점만 가능)")
         @ApiResponses(value = {
-                        @ApiResponse(responseCode = "204", description = "상점 삭제 성공"),
-                        @ApiResponse(responseCode = "403", description = "권한 없음 (본인 소유 상점 아님)", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class))),
-                        @ApiResponse(responseCode = "404", description = "상점 없음", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class)))
+                @ApiResponse(responseCode = "204", description = "상점 삭제 성공"),
+                @ApiResponse(responseCode = "403", description = "권한 없음 (본인 소유 상점 아님)", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class))),
+                @ApiResponse(responseCode = "404", description = "상점 없음", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class)))
         })
         @DeleteMapping("/{storeId}")
         public ResponseEntity<CommonResponse<Void>> deleteStore(
-                        @Parameter(description = "상점 ID") @PathVariable Long storeId,
-                        @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails) {
+                @Parameter(description = "상점 ID") @PathVariable Long storeId,
+                @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails
+        )
+        {
                 storeService.deleteStore(storeId, principalDetails.getUser());
                 return ResponseEntity.status(HttpStatus.NO_CONTENT).body(CommonResponse.success(null));
         }
 
         @Operation(summary = "[점주] 내 상점 목록 조회", description = "내가 소유한 모든 상점 목록을 조회합니다.")
         @ApiResponses(value = {
-                        @ApiResponse(responseCode = "200", description = "내 상점 목록 조회 성공")
+                @ApiResponse(responseCode = "200", description = "내 상점 목록 조회 성공")
         })
         @GetMapping("/my")
         public ResponseEntity<CommonResponse<List<StoreResponse>>> getMyStores(
-                        @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails) {
+                @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails
+        )
+        {
                 List<StoreResponse> response = storeService.getMyStores(principalDetails.getUser());
                 return ResponseEntity.ok(CommonResponse.success(response));
         }

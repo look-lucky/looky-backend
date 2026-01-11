@@ -40,7 +40,9 @@ public class PartnershipController {
     public ResponseEntity<CommonResponse<Long>> createPartnership(
             @Parameter(description = "상점 ID") @PathVariable Long storeId,
             @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,
-            @RequestBody @Valid CreatePartnershipRequest request) {
+            @RequestBody @Valid CreatePartnershipRequest request
+    )
+    {
         Long partnershipId = partnershipService.createPartnership(storeId, principalDetails.getUser(), request);
         return ResponseEntity.status(HttpStatus.CREATED).body(CommonResponse.success(partnershipId));
     }
@@ -56,7 +58,9 @@ public class PartnershipController {
             @Parameter(description = "상점 ID") @PathVariable Long storeId,
             @Parameter(description = "제휴 ID") @PathVariable Long partnershipId,
             @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,
-            @RequestBody @Valid UpdatePartnershipRequest request) {
+            @RequestBody @Valid UpdatePartnershipRequest request
+    )
+    {
         partnershipService.updatePartnershipBenefit(storeId, partnershipId, principalDetails.getUser(), request);
         return ResponseEntity.ok(CommonResponse.success(null));
     }
@@ -71,7 +75,9 @@ public class PartnershipController {
     public ResponseEntity<CommonResponse<Void>> deletePartnership(
             @Parameter(description = "상점 ID") @PathVariable Long storeId,
             @Parameter(description = "제휴 ID") @PathVariable Long partnershipId,
-            @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails) {
+            @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails
+    )
+    {
         partnershipService.deletePartnership(storeId, partnershipId, principalDetails.getUser());
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body(CommonResponse.success(null));
     }

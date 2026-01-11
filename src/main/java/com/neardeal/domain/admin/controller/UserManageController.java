@@ -35,7 +35,9 @@ public class UserManageController {
     })
     @GetMapping
     public ResponseEntity<CommonResponse<PageResponse<UserResponse>>> getAllUsers(
-            @Parameter(description = "페이징 정보") @PageableDefault(size = 10) Pageable pageable) {
+            @Parameter(description = "페이징 정보") @PageableDefault(size = 10) Pageable pageable
+    )
+    {
         PageResponse<UserResponse> response = userManageService.getAllUsers(pageable);
         return ResponseEntity.ok(CommonResponse.success(response));
     }
@@ -49,7 +51,9 @@ public class UserManageController {
     @PatchMapping("/{userId}/role")
     public ResponseEntity<CommonResponse<Void>> updateUserRole(
             @PathVariable Long userId,
-            @RequestBody @Valid UserRoleUpdateRequest request) {
+            @RequestBody @Valid UserRoleUpdateRequest request
+    )
+    {
         userManageService.updateUserRole(userId, request);
         return ResponseEntity.ok(CommonResponse.success(null));
     }
@@ -61,7 +65,10 @@ public class UserManageController {
             @ApiResponse(responseCode = "404", description = "사용자 없음", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class)))
     })
     @DeleteMapping("/{userId}")
-    public ResponseEntity<CommonResponse<Void>> deleteUser(@PathVariable Long userId) {
+    public ResponseEntity<CommonResponse<Void>> deleteUser(
+            @PathVariable Long userId
+    )
+    {
         userManageService.deleteUser(userId);
         return ResponseEntity.status(org.springframework.http.HttpStatus.NO_CONTENT).body(CommonResponse.success(null));
     }

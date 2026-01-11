@@ -32,31 +32,35 @@ public class CouponController {
         // --- 점주용 ---
         @Operation(summary = "[점주] 쿠폰 생성", description = "상점의 새로운 쿠폰을 생성합니다.")
         @ApiResponses(value = {
-                        @ApiResponse(responseCode = "201", description = "쿠폰 생성 성공"),
-                        @ApiResponse(responseCode = "400", description = "잘못된 요청 데이터 (타 상점 물품 등)", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class))),
-                        @ApiResponse(responseCode = "403", description = "권한 없음 (본인 소유 상점 아님)", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class))),
-                        @ApiResponse(responseCode = "404", description = "상점 없음", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class)))
+                @ApiResponse(responseCode = "201", description = "쿠폰 생성 성공"),
+                @ApiResponse(responseCode = "400", description = "잘못된 요청 데이터 (타 상점 물품 등)", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class))),
+                @ApiResponse(responseCode = "403", description = "권한 없음 (본인 소유 상점 아님)", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class))),
+                @ApiResponse(responseCode = "404", description = "상점 없음", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class)))
         })
         @PostMapping("/stores/{storeId}/coupons")
         public ResponseEntity<CommonResponse<Long>> createCoupon(
-                        @Parameter(description = "상점 ID") @PathVariable Long storeId,
-                        @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,
-                        @RequestBody @Valid CreateCouponRequest request) {
+                @Parameter(description = "상점 ID") @PathVariable Long storeId,
+                @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,
+                @RequestBody @Valid CreateCouponRequest request
+        )
+        {
                 Long couponId = couponService.createCoupon(storeId, principalDetails.getUser(), request);
                 return ResponseEntity.status(HttpStatus.CREATED).body(CommonResponse.success(couponId));
         }
 
         @Operation(summary = "[점주] 쿠폰 수정", description = "쿠폰 정보를 수정합니다. (본인 상점만 가능)")
         @ApiResponses(value = {
-                        @ApiResponse(responseCode = "200", description = "쿠폰 수정 성공"),
-                        @ApiResponse(responseCode = "403", description = "권한 없음 (본인 소유 상점 아님)", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class))),
-                        @ApiResponse(responseCode = "404", description = "쿠폰 없음", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class)))
+                @ApiResponse(responseCode = "200", description = "쿠폰 수정 성공"),
+                @ApiResponse(responseCode = "403", description = "권한 없음 (본인 소유 상점 아님)", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class))),
+                @ApiResponse(responseCode = "404", description = "쿠폰 없음", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class)))
         })
         @PatchMapping("/coupons/{couponId}")
         public ResponseEntity<CommonResponse<Void>> updateCoupon(
-                        @Parameter(description = "쿠폰 ID") @PathVariable Long couponId,
-                        @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,
-                        @RequestBody @Valid UpdateCouponRequest request) {
+                @Parameter(description = "쿠폰 ID") @PathVariable Long couponId,
+                @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,
+                @RequestBody @Valid UpdateCouponRequest request
+        )
+        {
                 couponService.updateCoupon(couponId, principalDetails.getUser(), request);
                 return ResponseEntity.ok(CommonResponse.success(null));
         }
@@ -69,8 +73,10 @@ public class CouponController {
         })
         @DeleteMapping("/coupons/{couponId}")
         public ResponseEntity<CommonResponse<Void>> deleteCoupon(
-                        @Parameter(description = "쿠폰 ID") @PathVariable Long couponId,
-                        @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails) {
+                @Parameter(description = "쿠폰 ID") @PathVariable Long couponId,
+                @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails
+        )
+        {
                 couponService.deleteCoupon(couponId, principalDetails.getUser());
                 return ResponseEntity.status(HttpStatus.NO_CONTENT).body(CommonResponse.success(null));
         }
@@ -84,7 +90,9 @@ public class CouponController {
         public ResponseEntity<CommonResponse<Void>> verifyCoupon(
                 @Parameter(description = "상점 ID") @PathVariable Long storeId,
                 @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,
-                @RequestBody @Valid VerifyCouponRequest request) {
+                @RequestBody @Valid VerifyCouponRequest request
+        )
+        {
 
                 couponService.verifyAndUseCoupon(storeId, principalDetails.getUser(), request.getCode());
                 return ResponseEntity.ok(CommonResponse.success(null));
@@ -99,7 +107,9 @@ public class CouponController {
         })
         @GetMapping("/stores/{storeId}/coupons")
         public ResponseEntity<CommonResponse<List<CouponResponse>>> getCouponsByStore(
-                        @Parameter(description = "상점 ID") @PathVariable Long storeId) {
+                @Parameter(description = "상점 ID") @PathVariable Long storeId
+        )
+        {
                 List<CouponResponse> response = couponService.getCouponsByStore(storeId);
                 return ResponseEntity.ok(CommonResponse.success(response));
         }
@@ -111,7 +121,9 @@ public class CouponController {
         })
         @GetMapping("/items/{itemId}/coupons")
         public ResponseEntity<CommonResponse<List<CouponResponse>>> getCouponsByItem(
-                        @Parameter(description = "상품 ID") @PathVariable Long itemId) {
+                @Parameter(description = "상품 ID") @PathVariable Long itemId
+        )
+        {
                 List<CouponResponse> response = couponService.getCouponsByItem(itemId);
                 return ResponseEntity.ok(CommonResponse.success(response));
         }
@@ -125,8 +137,10 @@ public class CouponController {
         })
         @PostMapping("/coupons/{couponId}/issue")
         public ResponseEntity<CommonResponse<IssueCouponResponse>> issueCoupon(
-                        @Parameter(description = "쿠폰 ID") @PathVariable Long couponId,
-                        @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails) {
+                @Parameter(description = "쿠폰 ID") @PathVariable Long couponId,
+                @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails
+        )
+        {
                 IssueCouponResponse response = couponService.issueCoupon(couponId, principalDetails.getUser());
                 return ResponseEntity.ok(CommonResponse.success(response));
         }
@@ -140,8 +154,10 @@ public class CouponController {
         })
         @PostMapping("/my-coupons/{customerCouponId}/activate")
         public ResponseEntity<CommonResponse<String>> activateCoupon(
-                        @Parameter(description = "사용자 쿠폰 ID (issue ID)") @PathVariable Long customerCouponId,
-                        @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails) {
+                @Parameter(description = "사용자 쿠폰 ID (issue ID)") @PathVariable Long customerCouponId,
+                @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails
+        )
+        {
                 String verificationCode = couponService.activateCoupon(customerCouponId, principalDetails.getUser());
                 return ResponseEntity.ok(CommonResponse.success(verificationCode));
         }
@@ -152,7 +168,9 @@ public class CouponController {
         })
         @GetMapping("/my-coupons")
         public ResponseEntity<CommonResponse<List<IssueCouponResponse>>> getMyCoupons(
-                        @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails) {
+                @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails
+        )
+        {
                 List<IssueCouponResponse> response = couponService.getMyCoupons(principalDetails.getUser());
                 return ResponseEntity.ok(CommonResponse.success(response));
         }

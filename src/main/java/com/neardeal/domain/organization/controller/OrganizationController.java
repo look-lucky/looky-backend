@@ -32,7 +32,9 @@ public class OrganizationController {
     @Operation(summary = "[공통] 특정 대학의 소속 목록 조회", description = "대학의 모든 소속을 조회합니다.")
     @GetMapping("/universities/{universityId}/organizations")
     public ResponseEntity<CommonResponse<List<OrganizationResponse>>> getOrganizations(
-            @PathVariable Long universityId) {
+            @PathVariable Long universityId
+    )
+    {
         List<OrganizationResponse> responses = organizationService.getOrganizations(universityId);
         return ResponseEntity.ok(CommonResponse.success(responses));
     }
@@ -44,7 +46,9 @@ public class OrganizationController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<CommonResponse<Long>> createOrganization(
             @PathVariable Long universityId,
-            @RequestBody @Valid CreateOrganizationRequest request) {
+            @RequestBody @Valid CreateOrganizationRequest request
+    )
+    {
         Long organizationId = organizationService.createOrganization(universityId, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(CommonResponse.success(organizationId));
     }
@@ -54,7 +58,9 @@ public class OrganizationController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<CommonResponse<Void>> updateOrganization(
             @PathVariable Long organizationId,
-            @RequestBody @Valid UpdateOrganizationRequest request) {
+            @RequestBody @Valid UpdateOrganizationRequest request
+    )
+    {
         organizationService.updateOrganization(organizationId, request);
         return ResponseEntity.ok(CommonResponse.success(null));
     }
@@ -62,7 +68,10 @@ public class OrganizationController {
     @Operation(summary = "[관리자] 소속 삭제", description = "소속을 삭제합니다.")
     @DeleteMapping("/organizations/{organizationId}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<CommonResponse<Void>> deleteOrganization(@PathVariable Long organizationId) {
+    public ResponseEntity<CommonResponse<Void>> deleteOrganization(
+            @PathVariable Long organizationId
+    )
+    {
         organizationService.deleteOrganization(organizationId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body(CommonResponse.success(null));
     }
@@ -75,7 +84,9 @@ public class OrganizationController {
     @PreAuthorize("hasRole('CUSTOMER')")
     public ResponseEntity<CommonResponse<Void>> joinOrganization(
             @PathVariable Long organizationId,
-            @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails) {
+            @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails
+    )
+    {
         organizationService.joinOrganization(organizationId, principalDetails.getUser());
         return ResponseEntity.ok(CommonResponse.success(null));
     }
@@ -85,7 +96,9 @@ public class OrganizationController {
     @PreAuthorize("hasRole('CUSTOMER')")
     public ResponseEntity<CommonResponse<Void>> leaveOrganization(
             @PathVariable Long organizationId,
-            @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails) {
+            @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails
+    )
+    {
         organizationService.leaveOrganization(organizationId, principalDetails.getUser());
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body(CommonResponse.success(null));
     }

@@ -45,7 +45,9 @@ public class AuthManageController {
     })
     @GetMapping("/tokens/{userId}")
     public ResponseEntity<CommonResponse<String>> getUserRefreshToken(
-            @Parameter(description = "사용자 ID") @PathVariable Long userId) {
+            @Parameter(description = "사용자 ID") @PathVariable Long userId
+    )
+    {
         String token = authManageService.getToken(userId);
         if (token == null) {
             throw new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "토큰 정보가 없습니다.");
@@ -61,7 +63,9 @@ public class AuthManageController {
     })
     @DeleteMapping("/tokens/{userId}")
     public ResponseEntity<CommonResponse<Void>> deleteUserRefreshToken(
-            @Parameter(description = "사용자 ID") @PathVariable Long userId) {
+            @Parameter(description = "사용자 ID") @PathVariable Long userId
+    )
+    {
         authManageService.deleteToken(userId);
         return ResponseEntity.noContent().build();
     }

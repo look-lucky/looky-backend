@@ -38,7 +38,10 @@ public class UniversityController {
     @Operation(summary = "[관리자] 대학 등록", description = "새로운 대학을 등록합니다.")
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<CommonResponse<Long>> createUniversity(@RequestBody @Valid CreateUniversityRequest request) {
+    public ResponseEntity<CommonResponse<Long>> createUniversity(
+            @RequestBody @Valid CreateUniversityRequest request
+    )
+    {
         Long universityId = universityService.createUniversity(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(CommonResponse.success(universityId));
     }
@@ -48,7 +51,9 @@ public class UniversityController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<CommonResponse<Void>> updateUniversity(
             @PathVariable Long universityId,
-            @RequestBody @Valid UpdateUniversityRequest request) {
+            @RequestBody @Valid UpdateUniversityRequest request
+    )
+    {
         universityService.updateUniversity(universityId, request);
         return ResponseEntity.ok(CommonResponse.success(null));
     }
@@ -56,7 +61,10 @@ public class UniversityController {
     @Operation(summary = "[관리자] 대학 삭제", description = "대학을 삭제합니다.")
     @DeleteMapping("/{universityId}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<CommonResponse<Void>> deleteUniversity(@PathVariable Long universityId) {
+    public ResponseEntity<CommonResponse<Void>> deleteUniversity(
+            @PathVariable Long universityId
+    )
+    {
         universityService.deleteUniversity(universityId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body(CommonResponse.success(null));
     }

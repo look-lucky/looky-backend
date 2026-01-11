@@ -58,7 +58,9 @@ public class ItemController {
         })
         @GetMapping("/stores/{storeId}/items")
         public ResponseEntity<CommonResponse<List<ItemResponse>>> getItems (
-                        @Parameter(description = "상점 ID") @PathVariable Long storeId) {
+                @Parameter(description = "상점 ID") @PathVariable Long storeId
+        )
+        {
                 List<ItemResponse> response = itemService.getItems(storeId);
                 return ResponseEntity.ok(CommonResponse.success(response));
         }
@@ -70,7 +72,9 @@ public class ItemController {
         })
         @GetMapping("/items/{itemId}")
         public ResponseEntity<CommonResponse<ItemResponse>> getItem(
-                        @Parameter(description = "상품 ID") @PathVariable Long itemId) {
+                @Parameter(description = "상품 ID") @PathVariable Long itemId
+        )
+        {
                 ItemResponse response = itemService.getItem(itemId);
                 return ResponseEntity.ok(CommonResponse.success(response));
         }
@@ -96,14 +100,16 @@ public class ItemController {
 
         @Operation(summary = "[점주] 상품 삭제", description = "상품을 삭제합니다. (본인 상점만 가능)")
         @ApiResponses(value = {
-                        @ApiResponse(responseCode = "204", description = "상품 삭제 성공"),
-                        @ApiResponse(responseCode = "403", description = "권한 없음 (본인 소유 상점 아님)", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class))),
-                        @ApiResponse(responseCode = "404", description = "상품 없음", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class)))
+                @ApiResponse(responseCode = "204", description = "상품 삭제 성공"),
+                @ApiResponse(responseCode = "403", description = "권한 없음 (본인 소유 상점 아님)", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class))),
+                @ApiResponse(responseCode = "404", description = "상품 없음", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class)))
         })
         @DeleteMapping("/items/{itemId}")
         public ResponseEntity<CommonResponse<Void>> deleteItem(
-                        @Parameter(description = "상품 ID") @PathVariable Long itemId,
-                        @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails) {
+                @Parameter(description = "상품 ID") @PathVariable Long itemId,
+                @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails
+        )
+        {
                 itemService.deleteItem(itemId, principalDetails.getUser());
                 return ResponseEntity.status(HttpStatus.NO_CONTENT).body(CommonResponse.success(null));
         }

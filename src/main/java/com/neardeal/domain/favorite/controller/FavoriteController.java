@@ -39,8 +39,10 @@ public class FavoriteController {
         })
         @PostMapping("/stores/{storeId}/favorites")
         public ResponseEntity<CommonResponse<Void>> addFavorite(
-                        @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,
-                        @Parameter(description = "상점 ID") @PathVariable Long storeId) {
+                @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,
+                @Parameter(description = "상점 ID") @PathVariable Long storeId
+        )
+        {
                 favoriteService.addFavorite(principalDetails.getUser(), storeId);
                 return ResponseEntity.status(HttpStatus.CREATED).body(CommonResponse.success(null));
         }
@@ -52,8 +54,10 @@ public class FavoriteController {
         })
         @DeleteMapping("/stores/{storeId}/favorites")
         public ResponseEntity<CommonResponse<Void>> removeFavorite(
-                        @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,
-                        @Parameter(description = "상점 ID") @PathVariable Long storeId) {
+                @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,
+                @Parameter(description = "상점 ID") @PathVariable Long storeId
+        )
+        {
                 favoriteService.removeFavorite(principalDetails.getUser(), storeId);
                 return ResponseEntity.status(HttpStatus.NO_CONTENT).body(CommonResponse.success(null));
         }
@@ -65,7 +69,9 @@ public class FavoriteController {
         })
         @GetMapping("/stores/{storeId}/favorites/count")
         public ResponseEntity<CommonResponse<Long>> countFavorites(
-                        @Parameter(description = "상점 ID") @PathVariable Long storeId) {
+                @Parameter(description = "상점 ID") @PathVariable Long storeId
+        )
+        {
                 Long count = favoriteService.countFavorites(storeId);
                 return ResponseEntity.ok(CommonResponse.success(count));
         }
@@ -76,8 +82,10 @@ public class FavoriteController {
         })
         @GetMapping("/favorites")
         public ResponseEntity<CommonResponse<PageResponse<FavoriteStoreResponse>>> getMyFavorites(
-                        @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,
-                        @Parameter(description = "페이징 정보") @PageableDefault(size = 10) Pageable pageable) {
+                @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,
+                @Parameter(description = "페이징 정보") @PageableDefault(size = 10) Pageable pageable
+        )
+        {
                 Page<FavoriteStoreResponse> favorites = favoriteService.getMyFavorites(principalDetails.getUser(),
                                 pageable);
                 return ResponseEntity.ok(CommonResponse.success(PageResponse.from(favorites)));

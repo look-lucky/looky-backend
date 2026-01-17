@@ -33,7 +33,7 @@ public class ReviewService {
     @Transactional
     public Long createReview(User user, Long storeId, CreateReviewRequest request) {
         Store store = storeRepository.findById(storeId)
-                .orElseThrow(() -> new CustomException(ErrorCode.STORE_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "해당 상점을 찾을 수 없습니다."));
 
         if (reviewRepository.existsByUserAndStore(user, store)) {
             throw new CustomException(ErrorCode.DUPLICATE_RESOURCE, "이미 해당 상점에 대한 리뷰를 작성했습니다.");
@@ -57,7 +57,7 @@ public class ReviewService {
     @Transactional
     public void updateReview(Long reviewId, User user, UpdateReviewRequest request) {
         Review review = reviewRepository.findById(reviewId)
-                .orElseThrow(() -> new CustomException(ErrorCode.REVIEW_NOT_FOUND, "리뷰를 찾을 수 없습니다."));
+                .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "해당 리뷰를 찾을 수 없습니다."));
 
 
         if (!review.getUser().getId().equals(user.getId())) {
@@ -73,7 +73,7 @@ public class ReviewService {
     @Transactional
     public void deleteReview(Long reviewId, User user) {
         Review review = reviewRepository.findById(reviewId)
-                .orElseThrow(() -> new CustomException(ErrorCode.REVIEW_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "해당 리뷰를 찾을 수 없습니다."));
 
         if (!review.getUser().getId().equals(user.getId())) {
             throw new CustomException(ErrorCode.FORBIDDEN);
@@ -84,7 +84,7 @@ public class ReviewService {
 
     public Page<ReviewResponse> getReviews(Long storeId, Pageable pageable) {
         Store store = storeRepository.findById(storeId)
-                .orElseThrow(() -> new CustomException(ErrorCode.STORE_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "해당 상점을 찾을 수 없습니다."));
 
         return reviewRepository.findByStore(store, pageable)
                 .map(ReviewResponse::from);
@@ -114,7 +114,7 @@ public class ReviewService {
     @Transactional
     public void reportReview(Long reviewId, Long reporterId, ReportRequest request) {
         Review review = reviewRepository.findById(reviewId)
-                .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "존재하지 않는 리뷰입니다."));
+                .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "해당 리뷰를 찾을 수 없습니다."));
 
         User reporter = userRepository.getReferenceById(reporterId);
 

@@ -25,7 +25,7 @@ public class FavoriteService {
     @Transactional
     public void addFavorite(User user, Long storeId) {
         Store store = storeRepository.findById(storeId)
-                .orElseThrow(() -> new CustomException(ErrorCode.STORE_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "해당 상점을 찾을 수 없습니다."));
 
         if (store.getUser().getId().equals(user.getId())) {
             throw new CustomException(ErrorCode.BAD_REQUEST, "자신의 상점은 즐겨찾기할 수 없습니다.");
@@ -50,14 +50,14 @@ public class FavoriteService {
     @Transactional
     public void removeFavorite(User user, Long storeId) {
         Store store = storeRepository.findById(storeId)
-                .orElseThrow(() -> new CustomException(ErrorCode.STORE_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "해당 상점을 찾을 수 없습니다."));
 
         favoriteRepository.deleteByUserAndStore(user, store);
     }
 
     public Long countFavorites(Long storeId) {
         Store store = storeRepository.findById(storeId)
-                .orElseThrow(() -> new CustomException(ErrorCode.STORE_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "해당 상점을 찾을 수 없습니다."));
 
         return favoriteRepository.countByStore(store);
     }

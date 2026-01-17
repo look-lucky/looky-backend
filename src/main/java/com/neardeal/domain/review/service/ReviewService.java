@@ -68,7 +68,8 @@ public class ReviewService {
     }
 
     @Transactional
-    public void updateReview(Long reviewId, User user, UpdateReviewRequest request, List<MultipartFile> images) throws IOException {
+    public void updateReview(Long reviewId, User user, UpdateReviewRequest request, List<MultipartFile> images)
+            throws IOException {
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "해당 리뷰를 찾을 수 없습니다."));
 
@@ -165,7 +166,7 @@ public class ReviewService {
     @Transactional
     public void addLike(User user, Long reviewId) {
         Review review = reviewRepository.findById(reviewId)
-                .orElseThrow(() -> new CustomException(ErrorCode.REVIEW_NOT_FOUND, "존재하지 않는 리뷰입니다."));
+                .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "존재하지 않는 리뷰입니다."));
 
         if (review.getUser().getId().equals(user.getId())) {
             throw new CustomException(ErrorCode.BAD_REQUEST, "자신의 리뷰에는 좋아요를 누를 수 없습니다.");
@@ -188,7 +189,7 @@ public class ReviewService {
     @Transactional
     public void removeLike(User user, Long reviewId) {
         Review review = reviewRepository.findById(reviewId)
-                .orElseThrow(() -> new CustomException(ErrorCode.REVIEW_NOT_FOUND, "존재하지 않는 리뷰입니다."));
+                .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "존재하지 않는 리뷰입니다."));
 
         if (!reviewLikeRepository.existsByUserAndReview(user, review)) {
             throw new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "좋아요를 누른 리뷰가 아닙니다.");
@@ -206,7 +207,8 @@ public class ReviewService {
         int currentOrderIndex = review.getImages().size();
 
         for (MultipartFile file : images) {
-            if (file.isEmpty()) continue;
+            if (file.isEmpty())
+                continue;
 
             String imageUrl = s3Service.uploadFile(file);
 

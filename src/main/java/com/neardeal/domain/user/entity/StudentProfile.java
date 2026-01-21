@@ -8,7 +8,7 @@ import lombok.*;
 @Getter
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class CustomerProfile {
+public class StudentProfile {
 
     @Id
     private Long userId;
@@ -26,7 +26,7 @@ public class CustomerProfile {
     private University university;
 
     @Builder
-    public CustomerProfile(User user, University university, String nickname) {
+    public StudentProfile(User user, University university, String nickname) {
         this.user = user;
         this.university = university;
         this.nickname = nickname;

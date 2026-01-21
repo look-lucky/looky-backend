@@ -21,7 +21,7 @@ public class OwnerSignupRequest {
     private String phoneNumber;
     private Gender gender;
     private LocalDate birthDate;
-    
+
     private List<StoreCreateRequest> storeList;
 
     @Getter
@@ -32,7 +32,7 @@ public class OwnerSignupRequest {
         private String name;
         private String address;
         private Long partnerUniversityId;
-        private List<Long> partnerOrganizationIds; 
+        private List<Long> partnerOrganizationIds;
         private String businessRegistrationNumber;
     }
 }

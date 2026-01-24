@@ -1,9 +1,9 @@
 spring:
   application:
-    name: neardeal
+    name: looky
 
   datasource:
-    url: jdbc:mysql://${DB_HOST}:${DB_PORT}/neardeal?useSSL=false&allowPublicKeyRetrieval=true&characterEncoding=UTF-8&serverTimezone=Asia/Seoul&createDatabaseIfNotExist=true
+    url: jdbc:mysql://${DB_HOST}:${DB_PORT}/looky?useSSL=false&allowPublicKeyRetrieval=true&characterEncoding=UTF-8&serverTimezone=Asia/Seoul&createDatabaseIfNotExist=true
     username: ${DB_USER}
     password: ${DB_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver

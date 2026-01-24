@@ -1,4 +1,4 @@
-package com.looky.domain.store.dto;
+package com.looky.domain.partnership.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;

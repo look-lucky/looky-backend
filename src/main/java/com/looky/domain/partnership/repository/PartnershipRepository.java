@@ -1,19 +1,19 @@
-package com.looky.domain.store.repository;
+package com.looky.domain.partnership.repository;
 
-import com.looky.domain.store.entity.StoreOrganization;
+import com.looky.domain.partnership.entity.Partnership;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 
-public interface StoreOrganizationRepository extends JpaRepository<StoreOrganization, Long> {
+public interface PartnershipRepository extends JpaRepository<Partnership, Long> {
 
-    @Query("SELECT so FROM StoreOrganization so " +
+    @Query("SELECT so FROM Partnership so " +
             "JOIN FETCH so.store s " +
             "JOIN FETCH so.organization o " +
             "JOIN FETCH o.university " +
             "ORDER BY so.id DESC")
-    List<StoreOrganization> findAllWithStoreAndOrganization();
+    List<Partnership> findAllWithStoreAndOrganization();
 
     boolean existsByStoreIdAndOrganizationId(Long storeId, Long organizationId);
 }

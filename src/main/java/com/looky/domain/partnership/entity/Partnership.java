@@ -1,6 +1,7 @@
-package com.looky.domain.store.entity;
+package com.looky.domain.partnership.entity;
 
 import com.looky.domain.organization.entity.Organization;
+import com.looky.domain.store.entity.Store;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -8,10 +9,7 @@ import lombok.*;
 @Getter
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "store_organization", uniqueConstraints = {
-        @UniqueConstraint(columnNames = { "store_id", "organization_id" })
-})
-public class StoreOrganization {
+public class Partnership {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,7 +26,7 @@ public class StoreOrganization {
     private String benefit;
 
     @Builder
-    public StoreOrganization(Store store, Organization organization, String benefit) {
+    public Partnership(Store store, Organization organization, String benefit) {
         this.store = store;
         this.organization = organization;
         this.benefit = benefit;

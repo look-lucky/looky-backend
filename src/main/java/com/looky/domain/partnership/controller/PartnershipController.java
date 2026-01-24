@@ -1,10 +1,10 @@
-package com.looky.domain.store.controller;
+package com.looky.domain.partnership.controller;
 
 import com.looky.common.response.CommonResponse;
 import com.looky.common.response.SwaggerErrorResponse;
-import com.looky.domain.store.dto.CreatePartnershipRequest;
-import com.looky.domain.store.dto.UpdatePartnershipRequest;
-import com.looky.domain.store.service.PartnershipService;
+import com.looky.domain.partnership.dto.CreatePartnershipRequest;
+import com.looky.domain.partnership.dto.UpdatePartnershipRequest;
+import com.looky.domain.partnership.service.PartnershipService;
 import com.looky.security.details.PrincipalDetails;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;

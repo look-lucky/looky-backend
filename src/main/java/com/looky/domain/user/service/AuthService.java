@@ -10,8 +10,8 @@ import com.looky.domain.organization.entity.UserOrganization;
 import com.looky.domain.organization.repository.OrganizationRepository;
 import com.looky.domain.organization.repository.UserOrganizationRepository;
 import com.looky.domain.store.entity.Store;
-import com.looky.domain.store.entity.StoreOrganization;
-import com.looky.domain.store.repository.StoreOrganizationRepository;
+import com.looky.domain.partnership.entity.Partnership;
+import com.looky.domain.partnership.repository.PartnershipRepository;
 import com.looky.domain.store.repository.StoreRepository;
 import com.looky.domain.user.entity.*;
 import com.looky.domain.user.repository.CouncilProfileRepository;
@@ -46,7 +46,7 @@ public class AuthService {
     private final CouncilProfileRepository councilProfileRepository;
     private final UniversityRepository universityRepository;
     private final StoreRepository storeRepository;
-    private final StoreOrganizationRepository storeOrganizationRepository;
+    private final PartnershipRepository partnershipRepository;
     private final OrganizationRepository organizationRepository;
     private final UserOrganizationRepository userOrganizationRepository;
 
@@ -121,7 +121,7 @@ public class AuthService {
                     for (Long orgId : storeReq.getPartnerOrganizationIds()) {
                         Organization org = organizationRepository.findById(orgId)
                                 .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "제휴 단체를 찾을 수 없습니다."));
-                        storeOrganizationRepository.save(new StoreOrganization(store, org, null));
+                        partnershipRepository.save(new Partnership(store, org, null));
                     }
                 }
             }
@@ -256,7 +256,7 @@ public class AuthService {
                          for (Long orgId : storeReq.getPartnerOrganizationIds()) {
                              Organization org = organizationRepository.findById(orgId)
                                      .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "제휴 단체를 찾을 수 없습니다."));
-                             storeOrganizationRepository.save(new StoreOrganization(store, org, null));
+                             partnershipRepository.save(new Partnership(store, org, null));
                          }
                      }
                 }

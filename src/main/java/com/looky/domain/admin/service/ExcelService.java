@@ -2,8 +2,8 @@ package com.looky.domain.admin.service;
 
 import com.looky.domain.organization.entity.Organization;
 import com.looky.domain.store.entity.Store;
-import com.looky.domain.store.entity.StoreOrganization;
-import com.looky.domain.store.repository.StoreOrganizationRepository;
+import com.looky.domain.partnership.entity.Partnership;
+import com.looky.domain.partnership.repository.PartnershipRepository;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -20,10 +20,10 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ExcelService {
 
-    private final StoreOrganizationRepository storeOrganizationRepository;
+    private final PartnershipRepository partnershipRepository;
 
     public byte[] downloadXlsx() throws IOException {
-        List<StoreOrganization> storeOrganizations = storeOrganizationRepository.findAllWithStoreAndOrganization();
+        List<Partnership> partnerships = partnershipRepository.findAllWithStoreAndOrganization();
 
         // 엑셀 Workbook 객체 생성
         Workbook workbook = new XSSFWorkbook();
@@ -42,7 +42,7 @@ public class ExcelService {
 
         // 데이터 채우기
         int rowNum = 1;
-        for (StoreOrganization so : storeOrganizations) {
+        for (Partnership so : partnerships) {
             Row row = sheet.createRow(rowNum++);
 
             Store store = so.getStore();
@@ -100,8 +100,7 @@ public class ExcelService {
             // DB 업데이트
             Long finalId = id;
             String finalBenefit = benefit;
-            storeOrganizationRepository.findById(finalId).ifPresent(so -> {so.updateBenefit(finalBenefit);
-            });
+            partnershipRepository.findById(finalId).ifPresent(so -> {so.updateBenefit(finalBenefit);});
         }
 
         workbook.close();

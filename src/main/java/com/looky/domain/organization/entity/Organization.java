@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.looky.common.entity.BaseEntity;
+import com.looky.domain.user.entity.User;
 
 @Entity
 @Getter
@@ -40,8 +41,14 @@ public class Organization extends BaseEntity {
     @OneToMany(mappedBy = "parent")
     private List<Organization> children = new ArrayList<>();
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
     @Builder
-    public Organization(University university, OrganizationCategory category, String name, LocalDateTime expiresAt, Organization parent) {
+    public Organization(User user, University university, OrganizationCategory category, String name,
+            LocalDateTime expiresAt, Organization parent) {
+        this.user = user;
         this.university = university;
         this.category = category;
         this.name = name;

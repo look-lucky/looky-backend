@@ -11,6 +11,8 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
+import com.looky.domain.user.entity.User;
+
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class CreateOrganizationRequest {
@@ -25,13 +27,14 @@ public class CreateOrganizationRequest {
 
     private LocalDateTime expiresAt;
 
-    public Organization toEntity(University university, Organization parent) {
+    public Organization toEntity(University university, Organization parent, User user) {
         return Organization.builder()
                 .university(university)
                 .category(this.category)
                 .name(this.name)
                 .expiresAt(this.expiresAt)
                 .parent(parent)
+                .user(user)
                 .build();
     }
 }

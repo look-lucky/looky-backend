@@ -54,9 +54,10 @@ public class OrganizationController {
     @PatchMapping("/organizations/{organizationId}")
     @PreAuthorize("hasAnyRole('ADMIN', 'COUNCIL')")
     public ResponseEntity<CommonResponse<Void>> updateOrganization(
+            @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,
             @PathVariable Long organizationId,
             @RequestBody @Valid UpdateOrganizationRequest request) {
-        organizationService.updateOrganization(organizationId, request);
+        organizationService.updateOrganization(organizationId, principalDetails.getUser(), request);
         return ResponseEntity.ok(CommonResponse.success(null));
     }
 
@@ -64,8 +65,9 @@ public class OrganizationController {
     @DeleteMapping("/organizations/{organizationId}")
     @PreAuthorize("hasAnyRole('ADMIN', 'COUNCIL')")
     public ResponseEntity<CommonResponse<Void>> deleteOrganization(
+            @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,
             @PathVariable Long organizationId) {
-        organizationService.deleteOrganization(organizationId);
+        organizationService.deleteOrganization(organizationId, principalDetails.getUser());
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body(CommonResponse.success(null));
     }
 

@@ -53,14 +53,12 @@ public class OrganizationService {
                 University university = universityRepository.findById(universityId)
                                 .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "대학을 찾을 수 없습니다."));
 
-
-
                 Organization parent = null;
 
                 // 학생회가 등록할 때
                 if (user.getRole() == Role.ROLE_COUNCIL) {
                         CouncilProfile councilProfile = councilProfileRepository.findById(user.getId())
-                                .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "학생회를 찾을 수 없습니다."));
+                                        .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "학생회를 찾을 수 없습니다."));
                         if (!Objects.equals(councilProfile.getUniversity().getId(), universityId)) {
                                 throw new CustomException(ErrorCode.FORBIDDEN, "자신의 대학에만 소속을 등록할 수 있습니다.");
                         }
@@ -68,35 +66,45 @@ public class OrganizationService {
 
                 // 학과일 때
                 if (request.getParentId() != null) {
-                    parent = organizationRepository.findById(request.getParentId())
-                            .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "단과대학을 찾을 수 없습니다."));
+                        parent = organizationRepository.findById(request.getParentId())
+                                        .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "단과대학을 찾을 수 없습니다."));
                 }
 
-                Organization organization = request.toEntity(university, parent);
+                Organization organization = request.toEntity(university, parent, user);
                 Organization savedOrganization = organizationRepository.save(organization);
                 return savedOrganization.getId();
         }
 
         @Transactional
-        public void updateOrganization(Long organizationId, UpdateOrganizationRequest request) {
+        public void updateOrganization(Long organizationId, User user, UpdateOrganizationRequest request) {
                 Organization organization = organizationRepository.findById(organizationId)
                                 .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "소속을 찾을 수 없습니다."));
+
+                // 본인 소유 확인
+                if (!Objects.equals(organization.getUser().getId(), user.getId())) {
+                        throw new CustomException(ErrorCode.FORBIDDEN, "본인이 생성한 소속만 수정할 수 있습니다.");
+                }
 
                 Organization parent = null;
 
                 // 학과일 때
                 if (request.getParentId() != null) {
-                    parent = organizationRepository.findById(request.getParentId())
-                            .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "단과대학을 찾을 수 없습니다."));
+                        parent = organizationRepository.findById(request.getParentId())
+                                        .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "단과대학을 찾을 수 없습니다."));
                 }
 
                 organization.update(request.getCategory(), request.getName(), request.getExpiresAt(), parent);
         }
 
         @Transactional
-        public void deleteOrganization(Long organizationId) {
+        public void deleteOrganization(Long organizationId, User user) {
                 Organization organization = organizationRepository.findById(organizationId)
                                 .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "소속을 찾을 수 없습니다."));
+
+                // 본인 소유 확인
+                if (!Objects.equals(organization.getUser().getId(), user.getId())) {
+                        throw new CustomException(ErrorCode.FORBIDDEN, "본인이 생성한 소속만 삭제할 수 있습니다.");
+                }
 
                 organizationRepository.delete(organization);
         }

@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 @Builder
 public class OrganizationResponse {
     private Long id;
+    private Long userId;
     private Long universityId;
     private String universityName;
     private OrganizationCategory category;
@@ -20,6 +21,7 @@ public class OrganizationResponse {
     public static OrganizationResponse from(Organization organization) {
         return OrganizationResponse.builder()
                 .id(organization.getId())
+                .userId(organization.getUser().getId())
                 .universityId(organization.getUniversity().getId())
                 .universityName(organization.getUniversity().getName())
                 .category(organization.getCategory())

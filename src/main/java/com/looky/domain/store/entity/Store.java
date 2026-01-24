@@ -24,24 +24,35 @@ public class Store extends BaseEntity {
     private Long id;
 
     @Column(nullable = false)
-    private String name;
+    private String name; // 상호명
+    
+    private String branch; // 지점명
+
+    private String businessNumber; // 사업자등록번호
 
     @Column(nullable = false)
-    private String businessRegistrationNumber;
+    private String roadNameAddress; // 도로명 주소
 
     @Column(nullable = false)
-    private String address;
+    private String numberAddress; // 지번 주소
 
-    private Double latitude;
-    private Double longitude;
+    private Double latitude; // 위도
 
-    private String phoneNumber;
+    private Double longitude; // 경도
+
+    private String phoneNumber; // 가게 전화 번호
+
+    private Boolean needToCheck; // 관리자 확인 필요 (엑셀 자동 등록 시)
 
     @Lob
     private String introduction;
 
     @Lob
     private String operatingHours; // JSON String
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private StoreStatus storeStatus;
 
     @ElementCollection(targetClass = StoreCategory.class)
     @CollectionTable(name = "store_categories", joinColumns = @JoinColumn(name = "store_id"))
@@ -62,18 +73,13 @@ public class Store extends BaseEntity {
     @OneToMany(mappedBy = "store", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<StoreImage> images = new ArrayList<>();
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private VerificationStatus verificationStatus = VerificationStatus.PENDING;
-
-
     @Builder
-    public Store(User user, String name, String address, String businessRegistrationNumber, Double latitude, Double longitude, String phoneNumber,
-            String introduction, String operatingHours, Set<StoreCategory> storeCategories, Set<StoreMood> storeMoods, VerificationStatus verificationStatus) {
+    public Store(User user, String name, String roadNameAddress, String businessNumber, Double latitude, Double longitude, String phoneNumber,
+                 String introduction, String operatingHours, Set<StoreCategory> storeCategories, Set<StoreMood> storeMoods, StoreStatus storeStatus) {
         this.user = user;
         this.name = name;
-        this.address = address;
-        this.businessRegistrationNumber = businessRegistrationNumber;
+        this.roadNameAddress = roadNameAddress;
+        this.businessNumber = businessNumber;
         this.latitude = latitude;
         this.longitude = longitude;
         this.phoneNumber = phoneNumber;
@@ -81,7 +87,7 @@ public class Store extends BaseEntity {
         this.operatingHours = operatingHours;
         this.storeCategories = storeCategories != null ? storeCategories : new HashSet<>();
         this.storeMoods = storeMoods != null ? storeMoods : new HashSet<>();
-        this.verificationStatus = verificationStatus != null ? verificationStatus : VerificationStatus.PENDING;
+        this.storeStatus = storeStatus != null ? storeStatus : StoreStatus.UNCLAIMED;
     }
 
     public void updateStore(String name, String address, Double latitude, Double longitude, String phoneNumber,
@@ -90,7 +96,7 @@ public class Store extends BaseEntity {
             this.name = name;
         }
         if (address != null) {
-            this.address = address;
+            this.roadNameAddress = address;
         }
         if (latitude != null) {
             this.latitude = latitude;

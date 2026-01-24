@@ -86,7 +86,7 @@ public class PartnershipService {
             throw new CustomException(ErrorCode.BAD_REQUEST, "해당 상점의 제휴 정보가 아닙니다.");
         }
 
-        partnership.updateBenefit(request.getBenefit());
+        partnership.updateBenefit(request.getBenefit(), request.getStartsAt(), request.getEndsAt());
     }
 
     // 제휴 삭제

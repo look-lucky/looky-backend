@@ -26,7 +26,7 @@ public class FavoriteStoreResponse {
         return FavoriteStoreResponse.builder()
                 .storeId(store.getId())
                 .name(store.getName())
-                .address(store.getAddress())
+                .address(store.getRoadNameAddress())
                 .storeCategories(new ArrayList<>(store.getStoreCategories()))
                 .build();
     }

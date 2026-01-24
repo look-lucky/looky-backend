@@ -71,6 +71,7 @@ public class ExcelService {
 
     @Transactional
     public void uploadXlsx(MultipartFile file) throws IOException {
+        // todo: 변경된 프로세스에 따라 엑셀도 변경 필요!!
         InputStream inputStream = file.getInputStream();
         Workbook workbook = new XSSFWorkbook(inputStream);
 
@@ -100,7 +101,7 @@ public class ExcelService {
             // DB 업데이트
             Long finalId = id;
             String finalBenefit = benefit;
-            partnershipRepository.findById(finalId).ifPresent(so -> {so.updateBenefit(finalBenefit);});
+            // partnershipRepository.findById(finalId).ifPresent(so -> {so.updateBenefit(finalBenefit);});
         }
 
         workbook.close();

@@ -18,11 +18,14 @@ public class StoreResponse {
     private Long userId; // Owner ID
     private String name;
     private String address;
+    private String roadNameAddress;
+    private String numberAddress;
     private Double latitude;
     private Double longitude;
     private String phoneNumber;
     private String introduction;
     private String operatingHours;
+    private Boolean needToCheck;
     private List<StoreCategory> storeCategories;
     private List<StoreMood> storeMoods;
     private List<String> imageUrls; // 0번 째 값이 썸네일
@@ -32,12 +35,14 @@ public class StoreResponse {
                 .id(store.getId())
                 .userId(store.getUser().getId())
                 .name(store.getName())
-                .address(store.getAddress())
+                .roadNameAddress(store.getRoadNameAddress())
+                .numberAddress(store.getNumberAddress())
                 .latitude(store.getLatitude())
                 .longitude(store.getLongitude())
                 .phoneNumber(store.getPhoneNumber())
                 .introduction(store.getIntroduction())
                 .operatingHours(store.getOperatingHours())
+                .needToCheck(store.getNeedToCheck())
                 .storeCategories(new ArrayList<>(store.getStoreCategories()))
                 .storeMoods(new ArrayList<>(store.getStoreMoods()))
                 .imageUrls(store.getImages().stream().map(StoreImage::getImageUrl).collect(Collectors.toList()))

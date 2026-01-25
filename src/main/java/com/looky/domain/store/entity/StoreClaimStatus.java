@@ -1,6 +1,6 @@
 package com.looky.domain.store.entity;
 
-public enum ClaimRequestStatus {
+public enum StoreClaimStatus {
     PENDING, // 대기
     APPROVED, // 승인 완료
     REJECTED, // 반려

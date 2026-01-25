@@ -15,7 +15,7 @@ public class CompleteSocialSignupRequest {
     // 공통
     private String name;
     private String email;
-    private String phoneNumber;
+    private String phone;
 
     // 학생 
     private String nickname;

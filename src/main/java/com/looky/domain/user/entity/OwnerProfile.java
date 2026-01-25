@@ -22,13 +22,13 @@ public class OwnerProfile {
     @Column(unique = true)
     private String email;
 
-    private String phoneNumber;
+    private String phone;
 
     @Builder
-    public OwnerProfile(User user, String name, String email, String phoneNumber) {
+    public OwnerProfile(User user, String name, String email, String phone) {
         this.user = user;
         this.name = name;
         this.email = email;
-        this.phoneNumber = phoneNumber;
+        this.phone = phone;
     }
 }

@@ -18,7 +18,7 @@ public class OwnerSignupRequest {
     private String password;
     private String name;
     private String email;
-    private String phoneNumber;
+    private String phone;
     private Gender gender;
     private LocalDate birthDate;
 

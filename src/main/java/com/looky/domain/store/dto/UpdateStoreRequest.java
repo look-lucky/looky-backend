@@ -22,7 +22,7 @@ public class UpdateStoreRequest {
     private Double latitude;
     private Double longitude;
 
-    private String phoneNumber;
+    private String phone;
 
     private String introduction;
 

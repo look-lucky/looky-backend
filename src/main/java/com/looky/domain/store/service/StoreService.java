@@ -118,7 +118,7 @@ public class StoreService {
                 request.getAddress(),
                 request.getLatitude(),
                 request.getLongitude(),
-                request.getPhoneNumber(),
+                request.getPhone(),
                 request.getIntroduction(),
                 request.getOperatingHours(),
                 request.getStoreCategories() != null ? new HashSet<>(request.getStoreCategories()) : null,

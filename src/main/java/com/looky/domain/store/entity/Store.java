@@ -38,7 +38,7 @@ public class Store extends BaseEntity {
 
     private Double longitude; // 경도
 
-    private String phoneNumber; // 가게 전화 번호
+    private String storePhone; // 가게 전화 번호
 
     private Boolean needToCheck; // 관리자 확인 필요 (엑셀 자동 등록 시)
 
@@ -72,7 +72,7 @@ public class Store extends BaseEntity {
     private List<StoreImage> images = new ArrayList<>();
 
     @Builder
-    public Store(User user, String name, String address, String bizRegNo, Double latitude, Double longitude, String phoneNumber,
+    public Store(User user, String name, String address, String bizRegNo, Double latitude, Double longitude, String storePhone,
                  String introduction, String operatingHours, Set<StoreCategory> storeCategories, Set<StoreMood> storeMoods, StoreStatus storeStatus) {
         this.user = user;
         this.name = name;
@@ -80,7 +80,7 @@ public class Store extends BaseEntity {
         this.bizRegNo = bizRegNo;
         this.latitude = latitude;
         this.longitude = longitude;
-        this.phoneNumber = phoneNumber;
+        this.storePhone = storePhone;
         this.introduction = introduction;
         this.operatingHours = operatingHours;
         this.storeCategories = storeCategories != null ? storeCategories : new HashSet<>();
@@ -88,7 +88,7 @@ public class Store extends BaseEntity {
         this.storeStatus = storeStatus != null ? storeStatus : StoreStatus.UNCLAIMED;
     }
 
-    public void updateStore(String name, String address, Double latitude, Double longitude, String phoneNumber,
+    public void updateStore(String name, String address, Double latitude, Double longitude, String phone,
             String introduction, String operatingHours, Set<StoreCategory> storeCategories, Set<StoreMood> storeMoods) {
         if (name != null) {
             this.name = name;
@@ -102,8 +102,8 @@ public class Store extends BaseEntity {
         if (longitude != null) {
             this.longitude = longitude;
         }
-        if (phoneNumber != null) {
-            this.phoneNumber = phoneNumber;
+        if (phone != null) {
+            this.storePhone = phone;
         }
         if (introduction != null) {
             this.introduction = introduction;

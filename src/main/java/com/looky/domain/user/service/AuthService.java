@@ -91,7 +91,7 @@ public class AuthService {
 
         userRepository.save(user);
 
-        createOwnerProfile(user, request.getName(), request.getEmail(), request.getPhoneNumber());
+        createOwnerProfile(user, request.getName(), request.getEmail(), request.getPhone());
 
         return user.getId();
     }
@@ -187,7 +187,7 @@ public class AuthService {
             createStudentProfile(user, request.getUniversityId(), request.getNickname(), request.getCollegeId(), request.getDepartmentId());
         } else if (request.getRole() == Role.ROLE_OWNER) {
             // 점주 로직
-            createOwnerProfile(user, request.getName(), request.getEmail(), request.getPhoneNumber());
+            createOwnerProfile(user, request.getName(), request.getEmail(), request.getPhone());
 
         } else if (request.getRole() == Role.ROLE_COUNCIL) {
             // 학생회 로직
@@ -226,12 +226,12 @@ public class AuthService {
 
     }
 
-    private void createOwnerProfile(User user, String name, String email, String phoneNumber) {
+    private void createOwnerProfile(User user, String name, String email, String phone) {
         OwnerProfile profile = OwnerProfile.builder()
                 .user(user)
                 .name(name)
                 .email(email)
-                .phoneNumber(phoneNumber)
+                .phone(phone)
                 .build();
         ownerProfileRepository.save(profile);
     }

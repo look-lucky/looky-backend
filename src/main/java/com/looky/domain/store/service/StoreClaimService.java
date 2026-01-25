@@ -2,8 +2,12 @@ package com.looky.domain.store.service;
 
 import com.looky.common.exception.CustomException;
 import com.looky.common.exception.ErrorCode;
+import com.looky.common.service.S3Service;
 import com.looky.domain.store.dto.BizVerificationRequest;
 import com.looky.domain.store.dto.BizVerificationResponse;
+import com.looky.domain.store.dto.StoreClaimRequest;
+import com.looky.domain.store.entity.StoreClaim;
+import com.looky.domain.store.repository.StoreClaimRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -12,18 +16,22 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.io.IOException;
 import java.net.URI;
 import java.util.Collections;
 
 @Service
 @RequiredArgsConstructor
-public class StoreVerificationService {
+public class StoreClaimService {
+
+    private final S3Service s3Service;
+    private final StoreClaimRepository  storeClaimRepository;
 
     @Value("${open-api.service-key}")
     private String serviceKey;
-
     private static final String API_URL = "https://api.odcloud.kr/api/nts-businessman/v1/validate";
 
     public BizVerificationResponse verifyBizRegNo(BizVerificationRequest request) {
@@ -68,5 +76,20 @@ public class StoreVerificationService {
         } catch (Exception e) {
             throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR, "사업자등록정보 진위확인 중 오류가 발생했습니다.");
         }
+    }
+
+    public Long createStoreClaims(StoreClaimRequest request, MultipartFile image) throws IOException {
+
+        // 이미지 S3에 업로드
+        String imageUrl = null;
+
+        if (image != null && !image.isEmpty()) {
+            imageUrl = s3Service.uploadFile(image);
+        }
+
+        StoreClaim storeClaim = request.toEntity(imageUrl);
+        StoreClaim savedStoreClaim = storeClaimRepository.save(storeClaim);
+
+        return savedStoreClaim.getId();
     }
 }

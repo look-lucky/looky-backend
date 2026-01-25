@@ -30,9 +30,10 @@ public class CreateStoreRequest {
     private String address;
 
     private Double latitude;
+
     private Double longitude;
 
-    private String phoneNumber;
+    private String storePhone;
 
     private String introduction;
 
@@ -51,7 +52,7 @@ public class CreateStoreRequest {
                 .address(address)
                 .latitude(latitude)
                 .longitude(longitude)
-                .phoneNumber(phoneNumber)
+                .storePhone(storePhone)
                 .introduction(introduction)
                 .operatingHours(operatingHours)
                 .storeCategories(new HashSet<>(storeCategories))

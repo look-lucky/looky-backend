@@ -20,7 +20,7 @@ public class StoreResponse {
     private String address;
     private Double latitude;
     private Double longitude;
-    private String phoneNumber;
+    private String phone;
     private String introduction;
     private String operatingHours;
     private Boolean needToCheck;
@@ -36,7 +36,7 @@ public class StoreResponse {
                 .address(store.getAddress())
                 .latitude(store.getLatitude())
                 .longitude(store.getLongitude())
-                .phoneNumber(store.getPhoneNumber())
+                .phone(store.getStorePhone())
                 .introduction(store.getIntroduction())
                 .operatingHours(store.getOperatingHours())
                 .needToCheck(store.getNeedToCheck())

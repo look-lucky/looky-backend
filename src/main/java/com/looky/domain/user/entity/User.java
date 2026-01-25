@@ -30,7 +30,7 @@ public class User extends BaseEntity {
     private String name;
 
     // 사용자 전화번호
-    private String phoneNumber;
+    private String phone;
 
     // 사용자 성별
     private Gender gender;
@@ -51,11 +51,11 @@ public class User extends BaseEntity {
     private String socialId;
 
     @Builder
-    public User(String username, String password, String name, String phoneNumber, Gender gender, LocalDate birthDate, Role role, SocialType socialType, String socialId) {
+    public User(String username, String password, String name, String phone, Gender gender, LocalDate birthDate, Role role, SocialType socialType, String socialId) {
         this.username = username;
         this.password = password;
         this.name = name;
-        this.phoneNumber = phoneNumber;
+        this.phone = phone;
         this.gender = gender;
         this.birthDate = birthDate;
         this.role = role;
@@ -64,9 +64,9 @@ public class User extends BaseEntity {
     }
 
     // 소셜 가입 후 부족한 정보 완성 -> ROLE_GUEST에서 승격
-    public void completeInsufficientInfo(Role role, String phoneNumber) {
+    public void completeInsufficientInfo(Role role, String phone) {
         this.role = role;
-        this.phoneNumber = phoneNumber;
+        this.phone = phone;
     }
 
     // 이미 가입된 소셜 식벼자일 때 나머지 정보 최신화

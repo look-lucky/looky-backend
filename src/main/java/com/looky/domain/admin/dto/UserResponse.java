@@ -14,7 +14,7 @@ public class UserResponse {
     private Long id;
     private String username;
     private String name;
-    private String phoneNumber;
+    private String phone;
     private Role role;
     private SocialType socialType;
 
@@ -23,7 +23,7 @@ public class UserResponse {
                 .id(user.getId())
                 .username(user.getUsername())
                 .name(user.getName())
-                .phoneNumber(user.getPhoneNumber())
+                .phone(user.getPhone())
                 .role(user.getRole())
                 .socialType(user.getSocialType())
                 .build();

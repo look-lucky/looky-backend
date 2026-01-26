@@ -1,7 +1,6 @@
 package com.looky.domain.user.entity;
 
 import com.looky.common.entity.BaseEntity;
-import com.looky.security.oauth.OAuth2UserInfo;
 import jakarta.persistence.*;
 import lombok.*;
 

@@ -7,7 +7,10 @@ import com.looky.domain.store.dto.BizVerificationRequest;
 import com.looky.domain.store.dto.BizVerificationResponse;
 import com.looky.domain.store.dto.StoreClaimRequest;
 import com.looky.domain.store.entity.StoreClaim;
+import com.looky.domain.store.entity.StoreClaimStatus;
 import com.looky.domain.store.repository.StoreClaimRepository;
+import com.looky.domain.store.repository.StoreRepository;
+import com.looky.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -29,6 +32,8 @@ public class StoreClaimService {
 
     private final S3Service s3Service;
     private final StoreClaimRepository  storeClaimRepository;
+    private final StoreRepository storeRepository;
+    private final UserRepository userRepository;
 
     @Value("${open-api.service-key}")
     private String serviceKey;
@@ -79,6 +84,16 @@ public class StoreClaimService {
     }
 
     public Long createStoreClaims(StoreClaimRequest request, MultipartFile image) throws IOException {
+
+
+        storeRepository.findById(request.getStoreId()).orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "존재하지 않는 상점입니다."));
+
+        userRepository.findById(request.getUserId()).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+
+        if (storeClaimRepository.existsByStoreIdAndStatus(request.getStoreId(), StoreClaimStatus.PENDING)) {
+            throw new CustomException(ErrorCode.STATE_CONFLICT, "이미 같은 가게에 대해 승인 대기 중인 요청이 존재합니다.");
+        }
 
         // 이미지 S3에 업로드
         String imageUrl = null;

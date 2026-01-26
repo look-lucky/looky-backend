@@ -129,4 +129,12 @@ public class Store extends BaseEntity {
     public void removeImage(StoreImage image) {
         this.images.remove(image);
     }
+
+    public void approveClaim(User owner, String bizRegNo, String storePhone) {
+        // 승인된 가게 점유 요청 정보로 업데이트
+        this.user = owner;
+        this.bizRegNo = bizRegNo;
+        this.storePhone = storePhone;
+        this.storeStatus = StoreStatus.ACTIVE;
+    }
 }

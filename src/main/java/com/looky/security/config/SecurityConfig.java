@@ -66,47 +66,46 @@ public class SecurityConfig {
 
                 // csrf disable
                 http
-                                .csrf((auth) -> auth.disable());
+                        .csrf((auth) -> auth.disable());
 
                 // From 로그인 방식 disable
                 http
-                                .formLogin((auth) -> auth.disable());
+                        .formLogin((auth) -> auth.disable());
 
                 // http basic 인증 방식 disable
                 http
-                                .httpBasic((auth) -> auth.disable());
+                        .httpBasic((auth) -> auth.disable());
 
                 // 세션 설정
                 http
-                                .sessionManagement((session) -> session
-                                                .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+                        .sessionManagement((session) -> session
+                                .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
                 // CORS 설정
                 http
-                                .cors(cors -> cors.configurationSource(corsConfigurationSource()));
+                        .cors(cors -> cors.configurationSource(corsConfigurationSource()));
 
                 // 경로별 인가 작업
                 http
-                                .authorizeHttpRequests((auth) -> auth
-                                                .requestMatchers("/api/auth/**", "/reissue", "/docs", "/swagger-ui/**",
-                                                                "/v3/api-docs/**", "/health")
-                                                .permitAll()
-                                                .requestMatchers(HttpMethod.GET, "/api/stores/**", "/api/items/**")
-                                                .permitAll()
-                                                .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                                                .anyRequest().authenticated());
+                        .authorizeHttpRequests((auth) -> auth
+                                .requestMatchers("/api/auth/**", "/reissue", "/docs", "/swagger-ui/**", "/v3/api-docs/**", "/health")
+                                .permitAll()
+                                .requestMatchers(HttpMethod.GET, "/api/stores/**", "/api/items/**")
+                                .permitAll()
+                                .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                                .anyRequest().authenticated());
 
                 http.oauth2Login(oauth2 -> oauth2
-                                .userInfoEndpoint(userInfo -> userInfo
-                                                .userService(customOAuth2UserService) // 유저 정보 로드 서비스
-                                )
-                                .successHandler(oAuth2LoginSuccessHandler) // 로그인 성공 시 핸들러
+                        .userInfoEndpoint(userInfo -> userInfo
+                                        .userService(customOAuth2UserService) // 유저 정보 로드 서비스
+                        )
+                        .successHandler(oAuth2LoginSuccessHandler) // 로그인 성공 시 핸들러
                 );
 
                 // 예외 처리 핸들러 등록
                 http.exceptionHandling(exception -> exception
-                                .authenticationEntryPoint(customAuthenticationEntryPoint)
-                                .accessDeniedHandler(customAccessDeniedHandler));
+                        .authenticationEntryPoint(customAuthenticationEntryPoint)
+                        .accessDeniedHandler(customAccessDeniedHandler));
 
                 http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 

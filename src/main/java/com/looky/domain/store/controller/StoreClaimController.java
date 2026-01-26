@@ -17,7 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 
-@Tag(name = "StoreClaim", description = "상점 소유권 등록 및 심사 API")
+@Tag(name = "StoreClaim", description = "상점 소유권 등록 API")
 @RestController
 @RequestMapping("/api")
 @RequiredArgsConstructor

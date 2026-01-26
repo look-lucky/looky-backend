@@ -1,13 +1,11 @@
 package com.looky.domain.user.dto;
 
-import com.looky.domain.user.dto.OwnerSignupRequest.StoreCreateRequest;
 import com.looky.domain.user.entity.Gender;
 import com.looky.domain.user.entity.Role;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDate;
-import java.util.List;
 
 @Getter
 @Setter

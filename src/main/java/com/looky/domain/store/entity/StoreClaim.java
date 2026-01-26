@@ -55,4 +55,13 @@ public class StoreClaim extends BaseEntity {
         this.licenseImageUrl = licenseImageUrl;
         this.status = status != null ? status : StoreClaimStatus.PENDING;
     }
+
+    public void updateStatus(StoreClaimStatus status, String rejectReason) {
+        this.status = status;
+        this.rejectReason = rejectReason;
+    }
+
+    public void updateAdminMemo(String adminMemo) {
+        this.adminMemo = adminMemo;
+    }
 }

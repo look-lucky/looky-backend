@@ -18,7 +18,8 @@ public class FavoriteStoreResponse {
 
     private Long storeId;
     private String name;
-    private String address;
+    private String roadAddress;
+    private String jibunAddress;
     private List<StoreCategory> storeCategories;
     private String imageUrl; // 대표이미지
 
@@ -26,7 +27,8 @@ public class FavoriteStoreResponse {
         return FavoriteStoreResponse.builder()
                 .storeId(store.getId())
                 .name(store.getName())
-                .address(store.getAddress())
+                .roadAddress(store.getRoadAddress())
+                .jibunAddress(store.getJibunAddress())
                 .storeCategories(new ArrayList<>(store.getStoreCategories()))
                 .build();
     }

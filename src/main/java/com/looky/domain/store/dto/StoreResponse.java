@@ -17,7 +17,8 @@ public class StoreResponse {
     private Long id;
     private Long userId; // Owner ID
     private String name;
-    private String address;
+    private String roadAddress; // 도로명 주소
+    private String jibunAddress; // 지번 주소
     private Double latitude;
     private Double longitude;
     private String phone;
@@ -31,9 +32,10 @@ public class StoreResponse {
     public static StoreResponse from(Store store) {
         return StoreResponse.builder()
                 .id(store.getId())
-                .userId(store.getUser().getId())
+                .userId(store.getUser() != null ? store.getUser().getId() : null) // User can be null now
                 .name(store.getName())
-                .address(store.getAddress())
+                .roadAddress(store.getRoadAddress())
+                .jibunAddress(store.getJibunAddress())
                 .latitude(store.getLatitude())
                 .longitude(store.getLongitude())
                 .phone(store.getStorePhone())

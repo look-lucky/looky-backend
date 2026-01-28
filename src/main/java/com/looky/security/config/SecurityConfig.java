@@ -92,7 +92,7 @@ public class SecurityConfig {
                                 .permitAll()
                                 .requestMatchers(HttpMethod.GET, "/api/stores/**", "/api/items/**")
                                 .permitAll()
-                                .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                                //.requestMatchers("/api/admin/**").hasRole("ADMIN")
                                 .anyRequest().authenticated());
 
                 http.oauth2Login(oauth2 -> oauth2

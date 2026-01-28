@@ -25,14 +25,17 @@ public class Store extends BaseEntity {
 
     @Column(nullable = false)
     private String name; // 상호명
-    
+
     private String branch; // 지점명
 
     @Column(name = "biz_reg_no")
     private String bizRegNo; // 사업자등록번호
 
-    @Column(nullable = false)
-    private String address; // 도로명 주소
+    @Column(name = "road_address", nullable = false)
+    private String roadAddress; // 도로명 주소
+
+    @Column(name = "jibun_address")
+    private String jibunAddress; // 지번 주소
 
     private Double latitude; // 위도
 
@@ -65,18 +68,19 @@ public class Store extends BaseEntity {
     private Set<StoreMood> storeMoods = new HashSet<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user; // Owner
+    @JoinColumn(name = "user_id") 
+    private User user; // 사장님 (미등록 가게일 경우 null)
 
     @OneToMany(mappedBy = "store", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<StoreImage> images = new ArrayList<>();
 
     @Builder
-    public Store(User user, String name, String address, String bizRegNo, Double latitude, Double longitude, String storePhone,
-                 String introduction, String operatingHours, Set<StoreCategory> storeCategories, Set<StoreMood> storeMoods, StoreStatus storeStatus) {
+    public Store(User user, String name, String branch, String roadAddress, String jibunAddress, String bizRegNo, Double latitude, Double longitude, String storePhone, String introduction, String operatingHours, Set<StoreCategory> storeCategories, Set<StoreMood> storeMoods, StoreStatus storeStatus) {
         this.user = user;
         this.name = name;
-        this.address = address;
+        this.branch = branch;
+        this.roadAddress = roadAddress;
+        this.jibunAddress = jibunAddress;
         this.bizRegNo = bizRegNo;
         this.latitude = latitude;
         this.longitude = longitude;
@@ -88,13 +92,18 @@ public class Store extends BaseEntity {
         this.storeStatus = storeStatus != null ? storeStatus : StoreStatus.UNCLAIMED;
     }
 
-    public void updateStore(String name, String address, Double latitude, Double longitude, String phone,
-            String introduction, String operatingHours, Set<StoreCategory> storeCategories, Set<StoreMood> storeMoods) {
+    public void updateStore(String name, String branch, String roadAddress, String jibunAddress, Double latitude, Double longitude, String phone, String introduction, String operatingHours, Set<StoreCategory> storeCategories, Set<StoreMood> storeMoods) {
         if (name != null) {
             this.name = name;
         }
-        if (address != null) {
-            this.address = address;
+        if (branch != null) {
+            this.branch = branch;
+        }
+        if (roadAddress != null) {
+            this.roadAddress = roadAddress;
+        }
+        if (jibunAddress != null) {
+            this.jibunAddress = jibunAddress;
         }
         if (latitude != null) {
             this.latitude = latitude;
@@ -136,5 +145,9 @@ public class Store extends BaseEntity {
         this.bizRegNo = bizRegNo;
         this.storePhone = storePhone;
         this.storeStatus = StoreStatus.ACTIVE;
+    }
+
+    public void markAsNeedCheck() {
+        this.needToCheck = true;
     }
 }

@@ -8,6 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface StoreRepository extends JpaRepository<Store, Long> {
     Page<Store> findAll(Pageable pageable);
@@ -23,4 +24,6 @@ public interface StoreRepository extends JpaRepository<Store, Long> {
     Page<Store> findByNameContainingAndStoreCategoriesContains(String keyword, StoreCategory category, Pageable pageable);
 
     List<Store> findAllByUser(User user);
+
+    Optional<Store> findByNameAndRoadAddress(String name, String roadAddress);
 }

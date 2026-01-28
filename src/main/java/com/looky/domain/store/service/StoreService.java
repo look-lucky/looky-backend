@@ -114,15 +114,18 @@ public class StoreService {
         }
 
         store.updateStore(
-                request.getName(),
-                request.getAddress(),
-                request.getLatitude(),
-                request.getLongitude(),
-                request.getPhone(),
-                request.getIntroduction(),
-                request.getOperatingHours(),
-                request.getStoreCategories() != null ? new HashSet<>(request.getStoreCategories()) : null,
-                request.getStoreMoods() != null ? new HashSet<>(request.getStoreMoods()) : null);
+            request.getName(),
+            request.getBranch(),
+            request.getRoadAddress(),
+            request.getJibunAddress(),
+            request.getLatitude(),
+            request.getLongitude(),
+            request.getPhone(),
+            request.getIntroduction(),
+            request.getOperatingHours(),
+            request.getStoreCategories() != null ? new HashSet<>(request.getStoreCategories()) : null,
+            request.getStoreMoods() != null ? new HashSet<>(request.getStoreMoods()) : null
+        );
 
         // 새 이미지가 존재하면 기존 것 모두 삭제 후 새로 등록
         if (images != null && !images.isEmpty()) {

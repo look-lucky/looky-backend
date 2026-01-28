@@ -30,7 +30,8 @@ public class OwnerSignupRequest {
     @Builder
     public static class StoreCreateRequest {
         private String name;
-        private String address;
+        private String roadAddress;
+        private String jibunAddress;
         private Long partnerUniversityId;
         private List<Long> partnerOrganizationIds;
         private String bizRegNo;

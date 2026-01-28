@@ -16,8 +16,10 @@ import java.util.List;
 public class UpdateStoreRequest {
 
     private String name;
+    private String branch;
 
-    private String address;
+    private String roadAddress;
+    private String jibunAddress;
 
     private Double latitude;
     private Double longitude;
@@ -29,6 +31,6 @@ public class UpdateStoreRequest {
     private String operatingHours;
 
     private List<StoreCategory> storeCategories;
-    
+
     private List<StoreMood> storeMoods;
 }

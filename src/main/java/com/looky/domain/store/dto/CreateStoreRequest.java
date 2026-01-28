@@ -26,8 +26,10 @@ public class CreateStoreRequest {
     @NotBlank(message = "사업자등록번호는 필수입니다.")
     private String bizRegNo;
 
-    @NotBlank(message = "주소는 필수입니다.")
-    private String address;
+    @NotBlank(message = "도로명 주소는 필수입니다.")
+    private String roadAddress;
+
+    private String jibunAddress;
 
     private Double latitude;
 
@@ -49,7 +51,8 @@ public class CreateStoreRequest {
                 .user(user)
                 .name(name)
                 .bizRegNo(bizRegNo)
-                .address(address)
+                .roadAddress(roadAddress)
+                .jibunAddress(jibunAddress)
                 .latitude(latitude)
                 .longitude(longitude)
                 .storePhone(storePhone)

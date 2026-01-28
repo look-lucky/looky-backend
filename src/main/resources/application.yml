@@ -41,3 +41,9 @@ jwt:
 # open api 설정
 open-api:
   service-key: ${OPEN_API_KEY}
+
+# Naver Maps API
+naver:
+  maps:
+    client-id: ${NAVER_MAP_CLIENT_ID}
+    client-secret: ${NAVER_MAP_CLIENT_SECRET}

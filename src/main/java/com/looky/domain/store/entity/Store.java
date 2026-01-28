@@ -6,6 +6,7 @@ import com.looky.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
 
+import com.looky.domain.organization.entity.University;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -45,6 +46,8 @@ public class Store extends BaseEntity {
 
     private Boolean needToCheck; // 관리자 확인 필요 (엑셀 자동 등록 시)
 
+    private String checkReason; // 확인 필요 사유 (엑셀 자동 등록 시)
+
     @Lob
     private String introduction;
 
@@ -75,7 +78,7 @@ public class Store extends BaseEntity {
     private List<StoreImage> images = new ArrayList<>();
 
     @Builder
-    public Store(User user, String name, String branch, String roadAddress, String jibunAddress, String bizRegNo, Double latitude, Double longitude, String storePhone, String introduction, String operatingHours, Set<StoreCategory> storeCategories, Set<StoreMood> storeMoods, StoreStatus storeStatus) {
+    public Store(User user, String name, String branch, String roadAddress, String jibunAddress, String bizRegNo, Double latitude, Double longitude, String storePhone, String introduction, String operatingHours, Set<StoreCategory> storeCategories, Set<StoreMood> storeMoods, StoreStatus storeStatus, Boolean needToCheck, String checkReason) {
         this.user = user;
         this.name = name;
         this.branch = branch;
@@ -90,6 +93,8 @@ public class Store extends BaseEntity {
         this.storeCategories = storeCategories != null ? storeCategories : new HashSet<>();
         this.storeMoods = storeMoods != null ? storeMoods : new HashSet<>();
         this.storeStatus = storeStatus != null ? storeStatus : StoreStatus.UNCLAIMED;
+        this.needToCheck = needToCheck;
+        this.checkReason = checkReason;
     }
 
     public void updateStore(String name, String branch, String roadAddress, String jibunAddress, Double latitude, Double longitude, String phone, String introduction, String operatingHours, Set<StoreCategory> storeCategories, Set<StoreMood> storeMoods) {
@@ -130,7 +135,25 @@ public class Store extends BaseEntity {
         }
     }
 
+    @OneToMany(mappedBy = "store", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<StoreUniversity> universities = new ArrayList<>();
+
     // 연관관계 편의 메서드
+    
+    public void addUniversity(University university) {
+        // 중복 체크
+        boolean exists = this.universities.stream()
+                .anyMatch(su -> su.getUniversity().getId().equals(university.getId()));
+        
+        if (!exists) {
+            StoreUniversity storeUniversity = StoreUniversity.builder()
+                    .store(this)
+                    .university(university)
+                    .build();
+            this.universities.add(storeUniversity);
+        }
+    }
+
     public void addImage(StoreImage image) {
         this.images.add(image);
     }
@@ -145,9 +168,12 @@ public class Store extends BaseEntity {
         this.bizRegNo = bizRegNo;
         this.storePhone = storePhone;
         this.storeStatus = StoreStatus.ACTIVE;
+        this.needToCheck = false;
+        this.checkReason = null;
     }
 
-    public void markAsNeedCheck() {
+    public void markAsNeedCheck(String reason) {
         this.needToCheck = true;
+        this.checkReason = reason;
     }
 }

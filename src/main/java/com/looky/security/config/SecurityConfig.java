@@ -64,6 +64,10 @@ public class SecurityConfig {
         @Bean
         public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
+                // CORS 설정
+                http
+                        .cors(cors -> cors.configurationSource(corsConfigurationSource()));
+                
                 // csrf disable
                 http
                         .csrf((auth) -> auth.disable());
@@ -80,10 +84,6 @@ public class SecurityConfig {
                 http
                         .sessionManagement((session) -> session
                                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
-
-                // CORS 설정
-                http
-                        .cors(cors -> cors.configurationSource(corsConfigurationSource()));
 
                 // 경로별 인가 작업
                 http

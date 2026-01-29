@@ -8,8 +8,6 @@ import com.looky.domain.organization.entity.UserOrganization;
 import com.looky.domain.organization.repository.OrganizationRepository;
 import com.looky.domain.organization.repository.UniversityRepository;
 import com.looky.domain.organization.repository.UserOrganizationRepository;
-import com.looky.domain.partnership.repository.PartnershipRepository;
-import com.looky.domain.store.repository.StoreRepository;
 import com.looky.domain.user.dto.*;
 import com.looky.domain.user.entity.*;
 import com.looky.domain.user.repository.CouncilProfileRepository;
@@ -43,12 +41,16 @@ public class AuthService {
     private final StudentProfileRepository studentProfileRepository;
     private final CouncilProfileRepository councilProfileRepository;
     private final UniversityRepository universityRepository;
-    private final StoreRepository storeRepository;
-    private final PartnershipRepository partnershipRepository;
     private final OrganizationRepository organizationRepository;
     private final UserOrganizationRepository userOrganizationRepository;
 
 
+
+    // 아이디 중복 체크
+    @Transactional(readOnly = true)
+    public boolean checkUsernameAvailability(String username) {
+        return !userRepository.existsByUsername(username);
+    }
 
     @Transactional
     public Long signupStudent(StudentSignupRequest request) {

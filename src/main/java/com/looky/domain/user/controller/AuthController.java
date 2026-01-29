@@ -27,6 +27,12 @@ public class AuthController {
         private final AuthService authService;
         private final CookieUtil cookieUtil;
 
+        @Operation(summary = "[공통] 아이디 중복 확인", description = "아이디 사용 가능 여부를 확인합니다. (true: 사용 가능, false: 중복)")
+        @GetMapping("/check-username")
+        public ResponseEntity<CommonResponse<Boolean>> checkUsernameAvailability(@RequestParam String username) {
+            return ResponseEntity.ok(CommonResponse.success(authService.checkUsernameAvailability(username)));
+        }
+
         @Operation(summary = "[학생] 학생 회원가입", description = "학생 회원을 등록합니다.")
         @PostMapping("/signup/student")
         public ResponseEntity<CommonResponse<Long>> signupStudent(@RequestBody StudentSignupRequest request) {

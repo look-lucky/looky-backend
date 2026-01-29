@@ -5,6 +5,8 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+
 
 @Entity
 @Getter
@@ -42,6 +44,12 @@ public class User extends BaseEntity {
     // 소셜 식별 값 (예: 카카오의 회원번호)
     private String socialId;
 
+    // --- Soft Delete ---
+    @Column(nullable = false)
+    private boolean deleted = false;
+
+    private LocalDateTime deletedAt;
+
     @Builder
     public User(String username, String password, String name, String phone, Gender gender, LocalDate birthDate, Role role, SocialType socialType, String socialId) {
         this.username = username;
@@ -61,6 +69,11 @@ public class User extends BaseEntity {
     }
 
 
+    public void withdraw() {
+        this.deleted = true;
+        this.deletedAt = LocalDateTime.now();
+    }
+    
     public void setUserId(Long userId) {
         this.id = userId;
     }

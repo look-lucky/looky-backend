@@ -10,8 +10,12 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import com.looky.security.details.PrincipalDetails;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
@@ -135,5 +139,26 @@ public class AuthController {
                 return ResponseEntity.ok()
                         .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
                         .body(CommonResponse.success(LoginResponse.of(authTokens.getAccessToken(), authTokens.getExpiresIn())));
+        }
+
+        @Operation(summary = "[공통] 회원 탈퇴", description = "회원을 탈퇴 처리합니다. (Soft Delete)")
+        @ApiResponses(value = {
+                @ApiResponse(responseCode = "204", description = "회원 탈퇴 성공"),
+                @ApiResponse(responseCode = "400", description = "잘못된 요청 (기타 사유 미입력 등)", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class))),
+                @ApiResponse(responseCode = "401", description = "인증 실패", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class)))
+        })
+        @DeleteMapping("/withdraw")
+        public ResponseEntity<CommonResponse<Void>> withdraw(
+                @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,
+                @RequestBody @Valid WithdrawRequest request
+        ) {
+            authService.withdraw(principalDetails.getUser(), request);
+            
+            // 리프레시 토큰 쿠키 삭제
+            ResponseCookie deleteCookie = cookieUtil.createExpiredCookie("refreshToken");
+
+            return ResponseEntity.status(HttpStatus.NO_CONTENT)
+                    .header(HttpHeaders.SET_COOKIE, deleteCookie.toString())
+                    .body(CommonResponse.success(null));
         }
 }

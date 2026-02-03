@@ -10,8 +10,8 @@ INSERT INTO university (university_id, name, email_domain) VALUES (1, '전북대
 -- Hash: $2a$10$GRLdNijSQMUvl/au9ofL.eDwmoohzzS7.rmjMaJJJwal3vSRl0ep2
 
 -- 2.1 Admin
-INSERT INTO user (user_id, created_at, modified_at, username, password, role, deleted, name, gender, birth_date, social_type) 
-VALUES (1, NOW(), NOW(), 'admin', '$2a$10$GRLdNijSQMUvl/au9ofL.eDwmoohzzS7.rmjMaJJJwal3vSRl0ep2', 'ROLE_ADMIN', 0, '관리자', 0, '1990-01-01', 'LOCAL');
+INSERT INTO user (user_id, created_at, modified_at, username, password, role, deleted) 
+VALUES (1, NOW(), NOW(), 'admin', '$2a$10$GRLdNijSQMUvl/au9ofL.eDwmoohzzS7.rmjMaJJJwal3vSRl0ep2', 'ROLE_ADMIN', 0);
 
 -- 2.2 Owners (5 Owners)
 INSERT INTO user (user_id, created_at, modified_at, username, password, role, deleted, name, gender, birth_date, social_type) VALUES 

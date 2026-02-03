@@ -16,7 +16,7 @@ import java.util.Set;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "event")
+@Table(name = "events")
 public class Event extends BaseEntity {
 
     @Id

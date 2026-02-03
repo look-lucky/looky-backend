@@ -10,16 +10,16 @@ INSERT INTO university (university_id, name, email_domain) VALUES (1, '전북대
 -- Hash: $2a$10$GRLdNijSQMUvl/au9ofL.eDwmoohzzS7.rmjMaJJJwal3vSRl0ep2
 
 -- 2.1 Admin
-INSERT INTO user (user_id, created_at, modified_at, username, password, role, deleted) 
-VALUES (1, NOW(), NOW(), 'admin', '$2a$10$GRLdNijSQMUvl/au9ofL.eDwmoohzzS7.rmjMaJJJwal3vSRl0ep2', 'ROLE_ADMIN', 0);
+INSERT INTO user (user_id, created_at, modified_at, username, password, role, deleted, gender, birth_date, social_type) 
+VALUES (1, NOW(), NOW(), 'admin', '$2a$10$GRLdNijSQMUvl/au9ofL.eDwmoohzzS7.rmjMaJJJwal3vSRl0ep2', 'ROLE_ADMIN', 0, 0, '1990-01-01', 'LOCAL');
 
 -- 2.2 Owners (5 Owners)
-INSERT INTO user (user_id, created_at, modified_at, username, password, role, deleted, name, gender, birth_date, social_type) VALUES 
-(10, NOW(), NOW(), 'owner1', '$2a$10$GRLdNijSQMUvl/au9ofL.eDwmoohzzS7.rmjMaJJJwal3vSRl0ep2', 'ROLE_OWNER', 0, '김사장', 0, '1980-05-05', 'LOCAL'),
-(11, NOW(), NOW(), 'owner2', '$2a$10$GRLdNijSQMUvl/au9ofL.eDwmoohzzS7.rmjMaJJJwal3vSRl0ep2', 'ROLE_OWNER', 0, '이점주', 1, '1985-06-06', 'LOCAL'),
-(12, NOW(), NOW(), 'owner3', '$2a$10$GRLdNijSQMUvl/au9ofL.eDwmoohzzS7.rmjMaJJJwal3vSRl0ep2', 'ROLE_OWNER', 0, '박대표', 0, '1990-07-07', 'LOCAL'),
-(13, NOW(), NOW(), 'owner4', '$2a$10$GRLdNijSQMUvl/au9ofL.eDwmoohzzS7.rmjMaJJJwal3vSRl0ep2', 'ROLE_OWNER', 0, '최오너', 1, '1982-08-08', 'LOCAL'),
-(14, NOW(), NOW(), 'owner5', '$2a$10$GRLdNijSQMUvl/au9ofL.eDwmoohzzS7.rmjMaJJJwal3vSRl0ep2', 'ROLE_OWNER', 0, '정주인', 0, '1978-09-09', 'LOCAL');
+INSERT INTO user (user_id, created_at, modified_at, username, password, role, deleted, gender, birth_date, social_type) VALUES 
+(10, NOW(), NOW(), 'owner1', '$2a$10$GRLdNijSQMUvl/au9ofL.eDwmoohzzS7.rmjMaJJJwal3vSRl0ep2', 'ROLE_OWNER', 0, 0, '1980-05-05', 'LOCAL'),
+(11, NOW(), NOW(), 'owner2', '$2a$10$GRLdNijSQMUvl/au9ofL.eDwmoohzzS7.rmjMaJJJwal3vSRl0ep2', 'ROLE_OWNER', 0, 1, '1985-06-06', 'LOCAL'),
+(12, NOW(), NOW(), 'owner3', '$2a$10$GRLdNijSQMUvl/au9ofL.eDwmoohzzS7.rmjMaJJJwal3vSRl0ep2', 'ROLE_OWNER', 0, 0, '1990-07-07', 'LOCAL'),
+(13, NOW(), NOW(), 'owner4', '$2a$10$GRLdNijSQMUvl/au9ofL.eDwmoohzzS7.rmjMaJJJwal3vSRl0ep2', 'ROLE_OWNER', 0, 1, '1982-08-08', 'LOCAL'),
+(14, NOW(), NOW(), 'owner5', '$2a$10$GRLdNijSQMUvl/au9ofL.eDwmoohzzS7.rmjMaJJJwal3vSRl0ep2', 'ROLE_OWNER', 0, 0, '1978-09-09', 'LOCAL');
 
 INSERT INTO owner_profile (user_id, name, email, phone) VALUES 
 (10, '김사장', 'owner1@looky.com', '010-1111-1111'),
@@ -29,27 +29,27 @@ INSERT INTO owner_profile (user_id, name, email, phone) VALUES
 (14, '정주인', 'owner5@looky.com', '010-5555-5555');
 
 -- 2.3 Students (20 Students)
-INSERT INTO user (user_id, created_at, modified_at, username, password, role, deleted, name, gender, birth_date, social_type, social_id) VALUES 
-(101, NOW(), NOW(), 'student1', '$2a$10$GRLdNijSQMUvl/au9ofL.eDwmoohzzS7.rmjMaJJJwal3vSRl0ep2', 'ROLE_STUDENT', 0, '학생1', 0, '2000-01-01', 'KAKAO', 'kakao_101'),
-(102, NOW(), NOW(), 'student2', '$2a$10$GRLdNijSQMUvl/au9ofL.eDwmoohzzS7.rmjMaJJJwal3vSRl0ep2', 'ROLE_STUDENT', 0, '학생2', 1, '2001-02-02', 'KAKAO', 'kakao_102'),
-(103, NOW(), NOW(), 'student3', '$2a$10$GRLdNijSQMUvl/au9ofL.eDwmoohzzS7.rmjMaJJJwal3vSRl0ep2', 'ROLE_STUDENT', 0, '학생3', 0, '2002-03-03', 'NAVER', 'naver_103'),
-(104, NOW(), NOW(), 'student4', '$2a$10$GRLdNijSQMUvl/au9ofL.eDwmoohzzS7.rmjMaJJJwal3vSRl0ep2', 'ROLE_STUDENT', 0, '학생4', 1, '2000-04-04', 'GOOGLE', 'google_104'),
-(105, NOW(), NOW(), 'student5', '$2a$10$GRLdNijSQMUvl/au9ofL.eDwmoohzzS7.rmjMaJJJwal3vSRl0ep2', 'ROLE_STUDENT', 0, '학생5', 0, '2003-05-05', 'LOCAL', NULL),
-(106, NOW(), NOW(), 'student6', '$2a$10$GRLdNijSQMUvl/au9ofL.eDwmoohzzS7.rmjMaJJJwal3vSRl0ep2', 'ROLE_STUDENT', 0, '학생6', 1, '2001-06-06', 'LOCAL', NULL),
-(107, NOW(), NOW(), 'student7', '$2a$10$GRLdNijSQMUvl/au9ofL.eDwmoohzzS7.rmjMaJJJwal3vSRl0ep2', 'ROLE_STUDENT', 0, '학생7', 0, '2002-07-07', 'KAKAO', 'kakao_107'),
-(108, NOW(), NOW(), 'student8', '$2a$10$GRLdNijSQMUvl/au9ofL.eDwmoohzzS7.rmjMaJJJwal3vSRl0ep2', 'ROLE_STUDENT', 0, '학생8', 1, '2000-08-08', 'NAVER', 'naver_108'),
-(109, NOW(), NOW(), 'student9', '$2a$10$GRLdNijSQMUvl/au9ofL.eDwmoohzzS7.rmjMaJJJwal3vSRl0ep2', 'ROLE_STUDENT', 0, '학생9', 0, '2003-09-09', 'GOOGLE', 'google_109'),
-(110, NOW(), NOW(), 'student10', '$2a$10$GRLdNijSQMUvl/au9ofL.eDwmoohzzS7.rmjMaJJJwal3vSRl0ep2', 'ROLE_STUDENT', 0, '학생10', 1, '2001-10-10', 'LOCAL', NULL),
-(111, NOW(), NOW(), 'student11', '$2a$10$GRLdNijSQMUvl/au9ofL.eDwmoohzzS7.rmjMaJJJwal3vSRl0ep2', 'ROLE_STUDENT', 0, '학생11', 0, '2002-11-11', 'KAKAO', 'kakao_111'),
-(112, NOW(), NOW(), 'student12', '$2a$10$GRLdNijSQMUvl/au9ofL.eDwmoohzzS7.rmjMaJJJwal3vSRl0ep2', 'ROLE_STUDENT', 0, '학생12', 1, '2000-12-12', 'NAVER', 'naver_112'),
-(113, NOW(), NOW(), 'student13', '$2a$10$GRLdNijSQMUvl/au9ofL.eDwmoohzzS7.rmjMaJJJwal3vSRl0ep2', 'ROLE_STUDENT', 0, '학생13', 0, '2003-01-13', 'GOOGLE', 'google_113'),
-(114, NOW(), NOW(), 'student14', '$2a$10$GRLdNijSQMUvl/au9ofL.eDwmoohzzS7.rmjMaJJJwal3vSRl0ep2', 'ROLE_STUDENT', 0, '학생14', 1, '2001-02-14', 'LOCAL', NULL),
-(115, NOW(), NOW(), 'student15', '$2a$10$GRLdNijSQMUvl/au9ofL.eDwmoohzzS7.rmjMaJJJwal3vSRl0ep2', 'ROLE_STUDENT', 0, '학생15', 0, '2002-03-15', 'KAKAO', 'kakao_115'),
-(116, NOW(), NOW(), 'student16', '$2a$10$GRLdNijSQMUvl/au9ofL.eDwmoohzzS7.rmjMaJJJwal3vSRl0ep2', 'ROLE_STUDENT', 0, '학생16', 1, '2000-04-16', 'NAVER', 'naver_116'),
-(117, NOW(), NOW(), 'student17', '$2a$10$GRLdNijSQMUvl/au9ofL.eDwmoohzzS7.rmjMaJJJwal3vSRl0ep2', 'ROLE_STUDENT', 0, '학생17', 0, '2003-05-17', 'GOOGLE', 'google_117'),
-(118, NOW(), NOW(), 'student18', '$2a$10$GRLdNijSQMUvl/au9ofL.eDwmoohzzS7.rmjMaJJJwal3vSRl0ep2', 'ROLE_STUDENT', 0, '학생18', 1, '2001-06-18', 'LOCAL', NULL),
-(119, NOW(), NOW(), 'student19', '$2a$10$GRLdNijSQMUvl/au9ofL.eDwmoohzzS7.rmjMaJJJwal3vSRl0ep2', 'ROLE_STUDENT', 0, '학생19', 0, '2002-07-19', 'KAKAO', 'kakao_119'),
-(120, NOW(), NOW(), 'student20', '$2a$10$GRLdNijSQMUvl/au9ofL.eDwmoohzzS7.rmjMaJJJwal3vSRl0ep2', 'ROLE_STUDENT', 0, '학생20', 1, '2000-08-20', 'NAVER', 'naver_120');
+INSERT INTO user (user_id, created_at, modified_at, username, password, role, deleted, gender, birth_date, social_type, social_id) VALUES 
+(101, NOW(), NOW(), 'student1', '$2a$10$GRLdNijSQMUvl/au9ofL.eDwmoohzzS7.rmjMaJJJwal3vSRl0ep2', 'ROLE_STUDENT', 0, 0, '2000-01-01', 'KAKAO', 'kakao_101'),
+(102, NOW(), NOW(), 'student2', '$2a$10$GRLdNijSQMUvl/au9ofL.eDwmoohzzS7.rmjMaJJJwal3vSRl0ep2', 'ROLE_STUDENT', 0, 1, '2001-02-02', 'KAKAO', 'kakao_102'),
+(103, NOW(), NOW(), 'student3', '$2a$10$GRLdNijSQMUvl/au9ofL.eDwmoohzzS7.rmjMaJJJwal3vSRl0ep2', 'ROLE_STUDENT', 0, 0, '2002-03-03', 'NAVER', 'naver_103'),
+(104, NOW(), NOW(), 'student4', '$2a$10$GRLdNijSQMUvl/au9ofL.eDwmoohzzS7.rmjMaJJJwal3vSRl0ep2', 'ROLE_STUDENT', 0, 1, '2000-04-04', 'GOOGLE', 'google_104'),
+(105, NOW(), NOW(), 'student5', '$2a$10$GRLdNijSQMUvl/au9ofL.eDwmoohzzS7.rmjMaJJJwal3vSRl0ep2', 'ROLE_STUDENT', 0, 0, '2003-05-05', 'LOCAL', NULL),
+(106, NOW(), NOW(), 'student6', '$2a$10$GRLdNijSQMUvl/au9ofL.eDwmoohzzS7.rmjMaJJJwal3vSRl0ep2', 'ROLE_STUDENT', 0, 1, '2001-06-06', 'LOCAL', NULL),
+(107, NOW(), NOW(), 'student7', '$2a$10$GRLdNijSQMUvl/au9ofL.eDwmoohzzS7.rmjMaJJJwal3vSRl0ep2', 'ROLE_STUDENT', 0, 0, '2002-07-07', 'KAKAO', 'kakao_107'),
+(108, NOW(), NOW(), 'student8', '$2a$10$GRLdNijSQMUvl/au9ofL.eDwmoohzzS7.rmjMaJJJwal3vSRl0ep2', 'ROLE_STUDENT', 0, 1, '2000-08-08', 'NAVER', 'naver_108'),
+(109, NOW(), NOW(), 'student9', '$2a$10$GRLdNijSQMUvl/au9ofL.eDwmoohzzS7.rmjMaJJJwal3vSRl0ep2', 'ROLE_STUDENT', 0, 0, '2003-09-09', 'GOOGLE', 'google_109'),
+(110, NOW(), NOW(), 'student10', '$2a$10$GRLdNijSQMUvl/au9ofL.eDwmoohzzS7.rmjMaJJJwal3vSRl0ep2', 'ROLE_STUDENT', 0, 1, '2001-10-10', 'LOCAL', NULL),
+(111, NOW(), NOW(), 'student11', '$2a$10$GRLdNijSQMUvl/au9ofL.eDwmoohzzS7.rmjMaJJJwal3vSRl0ep2', 'ROLE_STUDENT', 0, 0, '2002-11-11', 'KAKAO', 'kakao_111'),
+(112, NOW(), NOW(), 'student12', '$2a$10$GRLdNijSQMUvl/au9ofL.eDwmoohzzS7.rmjMaJJJwal3vSRl0ep2', 'ROLE_STUDENT', 0, 1, '2000-12-12', 'NAVER', 'naver_112'),
+(113, NOW(), NOW(), 'student13', '$2a$10$GRLdNijSQMUvl/au9ofL.eDwmoohzzS7.rmjMaJJJwal3vSRl0ep2', 'ROLE_STUDENT', 0, 0, '2003-01-13', 'GOOGLE', 'google_113'),
+(114, NOW(), NOW(), 'student14', '$2a$10$GRLdNijSQMUvl/au9ofL.eDwmoohzzS7.rmjMaJJJwal3vSRl0ep2', 'ROLE_STUDENT', 0, 1, '2001-02-14', 'LOCAL', NULL),
+(115, NOW(), NOW(), 'student15', '$2a$10$GRLdNijSQMUvl/au9ofL.eDwmoohzzS7.rmjMaJJJwal3vSRl0ep2', 'ROLE_STUDENT', 0, 0, '2002-03-15', 'KAKAO', 'kakao_115'),
+(116, NOW(), NOW(), 'student16', '$2a$10$GRLdNijSQMUvl/au9ofL.eDwmoohzzS7.rmjMaJJJwal3vSRl0ep2', 'ROLE_STUDENT', 0, 1, '2000-04-16', 'NAVER', 'naver_116'),
+(117, NOW(), NOW(), 'student17', '$2a$10$GRLdNijSQMUvl/au9ofL.eDwmoohzzS7.rmjMaJJJwal3vSRl0ep2', 'ROLE_STUDENT', 0, 0, '2003-05-17', 'GOOGLE', 'google_117'),
+(118, NOW(), NOW(), 'student18', '$2a$10$GRLdNijSQMUvl/au9ofL.eDwmoohzzS7.rmjMaJJJwal3vSRl0ep2', 'ROLE_STUDENT', 0, 1, '2001-06-18', 'LOCAL', NULL),
+(119, NOW(), NOW(), 'student19', '$2a$10$GRLdNijSQMUvl/au9ofL.eDwmoohzzS7.rmjMaJJJwal3vSRl0ep2', 'ROLE_STUDENT', 0, 0, '2002-07-19', 'KAKAO', 'kakao_119'),
+(120, NOW(), NOW(), 'student20', '$2a$10$GRLdNijSQMUvl/au9ofL.eDwmoohzzS7.rmjMaJJJwal3vSRl0ep2', 'ROLE_STUDENT', 0, 1, '2000-08-20', 'NAVER', 'naver_120');
 
 INSERT INTO student_profile (user_id, nickname, university_id) VALUES 
 (101, '멋진학생1', 1), (102, '이쁜학생2', 1), (103, '공부왕3', 1), (104, '코딩천재4', 1), (105, '맛집탐방5', 1),
@@ -58,8 +58,8 @@ INSERT INTO student_profile (user_id, nickname, university_id) VALUES
 (116, '동아리장16', 1), (117, '과대17', 1), (118, '총무18', 1), (119, '인싸19', 1), (120, '아싸20', 1);
 
 -- 3. Organizations
-INSERT INTO user (user_id, created_at, modified_at, username, password, role, deleted, name, social_type) VALUES 
-(50, NOW(), NOW(), 'jbnu_council', '$2a$10$GRLdNijSQMUvl/au9ofL.eDwmoohzzS7.rmjMaJJJwal3vSRl0ep2', 'ROLE_COUNCIL', 0, '전북대총학', 'LOCAL');
+INSERT INTO user (user_id, created_at, modified_at, username, password, role, deleted, social_type) VALUES 
+(50, NOW(), NOW(), 'jbnu_council', '$2a$10$GRLdNijSQMUvl/au9ofL.eDwmoohzzS7.rmjMaJJJwal3vSRl0ep2', 'ROLE_COUNCIL', 0, 'LOCAL');
 
 INSERT INTO council_profile (user_id, university_id) VALUES (50, 1);
 

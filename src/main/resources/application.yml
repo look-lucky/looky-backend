@@ -1,8 +1,9 @@
+server:
+  port: 8080
+
 spring:
   application:
     name: looky
-  profiles:
-    active: local # 기본 실행 시 local 프로필 활성화
 
   # 업로드 제한
   servlet:

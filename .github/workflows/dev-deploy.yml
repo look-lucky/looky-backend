@@ -1,0 +1,59 @@
+name: Dev Deploy Workflow
+
+on:
+  push:
+    branches: [ dev ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: Development  # Development 환경의 Secret을 가져옴
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Build with Gradle
+        run: ./gradlew clean build -x test
+
+      - name: Docker Login
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
+
+      - name: Docker Build & Push (Dev Tag)
+        run: |
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/looky-backend:dev .
+          docker push ${{ secrets.DOCKER_USERNAME }}/looky-backend:dev
+
+      - name: EC2 Deploy (Dev - Port 8081)
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          port: 22
+          envs: ENV_FILE
+          script: |
+            
+            # 1. 환경변수 파일 생성 (.env.dev)
+            echo "$ENV_FILE" > .env.dev
+            
+            # 2. 이미지 Pull
+            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/looky-backend:dev
+            
+            # 3. 기존 Dev 컨테이너 중지/삭제
+            sudo docker stop looky-dev || true
+            sudo docker rm looky-dev || true
+            
+            # 4. Dev 컨테이너 실행
+            sudo docker run -d --name looky-dev -p 8080:8080 \
+              --env-file .env.dev \
+              ${{ secrets.DOCKER_USERNAME }}/looky-backend:dev
+            
+            # 5. 청소
+            sudo docker image prune -f
+        env:
+          ENV_FILE: ${{ secrets.ENV_FILE }}

@@ -18,7 +18,7 @@ spring:
         format_sql: true # 쿼리 가독성 향상
         
   flyway:
-    enabled: true # 로컬에선 JPA UPDATE 사용
+    enabled: false # 로컬에선 JPA UPDATE 사용
 
 
   security:

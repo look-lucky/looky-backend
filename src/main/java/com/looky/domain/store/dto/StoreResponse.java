@@ -28,8 +28,10 @@ public class StoreResponse {
     private List<StoreCategory> storeCategories;
     private List<StoreMood> storeMoods;
     private List<String> imageUrls; // 0번 째 값이 썸네일
+    private Double averageRating;
+    private Integer reviewCount;
 
-    public static StoreResponse from(Store store) {
+    public static StoreResponse of(Store store, Double averageRating, Integer reviewCount) {
         return StoreResponse.builder()
                 .id(store.getId())
                 .userId(store.getUser() != null ? store.getUser().getId() : null)
@@ -45,6 +47,12 @@ public class StoreResponse {
                 .storeCategories(new ArrayList<>(store.getStoreCategories()))
                 .storeMoods(new ArrayList<>(store.getStoreMoods()))
                 .imageUrls(store.getImages().stream().map(StoreImage::getImageUrl).collect(Collectors.toList()))
+                .averageRating(averageRating != null ? averageRating : 0.0)
+                .reviewCount(reviewCount != null ? reviewCount : 0)
                 .build();
+    }
+
+    public static StoreResponse from(Store store) {
+        return of(store, 0.0, 0);
     }
 }

@@ -22,6 +22,7 @@ import com.looky.domain.user.entity.Role;
 import com.looky.domain.user.repository.UserRepository;
 import com.looky.domain.item.repository.ItemRepository;
 import com.looky.domain.user.entity.User;
+import com.looky.domain.review.repository.ReviewRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -46,6 +47,7 @@ public class StoreService {
     private final StoreReportRepository storeReportRepository;
     private final ItemRepository itemRepository;
     private final S3Service s3Service;
+    private final ReviewRepository reviewRepository;
 
     @Transactional
     public Long createStore(User user, CreateStoreRequest request, List<MultipartFile> images) throws IOException {
@@ -79,7 +81,10 @@ public class StoreService {
         Store store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "상점을 찾을 수 없습니다."));
 
-        return StoreResponse.from(store);
+        Double averageRating = reviewRepository.findAverageRatingByStoreId(storeId);
+        Long reviewCount = reviewRepository.countByStoreId(storeId);
+
+        return StoreResponse.of(store, averageRating, reviewCount != null ? reviewCount.intValue() : 0);
     }
 
     public PageResponse<StoreResponse> getStores(String keyword, List<StoreCategory> categories, List<StoreMood> moods, Long universityId, Pageable pageable) {
@@ -90,7 +95,11 @@ public class StoreService {
 
         Page<Store> storePage = storeRepository.findAll(spec, pageable);
 
-        Page<StoreResponse> responsePage = storePage.map(StoreResponse::from);
+        Page<StoreResponse> responsePage = storePage.map(store -> {
+            Double averageRating = reviewRepository.findAverageRatingByStoreId(store.getId());
+            Long reviewCount = reviewRepository.countByStoreId(store.getId());
+            return StoreResponse.of(store, averageRating, reviewCount != null ? reviewCount.intValue() : 0);
+        });
         return PageResponse.from(responsePage);
     }
 
@@ -146,7 +155,11 @@ public class StoreService {
     // 위치 기반 상점 목록 조회
     public List<StoreResponse> getNearbyStores(Double latitude, Double longitude, Double radius) {
         List<Store> stores = storeRepository.findByLocationWithin(latitude, longitude, radius);
-        return stores.stream().map(StoreResponse::from).toList();
+        return stores.stream().map(store -> {
+            Double averageRating = reviewRepository.findAverageRatingByStoreId(store.getId());
+            Long reviewCount = reviewRepository.countByStoreId(store.getId());
+            return StoreResponse.of(store, averageRating, reviewCount != null ? reviewCount.intValue() : 0);
+        }).toList();
     }
     
     // 상점 이미지 개별 삭제
@@ -198,7 +211,11 @@ public class StoreService {
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         List<Store> stores = storeRepository.findAllByUser(owner);
-        return stores.stream().map(StoreResponse::from).toList();
+        return stores.stream().map(store -> {
+            Double averageRating = reviewRepository.findAverageRatingByStoreId(store.getId());
+            Long reviewCount = reviewRepository.countByStoreId(store.getId());
+            return StoreResponse.of(store, averageRating, reviewCount != null ? reviewCount.intValue() : 0);
+        }).toList();
     }
 
     // S3에 업로드 및 DB 저장

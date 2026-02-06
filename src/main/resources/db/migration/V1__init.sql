@@ -241,20 +241,14 @@ create table coupon (
     total_quantity int not null,
     limit_per_user int not null,
     status enum ('ACTIVE','DRAFT','EXPIRED','SCHEDULED','STOPPED') not null,
+    benefit_type enum ('FIXED_DISCOUNT','PERCENTAGE_DISCOUNT','SERVICE_GIFT') not null,
+    benefit_value varchar(255),
+    min_order_amount int,
     store_id bigint not null,
-    target_organization_id bigint,
-    foreign key (store_id) references store (store_id),
-    foreign key (target_organization_id) references organization (organization_id)
+    foreign key (store_id) references store (store_id)
 );
 
-create table coupon_item (
-    id bigint auto_increment primary key,
-    coupon_id bigint not null,
-    item_id bigint not null,
-    constraint UK_coupon_item unique (coupon_id, item_id),
-    foreign key (coupon_id) references coupon (coupon_id),
-    foreign key (item_id) references item (item_id)
-);
+    /* coupon_item table removed */
 
 create table student_coupon (
     student_coupon_id bigint auto_increment primary key,

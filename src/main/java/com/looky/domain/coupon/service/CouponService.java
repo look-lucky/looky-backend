@@ -2,13 +2,9 @@ package com.looky.domain.coupon.service;
 
 import com.looky.common.exception.CustomException;
 import com.looky.common.exception.ErrorCode;
-import com.looky.domain.organization.entity.Organization;
-import com.looky.domain.organization.repository.OrganizationRepository;
 import com.looky.domain.coupon.dto.*;
 import com.looky.domain.coupon.entity.*;
 import com.looky.domain.coupon.repository.*;
-import com.looky.domain.item.entity.Item;
-import com.looky.domain.item.repository.ItemRepository;
 import com.looky.domain.store.entity.Store;
 import com.looky.domain.store.repository.StoreRepository;
 import com.looky.domain.user.entity.User;
@@ -30,55 +26,34 @@ public class CouponService {
 
     private final CouponRepository couponRepository;
     private final StudentCouponRepository studentCouponRepository;
-    private final CouponItemRepository couponItemRepository;
     private final StoreRepository storeRepository;
     private final UserRepository userRepository;
-    private final ItemRepository itemRepository;
-    private final OrganizationRepository organizationRepository;
 
     // --- 점주용 ---
 
     @Transactional
     public Long createCoupon(Long storeId, User user, CreateCouponRequest request) {
+        
         Store store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "가게를 찾을 수 없습니다."));
 
         validateStoreOwner(store, user);
 
-        Organization organization = null;
-        if (request.getTargetOrganizationId() != null) {
-            organization = organizationRepository.findById(request.getTargetOrganizationId())
-                    .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "제휴 정보를 찾을 수 없습니다."));
-        }
-
         Coupon coupon = Coupon.builder()
                 .store(store)
                 .title(request.getTitle())
                 .description(request.getDescription())
-                .targetOrganization(organization)
                 .issueStartsAt(request.getIssueStartsAt())
                 .issueEndsAt(request.getIssueEndsAt())
                 .totalQuantity(request.getTotalQuantity())
                 .limitPerUser(request.getLimitPerUser())
                 .status(request.getStatus() != null ? request.getStatus() : CouponStatus.ACTIVE)
+                .benefitType(request.getBenefitType())
+                .benefitValue(request.getBenefitValue())
+                .minOrderAmount(request.getMinOrderAmount())
                 .build();
 
         Coupon savedCoupon = couponRepository.save(coupon);
-
-        if (request.getTargetItemIds() != null && !request.getTargetItemIds().isEmpty()) {
-            List<Item> items = itemRepository.findAllById(request.getTargetItemIds());
-            for (Item item : items) {
-                // Verify item belongs to store
-                if (!item.getStore().getId().equals(store.getId())) {
-                    throw new CustomException(ErrorCode.BAD_REQUEST, "다른 가게의 상품이 포함되어 있습니다.");
-                }
-                CouponItem couponItem = CouponItem.builder()
-                        .coupon(savedCoupon)
-                        .item(item)
-                        .build();
-                couponItemRepository.save(couponItem);
-            }
-        }
 
         return savedCoupon.getId();
     }
@@ -97,7 +72,10 @@ public class CouponService {
                 request.getIssueEndsAt(),
                 request.getTotalQuantity(),
                 request.getLimitPerUser(),
-                request.getStatus());
+                request.getStatus(),
+                request.getBenefitType(),
+                request.getBenefitValue(),
+                request.getMinOrderAmount());
     }
 
     @Transactional
@@ -152,36 +130,6 @@ public class CouponService {
 
         return responses;
     }
-
-    public List<CouponResponse> getCouponsByItem(Long itemId, User user) {
-        Item item = itemRepository.findById(itemId)
-                .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "상품을 찾을 수 없습니다."));
-
-        List<Coupon> coupons = couponItemRepository.findByItem(item).stream()
-                .map(CouponItem::getCoupon)
-                .collect(Collectors.toList());
-
-        List<CouponResponse> responses = coupons.stream()
-                .map(CouponResponse::from)
-                .collect(Collectors.toList());
-
-        // 학생인 경우에만 발급 여부 확인
-        if (user.getRole() == Role.ROLE_STUDENT && !coupons.isEmpty()) {
-            List<StudentCoupon> issuedCoupons = studentCouponRepository.findByUserAndCouponIn(user, coupons);
-            List<Long> issuedCouponIds = issuedCoupons.stream()
-                    .map(sc -> sc.getCoupon().getId())
-                    .collect(Collectors.toList());
-
-            responses.forEach(response -> {
-                if (issuedCouponIds.contains(response.getId())) {
-                    response.setIsIssued(true);
-                }
-            });
-        }
-
-        return responses;
-    }
-
 
     @Transactional
     public IssueCouponResponse issueCoupon(Long couponId, User user) {

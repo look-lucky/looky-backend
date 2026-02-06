@@ -1,5 +1,6 @@
 package com.looky.domain.coupon.dto;
 
+import com.looky.domain.coupon.entity.CouponBenefitType;
 import com.looky.domain.coupon.entity.CouponStatus;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -8,7 +9,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Getter
 @NoArgsConstructor
@@ -21,8 +21,6 @@ public class CreateCouponRequest {
 
     private String description;
 
-    private Long targetOrganizationId;
-
     private LocalDateTime issueStartsAt;
     private LocalDateTime issueEndsAt;
 
@@ -32,7 +30,12 @@ public class CreateCouponRequest {
     @NotNull(message = "인당 발행 한도는 필수입니다.")
     private Integer limitPerUser;
 
-    private CouponStatus status; // 선택 입력 (로직에 따라 DRAFT 또는 ACTIVE로 기본 설정)
+    @NotNull(message = "혜택 타입은 필수입니다.")
+    private CouponBenefitType benefitType;
 
-    private List<Long> targetItemIds; // 선택 입력 (상품 매핑)
+    private String benefitValue;
+
+    private Integer minOrderAmount; 
+
+    private CouponStatus status; 
 }

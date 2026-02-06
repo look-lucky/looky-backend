@@ -178,11 +178,11 @@ INSERT INTO partnership (created_at, modified_at, benefit, starts_at, ends_at, s
 (NOW(), NOW(), '전 메뉴 10% 할인 (동반 1인 포함)', '2025-01-01', '2025-12-31', 1, 100),
 (NOW(), NOW(), '음료수 서비스', '2025-03-01', '2025-06-30', 3, 101);
 
-INSERT INTO coupon (coupon_id, created_at, modified_at, title, description, issue_starts_at, issue_ends_at, total_quantity, limit_per_user, status, store_id, target_organization_id) VALUES 
-(1, NOW(), NOW(), '신학기 1000원 할인 쿠폰', '모든 메뉴에 적용 가능합니다.', '2025-03-01', '2025-03-31', 100, 1, 'ACTIVE', 1, NULL),
-(2, NOW(), NOW(), '감자튀김 무료 증정', '세트 메뉴 주문 시 사용 가능', '2025-01-01', '2025-12-31', 50, 1, 'ACTIVE', 2, 100);
+INSERT INTO coupon (coupon_id, created_at, modified_at, title, description, issue_starts_at, issue_ends_at, total_quantity, limit_per_user, status, benefit_type, benefit_value, min_order_amount, store_id) VALUES 
+(1, NOW(), NOW(), '신학기 1000원 할인 쿠폰', '모든 메뉴에 적용 가능합니다.', '2025-03-01', '2025-03-31', 100, 1, 'ACTIVE', 'FIXED_DISCOUNT', '1000', 10000, 1),
+(2, NOW(), NOW(), '감자튀김 무료 증정', '세트 메뉴 주문 시 사용 가능', '2025-01-01', '2025-12-31', 50, 1, 'ACTIVE', 'SERVICE_GIFT', '감자튀김', 15000, 2);
 
-INSERT INTO coupon_item (coupon_id, item_id) VALUES (2, 8);
+-- coupon_item insert removed
 
 -- 6. Events
 INSERT INTO events (event_id, created_at, modified_at, title, description, latitude, longitude, start_date_time, end_date_time, status) VALUES 

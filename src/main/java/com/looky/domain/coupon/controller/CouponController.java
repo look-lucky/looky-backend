@@ -93,7 +93,6 @@ public class CouponController {
                 @RequestBody @Valid VerifyCouponRequest request
         )
         {
-
                 couponService.verifyAndUseCoupon(storeId, principalDetails.getUser(), request.getCode());
                 return ResponseEntity.ok(CommonResponse.success(null));
         }
@@ -113,21 +112,6 @@ public class CouponController {
         )
         {
                 List<CouponResponse> response = couponService.getCouponsByStore(storeId, principalDetails != null ? principalDetails.getUser() : null);
-                return ResponseEntity.ok(CommonResponse.success(response));
-        }
-
-        @Operation(summary = "[공통] 상품별 적용 가능 쿠폰 조회", description = "특정 상품에 적용 가능한 쿠폰 목록을 조회합니다.")
-        @ApiResponses(value = {
-                        @ApiResponse(responseCode = "200", description = "성공"),
-                        @ApiResponse(responseCode = "404", description = "상품 없음", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class)))
-        })
-        @GetMapping("/items/{itemId}/coupons")
-        public ResponseEntity<CommonResponse<List<CouponResponse>>> getCouponsByItem(
-                @Parameter(description = "상품 ID") @PathVariable Long itemId,
-                @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails
-        )
-        {
-                List<CouponResponse> response = couponService.getCouponsByItem(itemId, principalDetails != null ? principalDetails.getUser() : null);
                 return ResponseEntity.ok(CommonResponse.success(response));
         }
 

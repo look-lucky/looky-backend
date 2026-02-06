@@ -1,7 +1,6 @@
 package com.looky.domain.coupon.entity;
 
 import com.looky.common.entity.BaseEntity;
-import com.looky.domain.organization.entity.Organization;
 import com.looky.domain.store.entity.Store;
 import jakarta.persistence.*;
 import lombok.*;
@@ -29,10 +28,6 @@ public class Coupon extends BaseEntity {
     @Lob
     private String description;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "target_organization_id")
-    private Organization targetOrganization; // 제휴 쿠폰일 경우 타겟 소속
-
     private LocalDateTime issueStartsAt; // 예약 발행 시 사용
     private LocalDateTime issueEndsAt; // 쿠폰 노출/발급 종료일
 
@@ -46,21 +41,29 @@ public class Coupon extends BaseEntity {
     @Column(nullable = false)
     private CouponStatus status;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private CouponBenefitType benefitType; // 혜택 타입 (정액, 정률, 서비스)
+
+    private String benefitValue; // 혜택 값 (할인 금액, 할인율, 서비스 내용 등)
+    private Integer minOrderAmount; // 최소 주문 금액
+
     @Builder
-    public Coupon(Store store, String title, String description, Organization targetOrganization, LocalDateTime issueStartsAt, LocalDateTime issueEndsAt, Integer totalQuantity, Integer limitPerUser, CouponStatus status) {
+    public Coupon(Store store, String title, String description, LocalDateTime issueStartsAt, LocalDateTime issueEndsAt, Integer totalQuantity, Integer limitPerUser, CouponStatus status, CouponBenefitType benefitType, String benefitValue, Integer minOrderAmount) {
         this.store = store;
         this.title = title;
         this.description = description;
-        this.targetOrganization = targetOrganization;
         this.issueStartsAt = issueStartsAt;
         this.issueEndsAt = issueEndsAt;
         this.totalQuantity = totalQuantity;
         this.limitPerUser = limitPerUser;
         this.status = status;
+        this.benefitType = benefitType;
+        this.benefitValue = benefitValue;
+        this.minOrderAmount = minOrderAmount;
     }
 
-    public void updateCoupon(String title, String description, LocalDateTime issueStartsAt, LocalDateTime issueEndsAt,
-            Integer totalQuantity, Integer limitPerUser, CouponStatus status) {
+    public void updateCoupon(String title, String description, LocalDateTime issueStartsAt, LocalDateTime issueEndsAt, Integer totalQuantity, Integer limitPerUser, CouponStatus status, CouponBenefitType benefitType, String benefitValue, Integer minOrderAmount) {
         if (title != null)
             this.title = title;
         if (description != null)
@@ -75,5 +78,11 @@ public class Coupon extends BaseEntity {
             this.limitPerUser = limitPerUser;
         if (status != null)
             this.status = status;
+        if (benefitType != null)
+            this.benefitType = benefitType;
+        if (benefitValue != null)
+            this.benefitValue = benefitValue;
+        if (minOrderAmount != null)
+            this.minOrderAmount = minOrderAmount;
     }
 }

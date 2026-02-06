@@ -30,4 +30,9 @@ public interface StoreRepository extends JpaRepository<Store, Long>, JpaSpecific
         "ORDER BY distance",
         nativeQuery = true)
     List<Store> findByLocationWithin(@Param("latitude") double latitude, @Param("longitude") double longitude, @Param("radius") double radius);
+
+    @Query("SELECT s FROM Store s " +
+           "WHERE s.storeStatus = 'UNCLAIMED' " +
+           "AND (s.name LIKE %:keyword% OR s.roadAddress LIKE %:keyword% OR s.jibunAddress LIKE %:keyword%)")
+    List<Store> findUnclaimedByNameOrAddress(@Param("keyword") String keyword);
 }

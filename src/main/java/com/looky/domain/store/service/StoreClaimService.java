@@ -10,8 +10,11 @@ import com.looky.domain.store.entity.StoreClaim;
 import com.looky.domain.store.entity.StoreClaimStatus;
 import com.looky.domain.store.repository.StoreClaimRepository;
 import com.looky.domain.store.repository.StoreRepository;
+import com.looky.domain.store.dto.StoreResponse;
 import com.looky.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import java.util.List;
+import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -37,8 +40,16 @@ public class StoreClaimService {
 
     @Value("${open-api.service-key}")
     private String serviceKey;
-    private static final String API_URL = "https://api.odcloud.kr/api/nts-businessman/v1/validate";
+    private static final String API_URL = "https://api.odcloud.kr/api/nts-businessman/v1/validate"; // 사업자등록정보 진위확인 API
 
+    // 미등록된 상점 조회 
+    public List<StoreResponse> searchUnclaimedStores(String keyword) {
+        return storeRepository.findUnclaimedByNameOrAddress(keyword).stream()
+                .map(StoreResponse::from)
+                .collect(Collectors.toList());
+    }
+
+    // 사업자등록번호 유효성 검증
     public BizVerificationResponse verifyBizRegNo(BizVerificationRequest request) {
 
         RestTemplate restTemplate = new RestTemplate();
@@ -83,6 +94,7 @@ public class StoreClaimService {
         }
     }
 
+    // 상점 소유권 신청   
     public Long createStoreClaims(StoreClaimRequest request, MultipartFile image) throws IOException {
 
 

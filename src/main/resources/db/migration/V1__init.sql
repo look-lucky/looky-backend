@@ -441,5 +441,31 @@ create table store_news_like (
     foreign key (user_id) references user (user_id)
 );
 
+/* Inquiry */
+create table inquiry (
+    inquiry_id bigint auto_increment primary key,
+    created_at datetime(6) not null,
+    modified_at datetime(6) not null,
+    created_by varchar(255),
+    last_modified_by varchar(255),
+    user_id bigint not null,
+    type enum ('COUPON_BENEFIT','MAP_LOCATION','STORE_INFO_ERROR','EVENT_PARTICIPATION','ALERT_ACCOUNT','PROPOSAL_OTHER') not null,
+    title varchar(14) not null,
+    content varchar(500) not null,
+    foreign key (user_id) references user (user_id)
+);
+
+create table inquiry_image (
+    inquiry_image_id bigint auto_increment primary key,
+    created_at datetime(6) not null,
+    modified_at datetime(6) not null,
+    created_by varchar(255),
+    last_modified_by varchar(255),
+    inquiry_id bigint not null,
+    image_url varchar(255) not null,
+    order_index int not null,
+    foreign key (inquiry_id) references inquiry (inquiry_id)
+);
+
 /* 외래 키 제약 조건 검사를 다시 켭니다 */
 SET FOREIGN_KEY_CHECKS = 1;

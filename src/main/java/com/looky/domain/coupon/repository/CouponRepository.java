@@ -11,6 +11,8 @@ import org.springframework.data.repository.query.Param;
 public interface CouponRepository extends JpaRepository<Coupon, Long> {
     List<Coupon> findByStoreId(Long storeId);
 
+    long countByStoreId(Long storeId);
+
     @Query("SELECT DISTINCT c FROM Coupon c " +
            "JOIN c.store s " +
            "JOIN Partnership p ON p.store = s " +

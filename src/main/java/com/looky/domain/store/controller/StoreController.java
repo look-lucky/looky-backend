@@ -111,6 +111,21 @@ public class StoreController {
                 return ResponseEntity.ok(CommonResponse.success(response));
         }
 
+        @Operation(summary = "[점주] 상점 통계 조회", description = "상점의 통계 데이터(단골 수, 쿠폰 발행/사용 수, 리뷰 수)를 조회합니다.")
+        @ApiResponses(value = {
+                @ApiResponse(responseCode = "200", description = "조회 성공"),
+                @ApiResponse(responseCode = "403", description = "권한 없음", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class))),
+                @ApiResponse(responseCode = "404", description = "상점 없음", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class)))
+        })
+        @GetMapping("/{storeId}/stats")
+        public ResponseEntity<CommonResponse<StoreStatsResponse>> getStoreStats(
+                @Parameter(description = "상점 ID") @PathVariable Long storeId,
+                @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails
+        ) {
+                StoreStatsResponse response = storeService.getStoreStats(storeId, principalDetails.getUser());
+                return ResponseEntity.ok(CommonResponse.success(response));
+        }
+
         @Operation(summary = "[점주] 상점 등록 상태 조회", description = "상점의 정보 및 메뉴 등록 여부를 조회합니다.")
         @ApiResponses(value = {
                 @ApiResponse(responseCode = "200", description = "조회 성공"),

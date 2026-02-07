@@ -18,7 +18,10 @@ public interface StudentCouponRepository extends JpaRepository<StudentCoupon, Lo
     List<StudentCoupon> findByUser(User user);
 
     Optional<StudentCoupon> findByIdAndUser(Long id, User user);
-    
+
+    // 특정 가게 총 사용된 쿠폰 수
+    long countByCoupon_StoreIdAndStatus(Long storeId, CouponUsageStatus status);
+
     // 검증 코드로 우리 가게 쿠폰 조회 (쿠폰 사용 처리용)
     @Query("SELECT cc FROM StudentCoupon cc " +
             "JOIN cc.coupon c " +

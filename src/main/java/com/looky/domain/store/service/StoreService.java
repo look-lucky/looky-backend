@@ -1,6 +1,7 @@
 package com.looky.domain.store.service;
 
 import com.looky.common.service.S3Service;
+import com.looky.domain.coupon.entity.CouponUsageStatus;
 import com.looky.domain.store.entity.*;
 import com.looky.domain.store.repository.StoreSpecification;
 import org.springframework.data.jpa.domain.Specification;
@@ -47,6 +48,7 @@ import com.looky.domain.coupon.entity.Coupon;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.Collections;
+import com.looky.domain.coupon.repository.StudentCouponRepository;
 
 @Service
 @RequiredArgsConstructor
@@ -64,6 +66,7 @@ public class StoreService {
     private final StudentProfileRepository studentProfileRepository;
     private final PartnershipRepository partnershipRepository;
     private final CouponRepository couponRepository;
+    private final StudentCouponRepository studentCouponRepository;
 
     @Transactional
     public Long createStore(User user, CreateStoreRequest request, List<MultipartFile> images) throws IOException {
@@ -182,6 +185,30 @@ public class StoreService {
         return PageResponse.from(responsePage);
     }
 
+        public StoreStatsResponse getStoreStats(Long storeId, User user) {
+        User owner = userRepository.findByUsername(user.getUsername())
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        Store store = storeRepository.findById(storeId)
+                .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "가게를 찾을 수 없습니다."));
+
+        if (!Objects.equals(store.getUser().getId(), owner.getId())) {
+            throw new CustomException(ErrorCode.FORBIDDEN, "본인 소유의 가게가 아닙니다.");
+        }
+
+        long totalRegulars = favoriteRepository.countByStore(store);
+        long totalReviews = reviewRepository.countByStoreIdAndParentReviewIsNull(storeId);
+        long totalIssuedCoupons = couponRepository.countByStoreId(storeId);
+        long totalUsedCoupons = studentCouponRepository.countByCoupon_StoreIdAndStatus(storeId, CouponUsageStatus.USED);
+
+        return StoreStatsResponse.builder()
+                .totalRegulars(totalRegulars)
+                .totalIssuedCoupons(totalIssuedCoupons)
+                .totalUsedCoupons(totalUsedCoupons)
+                .totalReviews(totalReviews)
+                .build();
+    }
+    
     @Transactional
     public void updateStore(Long storeId, User user, UpdateStoreRequest request, List<MultipartFile> images)
             throws IOException {
@@ -493,9 +520,9 @@ public class StoreService {
         boolean hasMenu = itemRepository.existsByStoreId(store.getId());
 
         if (hasStoreInfo && hasMenu) {
-            store.updateCloverGrade(com.looky.domain.store.entity.CloverGrade.THREE_LEAF);
+            store.updateCloverGrade(CloverGrade.THREE_LEAF);
         } else {
-            store.updateCloverGrade(com.looky.domain.store.entity.CloverGrade.SPROUT);
+            store.updateCloverGrade(CloverGrade.SPROUT);
         }
     }
 }

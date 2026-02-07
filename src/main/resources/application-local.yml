@@ -48,8 +48,8 @@ spring:
   mail:
     host: smtp.gmail.com
     port: 587
-    username: ${SPRING_MAIL_USERNAME:neardeals2@gmail.com}
-    password: ${SPRING_MAIL_PASSWORD:dxydlrnfjgtvkspl}
+    username: ${SPRING_MAIL_USERNAME}
+    password: ${SPRING_MAIL_PASSWORD}
     properties:
       mail:
         smtp:
@@ -59,6 +59,6 @@ spring:
 
 app:
   email:
-    from: ${SPRING_MAIL_USERNAME:neardeals2@gmail.com}
+    from: ${SPRING_MAIL_USERNAME}
     verification:
       ttl-minutes: 5

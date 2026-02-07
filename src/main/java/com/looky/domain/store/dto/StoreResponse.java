@@ -4,9 +4,10 @@ import com.looky.domain.store.entity.Store;
 import com.looky.domain.store.entity.StoreCategory;
 import com.looky.domain.store.entity.StoreImage;
 import com.looky.domain.store.entity.StoreMood;
+import com.looky.domain.store.entity.CloverGrade;
+
 import lombok.Builder;
 import lombok.Getter;
-
 import java.util.ArrayList;
 import java.time.LocalDate;
 import java.util.List;
@@ -36,8 +37,9 @@ public class StoreResponse {
     private Boolean isSuspended;
     private Boolean isPartnership; // 제휴 여부
     private Boolean hasCoupon; // 쿠폰 보유 여부
+    private CloverGrade cloverGrade; // 클로버 등급
 
-    public static StoreResponse of(Store store, Double averageRating, Integer reviewCount, Boolean isPartnership, Boolean hasCoupon) {
+    public static StoreResponse of(Store store, Double averageRating, Integer reviewCount, Boolean isPartnership, Boolean hasCoupon, CloverGrade cloverGrade) {
         return StoreResponse.builder()
                 .id(store.getId())
                 .userId(store.getUser() != null ? store.getUser().getId() : null)
@@ -60,10 +62,11 @@ public class StoreResponse {
                 .isSuspended(store.getIsSuspended())
                 .isPartnership(isPartnership)
                 .hasCoupon(hasCoupon)
+                .cloverGrade(cloverGrade)
                 .build();
     }
 
     public static StoreResponse from(Store store) {
-        return of(store, 0.0, 0, false, false);
+        return of(store, 0.0, 0, false, false, store.getCloverGrade());
     }
 }

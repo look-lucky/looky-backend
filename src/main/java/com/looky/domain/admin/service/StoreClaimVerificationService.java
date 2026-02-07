@@ -17,6 +17,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.looky.domain.store.service.StoreService;
 
 @Service
 @RequiredArgsConstructor
@@ -27,6 +28,7 @@ public class StoreClaimVerificationService {
     private final StoreRepository storeRepository;
     private final UserRepository userRepository;
     private final OwnerProfileRepository ownerProfileRepository;
+    private final StoreService storeService;
 
     public Page<StoreClaimResponse> getStoreClaims(StoreClaimStatus status, Pageable pageable) {
         Page<StoreClaim> claims;
@@ -67,6 +69,9 @@ public class StoreClaimVerificationService {
 
         // 연관 스토어 정보 업데이트
         store.approveClaim(user, claim.getBizRegNo(), claim.getStorePhone());
+        
+        // 등급 재계산
+        storeService.recalculateCloverGrade(store);
     }
 
     @Transactional

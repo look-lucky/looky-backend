@@ -129,6 +129,7 @@ create table store (
     holiday_starts_at date,
     holiday_ends_at date,
     is_suspended bit default 0 not null,
+    clover_grade enum ('SEED','SPROUT','THREE_LEAF') default 'SEED' not null,
     user_id bigint,
     foreign key (user_id) references user (user_id)
 );

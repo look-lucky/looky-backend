@@ -1,8 +1,7 @@
 package com.looky.domain.store.service;
 
 import com.looky.common.service.S3Service;
-import com.looky.domain.store.entity.StoreCategory;
-import com.looky.domain.store.entity.StoreMood;
+import com.looky.domain.store.entity.*;
 import com.looky.domain.store.repository.StoreSpecification;
 import org.springframework.data.jpa.domain.Specification;
 
@@ -10,10 +9,7 @@ import com.looky.common.exception.CustomException;
 import com.looky.common.exception.ErrorCode;
 import com.looky.common.response.PageResponse;
 import com.looky.domain.store.dto.*;
-import com.looky.domain.store.entity.Store;
-import com.looky.domain.store.entity.StoreImage;
-import com.looky.domain.store.entity.StoreReport;
-import com.looky.domain.store.entity.StoreReportReason;
+
 import java.util.HashSet;
 import java.util.Set;
 import com.looky.domain.store.repository.StoreReportRepository;
@@ -94,6 +90,9 @@ public class StoreService {
 
         Store savedStore = storeRepository.save(store);
 
+        // 초기 등급 계산 (SEED 할당)
+        recalculateCloverGrade(savedStore);
+
         return savedStore.getId();
     }
 
@@ -122,7 +121,7 @@ public class StoreService {
             }
         }
 
-        return StoreResponse.of(store, averageRating, reviewCount != null ? reviewCount.intValue() : 0, isPartnership, hasCoupon);
+        return StoreResponse.of(store, averageRating, reviewCount != null ? reviewCount.intValue() : 0, isPartnership, hasCoupon, store.getCloverGrade());
     }
 
     public PageResponse<StoreResponse> getStores(String keyword, List<StoreCategory> categories, List<StoreMood> moods, Long universityId, Pageable pageable, User user) {
@@ -178,7 +177,7 @@ public class StoreService {
             boolean isPartnership = finalPartnershipStoreIds.contains(store.getId());
             boolean hasCoupon = finalCouponStoreIds.contains(store.getId());
 
-            return StoreResponse.of(store, averageRating, reviewCount != null ? reviewCount.intValue() : 0, isPartnership, hasCoupon);
+            return StoreResponse.of(store, averageRating, reviewCount != null ? reviewCount.intValue() : 0, isPartnership, hasCoupon, store.getCloverGrade());
         });
         return PageResponse.from(responsePage);
     }
@@ -233,6 +232,9 @@ public class StoreService {
             // 새 이미지 업로드
             uploadAndSaveImages(store, images);
         }
+        
+        // 등급 재계산
+        recalculateCloverGrade(store);
     }
 
     // 위치 기반 상점 목록 조회
@@ -274,7 +276,7 @@ public class StoreService {
             boolean isPartnership = finalPartnershipStoreIds.contains(store.getId());
             boolean hasCoupon = finalCouponStoreIds.contains(store.getId());
             
-            return StoreResponse.of(store, averageRating, reviewCount != null ? reviewCount.intValue() : 0, isPartnership, hasCoupon);
+            return StoreResponse.of(store, averageRating, reviewCount != null ? reviewCount.intValue() : 0, isPartnership, hasCoupon, store.getCloverGrade());
         }).toList();
     }
     
@@ -330,10 +332,8 @@ public class StoreService {
         return stores.stream().map(store -> {
             Double averageRating = reviewRepository.findAverageRatingByStoreId(store.getId());
             Long reviewCount = reviewRepository.countByStoreIdAndParentReviewIsNull(store.getId());
-            // MyStores is for owner, so partnership/coupon info relative to "me" (as student) doesn't apply the same way, 
-            // but we can just set false or check if owner is also student? Usually owner view doesn't need this specific "benefit for me" flag.
-            // Let's set false for simplicity as this is "My Stores" (Owner view).
-            return StoreResponse.of(store, averageRating, reviewCount != null ? reviewCount.intValue() : 0, false, false);
+
+            return StoreResponse.of(store, averageRating, reviewCount != null ? reviewCount.intValue() : 0, false, false, store.getCloverGrade());
         }).toList();
     }
 
@@ -472,5 +472,30 @@ public class StoreService {
                     return HotStoreResponse.from(store, count, benefitContent);
                 })
                 .toList();
+    }
+
+    // 클로버 등급 재계산 및 업데이트
+    @Transactional
+    public void recalculateCloverGrade(Store store) {
+
+        if (store.getUser() == null) {
+            store.updateCloverGrade(CloverGrade.SEED);
+            return;
+        }
+
+        // 매장 정보: 소개글(introduction), 운영시간(operatingHours) 등 필수 정보 확인.
+        // 메뉴 정보: ItemRepository를 통해 확인.
+        boolean hasStoreInfo = StringUtils.hasText(store.getIntroduction()) 
+                && StringUtils.hasText(store.getOperatingHours())
+                && !store.getStoreCategories().isEmpty()
+                && !store.getStoreMoods().isEmpty();
+        
+        boolean hasMenu = itemRepository.existsByStoreId(store.getId());
+
+        if (hasStoreInfo && hasMenu) {
+            store.updateCloverGrade(com.looky.domain.store.entity.CloverGrade.THREE_LEAF);
+        } else {
+            store.updateCloverGrade(com.looky.domain.store.entity.CloverGrade.SPROUT);
+        }
     }
 }

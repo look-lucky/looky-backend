@@ -94,67 +94,67 @@ INSERT INTO organization (organization_id, created_at, modified_at, university_i
 
 -- 4. Stores (Around Center: 35.846833, 127.12936)
 -- 4.1 Store 1: 팀 레스토랑 (Active, Partnership, Coupon)
-INSERT INTO store (store_id, created_at, modified_at, name, branch, biz_reg_no, road_address, jibun_address, latitude, longitude, store_phone, store_status, user_id, introduction, operating_hours) VALUES 
-(1, NOW(), NOW(), '팀 레스토랑', '전북대점', '111-22-33333', '전북 전주시 덕진구 명륜4길 10', '전북 전주시 덕진구 덕진동1가 1262-4', 35.847133, 127.129060, '063-272-0000', 'ACTIVE', 10, '전북대 오래된 파스타 맛집, 팀입니다.', '{"0": [["11:00", "21:00"], ["15:00", "17:00"]], "1": [["11:00", "21:00"], ["15:00", "17:00"]], "2": [["11:00", "21:00"], ["15:00", "17:00"]], "3": [["11:00", "21:00"], ["15:00", "17:00"]], "4": [["11:00", "21:00"], ["15:00", "17:00"]], "5": [["11:00", "21:00"], ["15:00", "17:00"]], "6": [null, null]}');
+INSERT INTO store (store_id, created_at, modified_at, name, branch, biz_reg_no, road_address, jibun_address, latitude, longitude, store_phone, store_status, user_id, introduction, operating_hours, clover_grade) VALUES 
+(1, NOW(), NOW(), '팀 레스토랑', '전북대점', '111-22-33333', '전북 전주시 덕진구 명륜4길 10', '전북 전주시 덕진구 덕진동1가 1262-4', 35.847133, 127.129060, '063-272-0000', 'ACTIVE', 10, '전북대 오래된 파스타 맛집, 팀입니다.', '{"0": [["11:00", "21:00"], ["15:00", "17:00"]], "1": [["11:00", "21:00"], ["15:00", "17:00"]], "2": [["11:00", "21:00"], ["15:00", "17:00"]], "3": [["11:00", "21:00"], ["15:00", "17:00"]], "4": [["11:00", "21:00"], ["15:00", "17:00"]], "5": [["11:00", "21:00"], ["15:00", "17:00"]], "6": [null, null]}', 'THREE_LEAF');
 INSERT INTO store_categories (store_id, category) VALUES (1, 'RESTAURANT'), (1, 'ETC');
 INSERT INTO store_moods (store_id, mood) VALUES (1, 'ROMANTIC'), (1, 'GROUP_GATHERING');
 INSERT INTO store_university (store_id, university_id) VALUES (1, 1);
 INSERT INTO store_image (store_id, image_url, order_index) VALUES (1, 'https://example.com/team1.jpg', 0), (1, 'https://example.com/team2.jpg', 1);
 
 -- 4.2 Store 2: 맘스터치 (Active, Coupon)
-INSERT INTO store (store_id, created_at, modified_at, name, branch, biz_reg_no, road_address, jibun_address, latitude, longitude, store_phone, store_status, user_id, introduction, operating_hours) VALUES 
-(2, NOW(), NOW(), '맘스터치', '전북대본점', '222-33-44444', '전북 전주시 덕진구 명륜3길 15', '전북 전주시 덕진구 덕진동1가 1314-1', 35.846433, 127.129960, '063-271-1234', 'ACTIVE', 11, '빠르고 맛있는 치킨 버거!', '{"0": [["10:30", "22:00"], null], "1": [["10:30", "22:00"], null], "2": [["10:30", "22:00"], null], "3": [["10:30", "22:00"], null], "4": [["10:30", "22:00"], null], "5": [["10:30", "22:00"], null], "6": [["10:30", "22:00"], null]}');
+INSERT INTO store (store_id, created_at, modified_at, name, branch, biz_reg_no, road_address, jibun_address, latitude, longitude, store_phone, store_status, user_id, introduction, operating_hours, clover_grade) VALUES 
+(2, NOW(), NOW(), '맘스터치', '전북대본점', '222-33-44444', '전북 전주시 덕진구 명륜3길 15', '전북 전주시 덕진구 덕진동1가 1314-1', 35.846433, 127.129960, '063-271-1234', 'ACTIVE', 11, '빠르고 맛있는 치킨 버거!', '{"0": [["10:30", "22:00"], null], "1": [["10:30", "22:00"], null], "2": [["10:30", "22:00"], null], "3": [["10:30", "22:00"], null], "4": [["10:30", "22:00"], null], "5": [["10:30", "22:00"], null], "6": [["10:30", "22:00"], null]}', 'THREE_LEAF');
 INSERT INTO store_categories (store_id, category) VALUES (2, 'RESTAURANT');
 INSERT INTO store_moods (store_id, mood) VALUES (2, 'SOLO_DINING'), (2, 'LATE_NIGHT');
 INSERT INTO store_university (store_id, university_id) VALUES (2, 1);
 INSERT INTO store_image (store_id, image_url, order_index) VALUES (2, 'https://example.com/moms1.jpg', 0);
 
 -- 4.3 Store 3: 알촌 (Active, Partnership)
-INSERT INTO store (store_id, created_at, modified_at, name, branch, biz_reg_no, road_address, jibun_address, latitude, longitude, store_phone, store_status, user_id, introduction, operating_hours) VALUES 
-(3, NOW(), NOW(), '알촌', '전북대점', '333-44-55555', '전북 전주시 덕진구 권삼득로 333', '전북 전주시 덕진구 금암동 664-14', 35.846033, 127.128560, '063-270-5555', 'ACTIVE', 12, '가성비 최고의 알밥집', '{"0": [["10:00", "20:00"], ["15:00", "17:00"]], "1": [["10:00", "20:00"], ["15:00", "17:00"]], "2": [["10:00", "20:00"], ["15:00", "17:00"]], "3": [["10:00", "20:00"], ["15:00", "17:00"]], "4": [["10:00", "20:00"], ["15:00", "17:00"]], "5": [["11:00", "19:00"], null], "6": [["11:00", "19:00"], null]}');
+INSERT INTO store (store_id, created_at, modified_at, name, branch, biz_reg_no, road_address, jibun_address, latitude, longitude, store_phone, store_status, user_id, introduction, operating_hours, clover_grade) VALUES 
+(3, NOW(), NOW(), '알촌', '전북대점', '333-44-55555', '전북 전주시 덕진구 권삼득로 333', '전북 전주시 덕진구 금암동 664-14', 35.846033, 127.128560, '063-270-5555', 'ACTIVE', 12, '가성비 최고의 알밥집', '{"0": [["10:00", "20:00"], ["15:00", "17:00"]], "1": [["10:00", "20:00"], ["15:00", "17:00"]], "2": [["10:00", "20:00"], ["15:00", "17:00"]], "3": [["10:00", "20:00"], ["15:00", "17:00"]], "4": [["10:00", "20:00"], ["15:00", "17:00"]], "5": [["11:00", "19:00"], null], "6": [["11:00", "19:00"], null]}', 'THREE_LEAF');
 INSERT INTO store_categories (store_id, category) VALUES (3, 'RESTAURANT');
 INSERT INTO store_moods (store_id, mood) VALUES (3, 'SOLO_DINING');
 INSERT INTO store_university (store_id, university_id) VALUES (3, 1);
 INSERT INTO store_image (store_id, image_url, order_index) VALUES (3, 'https://example.com/alchon1.jpg', 0);
 
 -- 4.4 Store 4: 컴포즈커피 (Unclaimed)
-INSERT INTO store (store_id, created_at, modified_at, name, branch, biz_reg_no, road_address, jibun_address, latitude, longitude, store_phone, store_status, user_id, introduction, operating_hours) VALUES 
-(4, NOW(), NOW(), '컴포즈커피', '전북대구정문점', NULL, '전북 전주시 덕진구 명륜4길 1', '전북 전주시 덕진구 덕진동1가 1261', 35.847333, 127.129260, '063-222-3333', 'UNCLAIMED', NULL, '대용량 고품질 커피', '{"0": [["08:00", "23:00"], null], "1": [["08:00", "23:00"], null], "2": [["08:00", "23:00"], null], "3": [["08:00", "23:00"], null], "4": [["08:00", "23:00"], null], "5": [["08:00", "23:00"], null], "6": [["08:00", "23:00"], null]}');
+INSERT INTO store (store_id, created_at, modified_at, name, branch, biz_reg_no, road_address, jibun_address, latitude, longitude, store_phone, store_status, user_id, introduction, operating_hours, clover_grade) VALUES 
+(4, NOW(), NOW(), '컴포즈커피', '전북대구정문점', NULL, '전북 전주시 덕진구 명륜4길 1', '전북 전주시 덕진구 덕진동1가 1261', 35.847333, 127.129260, '063-222-3333', 'UNCLAIMED', NULL, '대용량 고품질 커피', '{"0": [["08:00", "23:00"], null], "1": [["08:00", "23:00"], null], "2": [["08:00", "23:00"], null], "3": [["08:00", "23:00"], null], "4": [["08:00", "23:00"], null], "5": [["08:00", "23:00"], null], "6": [["08:00", "23:00"], null]}', 'SEED');
 INSERT INTO store_categories (store_id, category) VALUES (4, 'CAFE');
 INSERT INTO store_university (store_id, university_id) VALUES (4, 1);
 INSERT INTO store_image (store_id, image_url, order_index) VALUES (4, 'https://example.com/compose1.jpg', 0);
 
 -- 4.5 Store 5: 슈퍼스타 코인노래방 (Active, No Benefits)
-INSERT INTO store (store_id, created_at, modified_at, name, branch, biz_reg_no, road_address, jibun_address, latitude, longitude, store_phone, store_status, user_id, introduction, operating_hours) VALUES 
-(5, NOW(), NOW(), '슈퍼스타 코인노래방', '전주점', '555-66-77777', '전북 전주시 덕진구 명륜4길 20', '전북 전주시 덕진구 덕진동1가 1263-1', 35.846633, 127.129760, '063-111-2222', 'ACTIVE', 14, '최신 시설 깨끗한 코인노래방', '{"0": [["11:00", "02:00"], null], "1": [["11:00", "02:00"], null], "2": [["11:00", "02:00"], null], "3": [["11:00", "02:00"], null], "4": [["11:00", "02:00"], null], "5": [["11:00", "02:00"], null], "6": [["11:00", "02:00"], null]}');
+INSERT INTO store (store_id, created_at, modified_at, name, branch, biz_reg_no, road_address, jibun_address, latitude, longitude, store_phone, store_status, user_id, introduction, operating_hours, clover_grade) VALUES 
+(5, NOW(), NOW(), '슈퍼스타 코인노래방', '전주점', '555-66-77777', '전북 전주시 덕진구 명륜4길 20', '전북 전주시 덕진구 덕진동1가 1263-1', 35.846633, 127.129760, '063-111-2222', 'ACTIVE', 14, '최신 시설 깨끗한 코인노래방', '{"0": [["11:00", "02:00"], null], "1": [["11:00", "02:00"], null], "2": [["11:00", "02:00"], null], "3": [["11:00", "02:00"], null], "4": [["11:00", "02:00"], null], "5": [["11:00", "02:00"], null], "6": [["11:00", "02:00"], null]}', 'THREE_LEAF');
 INSERT INTO store_categories (store_id, category) VALUES (5, 'ENTERTAINMENT');
 INSERT INTO store_moods (store_id, mood) VALUES (5, 'GROUP_GATHERING'), (5, 'SOLO_DINING');
 INSERT INTO store_university (store_id, university_id) VALUES (5, 1);
 INSERT INTO store_image (store_id, image_url, order_index) VALUES (5, 'https://example.com/coin1.jpg', 0);
 
 -- 4.6 Store 6: 광장포차 (Active)
-INSERT INTO store (store_id, created_at, modified_at, name, branch, biz_reg_no, road_address, jibun_address, latitude, longitude, store_phone, store_status, user_id, introduction, operating_hours) VALUES 
-(6, NOW(), NOW(), '광장포차', NULL, '111-22-33333', '전북 전주시 덕진구 권삼득로 300', '전북 전주시 덕진구 금암동 111-1', 35.845833, 127.128360, '063-777-8888', 'ACTIVE', 15, '대학생들의 성지, 낭만 포차', '{"0": [["17:00", "05:00"], null], "1": [["17:00", "05:00"], null], "2": [["17:00", "05:00"], null], "3": [["17:00", "05:00"], null], "4": [["17:00", "05:00"], null], "5": [["17:00", "05:00"], null], "6": [["17:00", "05:00"], null]}');
+INSERT INTO store (store_id, created_at, modified_at, name, branch, biz_reg_no, road_address, jibun_address, latitude, longitude, store_phone, store_status, user_id, introduction, operating_hours, clover_grade) VALUES 
+(6, NOW(), NOW(), '광장포차', NULL, '111-22-33333', '전북 전주시 덕진구 권삼득로 300', '전북 전주시 덕진구 금암동 111-1', 35.845833, 127.128360, '063-777-8888', 'ACTIVE', 15, '대학생들의 성지, 낭만 포차', '{"0": [["17:00", "05:00"], null], "1": [["17:00", "05:00"], null], "2": [["17:00", "05:00"], null], "3": [["17:00", "05:00"], null], "4": [["17:00", "05:00"], null], "5": [["17:00", "05:00"], null], "6": [["17:00", "05:00"], null]}', 'THREE_LEAF');
 INSERT INTO store_categories (store_id, category) VALUES (6, 'BAR');
 INSERT INTO store_moods (store_id, mood) VALUES (6, 'GROUP_GATHERING'), (6, 'LATE_NIGHT');
 INSERT INTO store_university (store_id, university_id) VALUES (6, 1);
 INSERT INTO store_image (store_id, image_url, order_index) VALUES (6, 'https://example.com/pocha1.jpg', 0);
 
 -- 4.7 Store 7: 금암면옥 (Banned)
-INSERT INTO store (store_id, created_at, modified_at, name, branch, biz_reg_no, road_address, jibun_address, latitude, longitude, store_phone, store_status, user_id, introduction, operating_hours) VALUES 
-(7, NOW(), NOW(), '금암면옥', '본점', '777-88-99999', '전북 전주시 덕진구 권삼득로 251', '전북 전주시 덕진구 금암동 123-4', 35.840000, 127.130000, '063-999-9999', 'BANNED', 16, '맛있는 냉면', '{"0": [["10:00", "20:00"], null], "1": [["10:00", "20:00"], null], "2": [["10:00", "20:00"], null], "3": [["10:00", "20:00"], null], "4": [["10:00", "20:00"], null], "5": [["10:00", "20:00"], null], "6": [["10:00", "20:00"], null]}');
+INSERT INTO store (store_id, created_at, modified_at, name, branch, biz_reg_no, road_address, jibun_address, latitude, longitude, store_phone, store_status, user_id, introduction, operating_hours, clover_grade) VALUES 
+(7, NOW(), NOW(), '금암면옥', '본점', '777-88-99999', '전북 전주시 덕진구 권삼득로 251', '전북 전주시 덕진구 금암동 123-4', 35.840000, 127.130000, '063-999-9999', 'BANNED', 16, '맛있는 냉면', '{"0": [["10:00", "20:00"], null], "1": [["10:00", "20:00"], null], "2": [["10:00", "20:00"], null], "3": [["10:00", "20:00"], null], "4": [["10:00", "20:00"], null], "5": [["10:00", "20:00"], null], "6": [["10:00", "20:00"], null]}', 'SPROUT');
 INSERT INTO store_categories (store_id, category) VALUES (7, 'RESTAURANT');
 INSERT INTO store_university (store_id, university_id) VALUES (7, 1);
 
 -- 4.8 Store 8: 스타벅스 (Active, Suspended)
-INSERT INTO store (store_id, created_at, modified_at, name, branch, biz_reg_no, road_address, jibun_address, latitude, longitude, store_phone, store_status, user_id, introduction, operating_hours, is_suspended) VALUES 
-(8, NOW(), NOW(), '스타벅스', '전북대점', '888-99-00000', '전북 전주시 덕진구 명륜4길 25', '덕진동1가 1262-11', 35.847500, 127.129500, '063-888-8888', 'ACTIVE', 17, '스타벅스입니다.', '{"0": [["07:00", "22:00"], null], "1": [["07:00", "22:00"], null], "2": [["07:00", "22:00"], null], "3": [["07:00", "22:00"], null], "4": [["07:00", "22:00"], null], "5": [["07:00", "22:00"], null], "6": [["07:00", "22:00"], null]}', 1);
+INSERT INTO store (store_id, created_at, modified_at, name, branch, biz_reg_no, road_address, jibun_address, latitude, longitude, store_phone, store_status, user_id, introduction, operating_hours, is_suspended, clover_grade) VALUES 
+(8, NOW(), NOW(), '스타벅스', '전북대점', '888-99-00000', '전북 전주시 덕진구 명륜4길 25', '덕진동1가 1262-11', 35.847500, 127.129500, '063-888-8888', 'ACTIVE', 17, '스타벅스입니다.', '{"0": [["07:00", "22:00"], null], "1": [["07:00", "22:00"], null], "2": [["07:00", "22:00"], null], "3": [["07:00", "22:00"], null], "4": [["07:00", "22:00"], null], "5": [["07:00", "22:00"], null], "6": [["07:00", "22:00"], null]}', 1, 'SPROUT');
 INSERT INTO store_categories (store_id, category) VALUES (8, 'CAFE');
 INSERT INTO store_university (store_id, university_id) VALUES (8, 1);
 
 -- 4.9 Store 9: 올리브영 (Active)
-INSERT INTO store (store_id, created_at, modified_at, name, branch, biz_reg_no, road_address, jibun_address, latitude, longitude, store_phone, store_status, user_id, introduction, operating_hours) VALUES
-(9, NOW(), NOW(), '올리브영', '전북대점', '999-00-11111', '전북 전주시 덕진구 명륜4길 15', '덕진동1가 1261-2', 35.847000, 127.129200, '063-000-0000', 'ACTIVE', 18, '헬스 앤 뷰티', '{"0": [["10:00", "22:00"], null], "1": [["10:00", "22:00"], null], "2": [["10:00", "22:00"], null], "3": [["10:00", "22:00"], null], "4": [["10:00", "22:00"], null], "5": [["10:00", "22:00"], null], "6": [["10:00", "22:00"], null]}');
+INSERT INTO store (store_id, created_at, modified_at, name, branch, biz_reg_no, road_address, jibun_address, latitude, longitude, store_phone, store_status, user_id, introduction, operating_hours, clover_grade) VALUES
+(9, NOW(), NOW(), '올리브영', '전북대점', '999-00-11111', '전북 전주시 덕진구 명륜4길 15', '덕진동1가 1261-2', 35.847000, 127.129200, '063-000-0000', 'ACTIVE', 18, '헬스 앤 뷰티', '{"0": [["10:00", "22:00"], null], "1": [["10:00", "22:00"], null], "2": [["10:00", "22:00"], null], "3": [["10:00", "22:00"], null], "4": [["10:00", "22:00"], null], "5": [["10:00", "22:00"], null], "6": [["10:00", "22:00"], null]}', 'SPROUT');
 INSERT INTO store_categories (store_id, category) VALUES (9, 'BEAUTY_HEALTH');
 INSERT INTO store_university (store_id, university_id) VALUES (9, 1);
 

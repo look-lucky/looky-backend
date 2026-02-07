@@ -12,6 +12,7 @@ import com.looky.domain.item.repository.ItemCategoryRepository;
 import com.looky.domain.item.repository.ItemRepository;
 import com.looky.domain.store.entity.Store;
 import com.looky.domain.store.repository.StoreRepository;
+import com.looky.domain.store.service.StoreService;
 import com.looky.domain.user.entity.User;
 import com.looky.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -34,6 +35,7 @@ public class ItemService {
     private final StoreRepository storeRepository;
     private final UserRepository userRepository;
     private final S3Service s3Service;
+    private final StoreService storeService;
 
     @Transactional
     public Long createItem(Long storeId, User user, CreateItemRequest request, MultipartFile image) throws IOException {
@@ -61,6 +63,10 @@ public class ItemService {
 
         Item item = request.toEntity(store, itemCategory, imageUrl);
         Item savedItem = itemRepository.save(item);
+        
+        // 등급 재계산
+        storeService.recalculateCloverGrade(store);
+        
         return savedItem.getId();
     }
 
@@ -124,6 +130,9 @@ public class ItemService {
                 request.getBadge(),
                 itemCategory
         );
+        
+        // 등급 재계산
+        storeService.recalculateCloverGrade(item.getStore());
     }
 
     @Transactional
@@ -134,6 +143,9 @@ public class ItemService {
         validateStoreOwner(item.getStore(), user);
 
         itemRepository.delete(item);
+        
+        // 등급 재계산
+        storeService.recalculateCloverGrade(item.getStore());
     }
 
     private void validateStoreOwner(Store store, User user) {

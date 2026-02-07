@@ -87,6 +87,10 @@ public class Store extends BaseEntity {
     @Column(nullable = false)
     private Boolean isSuspended = false; // 영업 중지 여부
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private CloverGrade cloverGrade = CloverGrade.SEED; // 클로버 등급 (Default: SEED)
+
     @Builder
     public Store(User user, String name, String branch, String roadAddress, String jibunAddress, String bizRegNo, Double latitude, Double longitude, String storePhone, String introduction, String operatingHours, Set<StoreCategory> storeCategories, Set<StoreMood> storeMoods, StoreStatus storeStatus, Boolean needToCheck, String checkReason, LocalDate holidayStartsAt, LocalDate holidayEndsAt, Boolean isSuspended) {
         this.user = user;
@@ -197,5 +201,9 @@ public class Store extends BaseEntity {
     public void markAsNeedCheck(String reason) {
         this.needToCheck = true;
         this.checkReason = reason;
+    }
+
+    public void updateCloverGrade(CloverGrade cloverGrade) {
+        this.cloverGrade = cloverGrade;
     }
 }

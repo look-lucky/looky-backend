@@ -15,6 +15,7 @@ import com.looky.domain.review.repository.ReviewReportRepository;
 import com.looky.domain.review.repository.ReviewRepository;
 import com.looky.domain.store.entity.Store;
 import com.looky.domain.store.repository.StoreRepository;
+import com.looky.domain.user.entity.Role;
 import com.looky.domain.user.entity.User;
 import com.looky.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -44,20 +45,66 @@ public class ReviewService {
         Store store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "해당 상점을 찾을 수 없습니다."));
 
-        if (reviewRepository.existsByUserAndStore(user, store)) {
-            throw new CustomException(ErrorCode.DUPLICATE_RESOURCE, "이미 해당 상점에 대한 리뷰를 작성했습니다.");
-        }
+        Review parentReview = null;
+        boolean isVerified = false;
+        Integer rating = request.getRating();
 
-        boolean isVerified = studentCouponRepository.existsByUserAndCoupon_StoreAndStatus(user, store,
-                CouponUsageStatus.USED);
+        // 답글 작성인 경우
+        if (request.getParentReviewId() != null) {
+            parentReview = reviewRepository.findById(request.getParentReviewId())
+                    .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "원본 리뷰를 찾을 수 없습니다."));
+
+            // 답글의 답글 불가 (Depth 1 제한)
+            if (parentReview.getParentReview() != null) {
+                throw new CustomException(ErrorCode.BAD_REQUEST, "답글에 답글을 달 수 없습니다.");
+            }
+            
+            // 점주인 경우
+            if (user.getRole() == Role.ROLE_OWNER) {
+                // 본인 가게 리뷰에만 답글 가능
+                if (!store.getUser().getId().equals(user.getId())) {
+                     throw new CustomException(ErrorCode.FORBIDDEN, "본인 가게의 리뷰에만 답글을 달 수 있습니다.");
+                }
+                // 답글은 평점 없음
+                rating = null;
+            } 
+            // 학생인 경우
+            else if (user.getRole() == Role.ROLE_STUDENT) {
+                 // 답글은 평점 없음
+                 rating = null;
+            } else {
+                 throw new CustomException(ErrorCode.FORBIDDEN);
+            }
+
+        } 
+        // 일반 리뷰 작성인 경우
+        else {
+            // 점주는 일반 리뷰 작성 불가
+            if (user.getRole() == Role.ROLE_OWNER) {
+                throw new CustomException(ErrorCode.BAD_REQUEST, "점주는 답글만 가능합니다.");
+            }
+
+            if (rating == null) {
+                throw new CustomException(ErrorCode.BAD_REQUEST, "평점은 필수입니다.");
+            }
+
+            // 학생: 중복 리뷰 확인 (일반 리뷰는 상점당 1개 제한 유지)
+            if (reviewRepository.existsByUserAndStoreAndParentReviewIsNull(user, store)) {
+                throw new CustomException(ErrorCode.DUPLICATE_RESOURCE, "이미 해당 상점에 대한 리뷰를 작성했습니다.");
+            }
+            
+            // 학생: 쿠폰 사용 여부로 인증 확인
+            isVerified = studentCouponRepository.existsByUserAndCoupon_StoreAndStatus(user, store,
+                    CouponUsageStatus.USED);
+        }
 
         Review review = Review.builder()
                 .user(user)
                 .store(store)
                 .content(request.getContent())
-                .rating(request.getRating())
+                .rating(rating)
                 .isVerified(isVerified)
-                .parentReview(null)
+                .parentReview(parentReview)
                 .build();
 
         // 이미지 S3 업로드 및 저장
@@ -77,9 +124,17 @@ public class ReviewService {
             throw new CustomException(ErrorCode.FORBIDDEN);
         }
 
+        // 업데이트 시 검증 로직 단순화 (기존 값을 유지하거나, 필요 시 재검증 로직 추가)
+        // 여기서는 기존 isVerified 상태 유지 혹은 coupon check 다시 수행
         Store store = review.getStore();
-        boolean isVerified = studentCouponRepository.existsByUserAndCoupon_StoreAndStatus(user, store,
-                CouponUsageStatus.USED);
+        boolean isVerified = review.isVerified();
+        
+        // 학생이고 일반 리뷰(답글 아님)인 경우에만 인증 상태 업데이트 체크? 
+        // 단순히 기존 로직 유지
+        if (review.getParentReview() == null && user.getRole() == Role.ROLE_STUDENT) {
+             isVerified = studentCouponRepository.existsByUserAndCoupon_StoreAndStatus(user, store,
+                    CouponUsageStatus.USED);
+        }
 
         review.updateReview(request.getContent(), request.getRating(), isVerified);
 
@@ -120,18 +175,21 @@ public class ReviewService {
         Store store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "해당 상점을 찾을 수 없습니다."));
 
-        return reviewRepository.findByStore(store, pageable)
+        // 대댓글 구조를 위해 Root 리뷰만 조회
+        return reviewRepository.findByStoreAndParentReviewIsNull(store, pageable)
                 .map(ReviewResponse::from);
     }
 
     public ReviewStatsResponse getReviewStats(Long storeId) {
+        // 평점 및 개수 산정 시 답글 제외
         Double avgRating = reviewRepository.findAverageRatingByStoreId(storeId);
-        Long totalReviews = reviewRepository.countByStoreId(storeId);
-        Long rating1 = reviewRepository.countByStoreIdAndRating(storeId, 1);
-        Long rating2 = reviewRepository.countByStoreIdAndRating(storeId, 2);
-        Long rating3 = reviewRepository.countByStoreIdAndRating(storeId, 3);
-        Long rating4 = reviewRepository.countByStoreIdAndRating(storeId, 4);
-        Long rating5 = reviewRepository.countByStoreIdAndRating(storeId, 5);
+        Long totalReviews = reviewRepository.countByStoreIdAndParentReviewIsNull(storeId);
+        
+        Long rating1 = reviewRepository.countByStoreIdAndRatingAndParentReviewIsNull(storeId, 1);
+        Long rating2 = reviewRepository.countByStoreIdAndRatingAndParentReviewIsNull(storeId, 2);
+        Long rating3 = reviewRepository.countByStoreIdAndRatingAndParentReviewIsNull(storeId, 3);
+        Long rating4 = reviewRepository.countByStoreIdAndRatingAndParentReviewIsNull(storeId, 4);
+        Long rating5 = reviewRepository.countByStoreIdAndRatingAndParentReviewIsNull(storeId, 5);
 
         return ReviewStatsResponse.builder()
                 .averageRating(avgRating != null ? avgRating : 0.0)

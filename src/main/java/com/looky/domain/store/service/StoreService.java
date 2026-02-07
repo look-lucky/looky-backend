@@ -35,7 +35,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
-import java.util.ArrayList;
 
 import com.looky.domain.favorite.repository.FavoriteRepository;
 import com.looky.domain.user.entity.StudentProfile;
@@ -103,7 +102,7 @@ public class StoreService {
                 .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "상점을 찾을 수 없습니다."));
 
         Double averageRating = reviewRepository.findAverageRatingByStoreId(storeId);
-        Long reviewCount = reviewRepository.countByStoreId(storeId);
+        Long reviewCount = reviewRepository.countByStoreIdAndParentReviewIsNull(storeId);
 
         boolean isPartnership = false;
         boolean hasCoupon = false;
@@ -173,7 +172,7 @@ public class StoreService {
 
         Page<StoreResponse> responsePage = storePage.map(store -> {
             Double averageRating = reviewRepository.findAverageRatingByStoreId(store.getId());
-            Long reviewCount = reviewRepository.countByStoreId(store.getId());
+            Long reviewCount = reviewRepository.countByStoreIdAndParentReviewIsNull(store.getId());
             
             // 제휴 여부 및 쿠폰 보유 여부 설정
             boolean isPartnership = finalPartnershipStoreIds.contains(store.getId());
@@ -270,7 +269,7 @@ public class StoreService {
         
         return stores.stream().map(store -> {
             Double averageRating = reviewRepository.findAverageRatingByStoreId(store.getId());
-            Long reviewCount = reviewRepository.countByStoreId(store.getId());
+            Long reviewCount = reviewRepository.countByStoreIdAndParentReviewIsNull(store.getId());
             
             boolean isPartnership = finalPartnershipStoreIds.contains(store.getId());
             boolean hasCoupon = finalCouponStoreIds.contains(store.getId());
@@ -330,7 +329,7 @@ public class StoreService {
         List<Store> stores = storeRepository.findAllByUser(owner);
         return stores.stream().map(store -> {
             Double averageRating = reviewRepository.findAverageRatingByStoreId(store.getId());
-            Long reviewCount = reviewRepository.countByStoreId(store.getId());
+            Long reviewCount = reviewRepository.countByStoreIdAndParentReviewIsNull(store.getId());
             // MyStores is for owner, so partnership/coupon info relative to "me" (as student) doesn't apply the same way, 
             // but we can just set false or check if owner is also student? Usually owner view doesn't need this specific "benefit for me" flag.
             // Let's set false for simplicity as this is "My Stores" (Owner view).

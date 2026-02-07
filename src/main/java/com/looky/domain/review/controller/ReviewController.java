@@ -34,48 +34,49 @@ public class ReviewController {
 
         private final ReviewService reviewService;
 
-        @Operation(summary = "[학생] 리뷰 작성", description = "상점에 대한 리뷰를 작성합니다.")
-        @ApiResponses(value = {
-                @ApiResponse(responseCode = "201", description = "리뷰 작성 성공"),
-                @ApiResponse(responseCode = "400", description = "잘못된 요청 데이터", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class))),
-                @ApiResponse(responseCode = "404", description = "상점 없음", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class))),
-                @ApiResponse(responseCode = "409", description = "이미 작성된 리뷰 존재", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class)))
-        })
-        @PostMapping("/stores/{storeId}/reviews")
-        public ResponseEntity<CommonResponse<Long>> createReview(
-                @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,
-                @Parameter(description = "상점 ID") @PathVariable Long storeId,
-                @RequestPart @Valid CreateReviewRequest request,
-                @Parameter(description = "리뷰 이미지 목록") @RequestPart(required = false) List<MultipartFile> images
-        ) throws IOException {
-                Long reviewId = reviewService.createReview(principalDetails.getUser(), storeId, request, images);
-                return ResponseEntity.status(HttpStatus.CREATED).body(CommonResponse.success(reviewId));
-        }
+    @Operation(summary = "[공통] 리뷰 및 답글 작성", description = "상점에 대한 리뷰(학생) 또는 답글(점주, 학생)을 작성합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "리뷰/답글 작성 성공"),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청 데이터", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class))),
+            @ApiResponse(responseCode = "403", description = "권한 없음 (점주의 일반 리뷰 작성 등)", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = "상점 또는 원본 리뷰 없음", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class))),
+            @ApiResponse(responseCode = "409", description = "이미 작성된 리뷰 존재", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class)))
+    })
+    @PostMapping("/stores/{storeId}/reviews")
+    public ResponseEntity<CommonResponse<Long>> createReview(
+            @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,
+            @Parameter(description = "상점 ID") @PathVariable Long storeId,
+            @RequestPart @Valid CreateReviewRequest request,
+            @Parameter(description = "리뷰 이미지 목록") @RequestPart(required = false) List<MultipartFile> images
+    ) throws IOException {
+            Long reviewId = reviewService.createReview(principalDetails.getUser(), storeId, request, images);
+            return ResponseEntity.status(HttpStatus.CREATED).body(CommonResponse.success(reviewId));
+    }
 
-        @Operation(summary = "[학생] 리뷰 수정", description = "작성한 리뷰를 수정합니다. (본인만 가능)")
-        @ApiResponses(value = {
-                @ApiResponse(responseCode = "200", description = "리뷰 수정 성공"),
-                @ApiResponse(responseCode = "403", description = "권한 없음 (본인 리뷰 아님)", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class))),
-                @ApiResponse(responseCode = "404", description = "리뷰 없음", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class)))
-        })
-        @PatchMapping("/reviews/{reviewId}")
-        public ResponseEntity<CommonResponse<Void>> updateReview(
-                @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,
-                @Parameter(description = "리뷰 ID") @PathVariable Long reviewId,
-                @RequestPart @Valid UpdateReviewRequest request,
-                @Parameter(description = "리뷰 이미지 목록") @RequestPart(required = false) List<MultipartFile> images
-        ) throws IOException {
-                reviewService.updateReview(reviewId, principalDetails.getUser(), request, images);
-                return ResponseEntity.ok(CommonResponse.success(null));
-        }
+    @Operation(summary = "[공통] 리뷰 수정", description = "작성한 리뷰 또는 답글을 수정합니다. (본인만 가능)")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "리뷰 수정 성공"),
+            @ApiResponse(responseCode = "403", description = "권한 없음 (본인 리뷰 아님)", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = "리뷰 없음", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class)))
+    })
+    @PatchMapping("/reviews/{reviewId}")
+    public ResponseEntity<CommonResponse<Void>> updateReview(
+            @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,
+            @Parameter(description = "리뷰 ID") @PathVariable Long reviewId,
+            @RequestPart @Valid UpdateReviewRequest request,
+            @Parameter(description = "리뷰 이미지 목록") @RequestPart(required = false) List<MultipartFile> images
+    ) throws IOException {
+            reviewService.updateReview(reviewId, principalDetails.getUser(), request, images);
+            return ResponseEntity.ok(CommonResponse.success(null));
+    }
 
-        @Operation(summary = "[학생] 리뷰 삭제", description = "작성한 리뷰를 삭제합니다. (본인만 가능)")
-        @ApiResponses(value = {
-                @ApiResponse(responseCode = "204", description = "리뷰 삭제 성공"),
-                @ApiResponse(responseCode = "403", description = "권한 없음 (본인 리뷰 아님)", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class))),
-                @ApiResponse(responseCode = "404", description = "리뷰 없음", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class)))
-        })
-        @DeleteMapping("/reviews/{reviewId}")
+    @Operation(summary = "[공통] 리뷰 삭제", description = "작성한 리뷰 또는 답글을 삭제합니다. (본인만 가능)")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "리뷰 삭제 성공"),
+            @ApiResponse(responseCode = "403", description = "권한 없음 (본인 리뷰 아님)", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = "리뷰 없음", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class)))
+    })
+    @DeleteMapping("/reviews/{reviewId}")
         public ResponseEntity<CommonResponse<Void>> deleteReview(
                 @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,
                 @Parameter(description = "리뷰 ID") @PathVariable Long reviewId

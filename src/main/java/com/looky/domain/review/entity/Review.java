@@ -34,8 +34,8 @@ public class Review extends BaseEntity {
     @Column(nullable = false)
     private boolean isVerified; // 구매인증여부 (쿠폰사용여부로 판단)
 
-    @Column(nullable = false)
-    private int rating;
+    @Column(nullable = true)
+    private Integer rating;
 
     @Lob
     private String content;
@@ -55,16 +55,20 @@ public class Review extends BaseEntity {
     @OneToMany(mappedBy = "review", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ReviewImage> images = new ArrayList<>();
 
+    @OneToMany(mappedBy = "parentReview", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("createdAt ASC")
+    private List<Review> replies = new ArrayList<>();
+
     @Builder
-    public Review(User user, Store store, Review parentReview, boolean isVerified, int rating, String content) {
+    public Review(User user, Store store, Review parentReview, boolean isVerified, Integer rating, String content) {
         this.user = user;
         this.store = store;
         this.parentReview = parentReview;
-        this.isVerified = isVerified; // 쿠폰을 사용한 학생이 작성한 리뷰인지
+        this.isVerified = isVerified;
         this.rating = rating;
         this.content = content;
-        this.status = ReviewStatus.PUBLISHED; // 리뷰 첫 생성 시 바로 등록
-        this.reportCount = 0; // 리뷰 첫 생성 시 신고 수는 0
+        this.status = ReviewStatus.PUBLISHED;
+        this.reportCount = 0;
     }
 
     public void updateReview(String content, Integer rating, Boolean isVerified) {
@@ -78,6 +82,11 @@ public class Review extends BaseEntity {
             this.isVerified = isVerified;
         }
     }
+
+    public void addReply(Review reply) {
+        this.replies.add(reply);
+    }
+
 
     // 리뷰 신고 접수
     public void increaseReportCount() {

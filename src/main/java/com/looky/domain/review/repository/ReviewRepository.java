@@ -5,19 +5,21 @@ import com.looky.domain.store.entity.Store;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
-
+import org.springframework.data.jpa.repository.EntityGraph;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import com.looky.domain.user.entity.User;
 
 public interface ReviewRepository extends JpaRepository<Review, Long> {
-    @org.springframework.data.jpa.repository.EntityGraph(attributePaths = { "user" })
-    Page<Review> findByStore(Store store, Pageable pageable);
+    @EntityGraph(attributePaths = { "user" })
+    Page<Review> findByStoreAndParentReviewIsNull(Store store, Pageable pageable);
 
-    boolean existsByUserAndStore(User user, Store store);
+    boolean existsByUserAndStoreAndParentReviewIsNull(User user, Store store);
 
-    Long countByStoreId(Long storeId);
+    Long countByStoreIdAndParentReviewIsNull(Long storeId);
 
-    @org.springframework.data.jpa.repository.Query("SELECT AVG(r.rating) FROM Review r WHERE r.store.id = :storeId")
-    Double findAverageRatingByStoreId(@org.springframework.data.repository.query.Param("storeId") Long storeId);
+    @Query("SELECT AVG(r.rating) FROM Review r WHERE r.store.id = :storeId AND r.parentReview IS NULL")
+    Double findAverageRatingByStoreId(@Param("storeId") Long storeId);
 
-    Long countByStoreIdAndRating(Long storeId, Integer rating);
+    Long countByStoreIdAndRatingAndParentReviewIsNull(Long storeId, Integer rating);
 }

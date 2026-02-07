@@ -23,6 +23,7 @@ public class ReviewResponse {
     private LocalDateTime createdAt;
     private int likeCount;
     private List<String> imageUrls;
+    private List<ReviewResponse> replies;
 
     public static ReviewResponse from(Review review) {
         return ReviewResponse.builder()
@@ -34,6 +35,7 @@ public class ReviewResponse {
                 .rating(review.getRating())
                 .createdAt(review.getCreatedAt())
                 .likeCount(review.getLikeCount())
+                .replies(review.getReplies().stream().map(ReviewResponse::from).toList())
                 .build();
     }
 }

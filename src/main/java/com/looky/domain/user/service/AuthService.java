@@ -11,6 +11,7 @@ import com.looky.domain.organization.repository.UserOrganizationRepository;
 import com.looky.domain.user.dto.*;
 import com.looky.domain.user.entity.*;
 import com.looky.domain.user.repository.CouncilProfileRepository;
+import com.looky.domain.user.repository.EmailVerificationRepository;
 import com.looky.domain.user.repository.OwnerProfileRepository;
 import com.looky.domain.user.repository.StudentProfileRepository;
 import com.looky.domain.user.repository.UserRepository;
@@ -26,6 +27,16 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
+import java.security.SecureRandom;
+import java.util.Locale;
+
+import java.time.LocalDateTime;
+
 
 @Service
 @RequiredArgsConstructor
@@ -45,6 +56,108 @@ public class AuthService {
     private final OrganizationRepository organizationRepository;
     private final UserOrganizationRepository userOrganizationRepository;
     private final WithdrawalFeedbackRepository withdrawalFeedbackRepository;
+
+    private static final int CODE_LENGTH = 6;
+    private static final String ALLOWED_DOMAIN = "jbnu.ac.kr";
+    private final JavaMailSender mailSender;
+    private final EmailVerificationRepository emailVerificationRepository;
+
+    @Value("${app.email.from}")
+    private String fromAddress;
+
+    @Value("${app.email.verification.ttl-minutes:5}")
+    private long ttlMinutes;
+
+    private final SecureRandom random = new SecureRandom();
+
+    // 학생 이메일 인증
+    @Transactional
+    public void sendVerificationCode(String email) {
+        validateEmailDomain(email);
+        if (emailVerificationRepository.existsByEmailAndVerifiedTrue(email)) {
+            throw new CustomException(ErrorCode.BAD_REQUEST, "이미 인증된 이메일입니다.");
+        }
+        String code = generateCode();
+
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime expiresAt = now.plusMinutes(ttlMinutes);
+
+        EmailVerification ev = emailVerificationRepository.findByEmail(email)
+                .orElseGet(() -> new EmailVerification(email, code, expiresAt));
+        ev.updateCode(code, expiresAt);
+        emailVerificationRepository.save(ev);
+        sendMail(email, code);
+    }
+
+    @Transactional
+    public void verifyCode(String email, String code) {
+        validateEmailDomain(email);
+
+        LocalDateTime now = LocalDateTime.now();
+
+        EmailVerification ev = emailVerificationRepository.findByEmail(email)
+                .orElseThrow(() -> new CustomException(ErrorCode.EMAIL_CODE_EXPIRED));
+
+        if (ev.isVerified()) {
+            return;
+        }
+
+        if (ev.isCodeExpired(now)) {
+            emailVerificationRepository.delete(ev);
+            throw new CustomException(ErrorCode.EMAIL_CODE_EXPIRED);
+        }
+
+        if (!ev.getCode().equals(code)) {
+            throw new CustomException(ErrorCode.EMAIL_CODE_MISMATCH);
+        }
+
+        ev.markVerifiedPermanent();
+        emailVerificationRepository.save(ev);
+    }
+
+    @Transactional(readOnly = true)
+    public boolean isVerified(String email) {
+        return emailVerificationRepository.existsByEmailAndVerifiedTrue(email);
+    }
+
+    @Transactional
+    public void clearVerification(String email) {
+        emailVerificationRepository.findByEmail(email)
+                .ifPresent(EmailVerification::clearVerified);
+    }
+
+    private void sendMail(String email, String code) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(email);
+        message.setFrom(fromAddress);
+        message.setSubject("[Looky] 이메일 인증번호 안내");
+        message.setText(
+            "안녕하세요.\n" +
+            "Looky 앱 학생 이메일 인증을 요청하셨습니다.\n\n" +
+            "인증번호: " + code + "\n\n" +
+            "해당 코드는 5분 후 만료됩니다.\n"
+        );
+        mailSender.send(message);
+    }
+
+    private String generateCode() {
+        int bound = 1;
+        for (int i = 0; i < CODE_LENGTH; i++) bound *= 10;
+        int number = random.nextInt(bound);
+        return String.format("%0" + CODE_LENGTH + "d", number);
+    }
+
+    private void validateEmailDomain(String email) {
+        if (email == null) {
+            throw new CustomException(ErrorCode.BAD_REQUEST, "이메일은 필수 입력값입니다.");
+        }
+        String normalized = email.toLowerCase(Locale.ROOT);
+        if (!normalized.endsWith("@" + ALLOWED_DOMAIN)) {
+            throw new CustomException(ErrorCode.BAD_REQUEST, "전북대학교 이메일 계정만 인증 가능합니다.");
+        }
+    }
+    
+
 
 
     // 아이디 중복 체크

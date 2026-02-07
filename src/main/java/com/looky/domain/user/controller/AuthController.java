@@ -5,6 +5,7 @@ import com.looky.common.response.SwaggerErrorResponse;
 import com.looky.common.util.CookieUtil;
 import com.looky.domain.user.dto.*;
 import com.looky.domain.user.service.AuthService;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -30,6 +31,20 @@ public class AuthController {
 
         private final AuthService authService;
         private final CookieUtil cookieUtil;
+
+        @Operation(summary = "[학생] 학교 이메일 인증 발송", description ="이메일 인증 코드를 전송합니다.")
+        @PostMapping("email/send")
+        public ResponseEntity<CommonResponse<Void>> send(@Valid @RequestBody SendEmailCodeRequest request) {
+                authService.sendVerificationCode(request.getEmail());
+                return ResponseEntity.ok(CommonResponse.success(null));
+        }
+        
+        @Operation(summary = "[학생] 학교 이메일 인증 확인", description ="이메일 인증 코드를 검증합니다. (true: 검증 (일치) 완료, false: 검증 실패 (코드 불일치 및 이미 등록된 이메일)")
+        @PostMapping("email/verify")
+        public ResponseEntity<CommonResponse<Void>> verify(@Valid @RequestBody VerifyEmailCodeRequest request) {
+                authService.verifyCode(request.getEmail(), request.getCode());
+                return ResponseEntity.ok(CommonResponse.success(null));
+        }
 
         @Operation(summary = "[공통] 아이디 중복 확인", description = "아이디 사용 가능 여부를 확인합니다. (true: 사용 가능, false: 중복)")
         @GetMapping("/check-username")

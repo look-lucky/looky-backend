@@ -16,7 +16,7 @@ spring:
     properties:
       hibernate:
         format_sql: true # 쿼리 가독성 향상
-        
+
   flyway:
     enabled: false # 로컬에선 JPA UPDATE 사용
 
@@ -45,3 +45,20 @@ spring:
             user-info-uri: https://kapi.kakao.com/v2/user/me
             user-name-attribute: id
 
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${SPRING_MAIL_USERNAME:neardeals2@gmail.com}
+    password: ${SPRING_MAIL_PASSWORD:dxydlrnfjgtvkspl}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+app:
+  email:
+    from: ${SPRING_MAIL_USERNAME:neardeals2@gmail.com}
+    verification:
+      ttl-minutes: 5

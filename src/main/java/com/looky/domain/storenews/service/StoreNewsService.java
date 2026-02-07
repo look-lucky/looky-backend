@@ -3,6 +3,7 @@ package com.looky.domain.storenews.service;
 import com.looky.common.exception.CustomException;
 import com.looky.common.exception.ErrorCode;
 import com.looky.common.service.S3Service;
+import com.looky.common.util.FileValidator;
 import com.looky.domain.store.entity.Store;
 import com.looky.domain.store.repository.StoreRepository;
 import com.looky.domain.storenews.dto.CreateStoreNewsCommentRequest;
@@ -48,6 +49,9 @@ public class StoreNewsService {
         if (!store.getUser().getId().equals(user.getId())) {
             throw new CustomException(ErrorCode.FORBIDDEN);
         }
+
+        // 이미지 유효성 검사 (최대 5장, 10MB)
+        FileValidator.validateImageFiles(images, 5, 10 * 1024 * 1024);
 
         StoreNews storeNews = StoreNews.builder()
                 .store(store)
@@ -101,6 +105,11 @@ public class StoreNewsService {
 
         if (!news.getStore().getUser().getId().equals(user.getId())) {
             throw new CustomException(ErrorCode.FORBIDDEN);
+        }
+
+        // 이미지 유효성 검사 (최대 5장, 10MB)
+        if (images != null && !images.isEmpty()) {
+            FileValidator.validateImageFiles(images, 5, 10 * 1024 * 1024);
         }
 
         news.update(request.getTitle(), request.getContent());

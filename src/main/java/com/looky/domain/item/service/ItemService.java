@@ -1,4 +1,7 @@
+
 package com.looky.domain.item.service;
+
+import com.looky.common.util.FileValidator;
 
 import com.looky.common.exception.CustomException;
 import com.looky.common.exception.ErrorCode;
@@ -48,6 +51,8 @@ public class ItemService {
         String imageUrl = null;
 
         if (image != null && !image.isEmpty()) {
+            // 이미지 유효성 검사 (10MB)
+            FileValidator.validateImageFile(image, 10 * 1024 * 1024);
             imageUrl = s3Service.uploadFile(image);
         }
 
@@ -95,6 +100,8 @@ public class ItemService {
         String imageUrl = item.getImageUrl();
 
         if (image != null && !image.isEmpty()) {
+            // 이미지 유효성 검사 (10MB)
+            FileValidator.validateImageFile(image, 10 * 1024 * 1024);
             
             // 기존 이미지 있다면 S3에서 삭제
             if (imageUrl != null && !imageUrl.isEmpty()) {

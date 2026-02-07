@@ -1,4 +1,7 @@
+
 package com.looky.domain.review.service;
+
+import com.looky.common.util.FileValidator;
 
 import com.looky.common.service.S3Service;
 import com.looky.common.exception.CustomException;
@@ -107,6 +110,9 @@ public class ReviewService {
                 .parentReview(parentReview)
                 .build();
 
+        // 이미지 유효성 검사 (최대 3장, 10MB)
+        FileValidator.validateImageFiles(images, 3, 10 * 1024 * 1024);
+
         // 이미지 S3 업로드 및 저장
         uploadAndSaveImages(review, images);
 
@@ -148,6 +154,9 @@ public class ReviewService {
 
             // DB 삭제 (orphanRemoval = true로 인해 리스트에서 제거하면 삭제됨)
             review.getImages().clear();
+
+            // 이미지 유효성 검사 (최대 3장, 10MB)
+            FileValidator.validateImageFiles(images, 3, 10 * 1024 * 1024);
 
             // 새 이미지 업로드
             uploadAndSaveImages(review, images);

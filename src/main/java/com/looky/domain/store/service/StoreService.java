@@ -1,6 +1,7 @@
 package com.looky.domain.store.service;
 
 import com.looky.common.service.S3Service;
+import com.looky.common.util.FileValidator;
 import com.looky.domain.coupon.entity.CouponUsageStatus;
 import com.looky.domain.store.entity.*;
 import com.looky.domain.store.repository.StoreSpecification;
@@ -78,6 +79,7 @@ public class StoreService {
             throw new CustomException(ErrorCode.FORBIDDEN, "점주 회원만 가게를 등록할 수 있습니다.");
         }
 
+
         if (storeRepository.existsByName(request.getName())) {
             throw new CustomException(ErrorCode.DUPLICATE_RESOURCE, "이미 등록된 상점 이름입니다.");
         }
@@ -85,6 +87,9 @@ public class StoreService {
         if (storeRepository.existsByBizRegNo(request.getBizRegNo())) {
             throw new CustomException(ErrorCode.DUPLICATE_RESOURCE, "이미 등록된 사업자등록번호입니다.");
         }
+
+        // 이미지 유효성 검사 (최대 3장, 10MB)
+        FileValidator.validateImageFiles(images, 3, 10 * 1024 * 1024);
 
         Store store = request.toEntity(owner);
 
@@ -226,6 +231,11 @@ public class StoreService {
 
         if (!store.getName().equals(request.getName()) && storeRepository.existsByName(request.getName())) {
             throw new CustomException(ErrorCode.DUPLICATE_RESOURCE, "이미 존재하는 상점 이름입니다.");
+        }
+
+        // 새 이미지 유효성 검사 (최대 3장, 10MB)
+        if (images != null && !images.isEmpty()) {
+            FileValidator.validateImageFiles(images, 3, 10 * 1024 * 1024);
         }
 
         store.updateStore(

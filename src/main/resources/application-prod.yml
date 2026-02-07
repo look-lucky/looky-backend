@@ -11,7 +11,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: update # 임시
+      ddl-auto: validate
 
   flyway:
     enabled: true

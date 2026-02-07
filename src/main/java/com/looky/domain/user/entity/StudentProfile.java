@@ -26,10 +26,24 @@ public class StudentProfile {
     private University university;
 
 
+    @Column(nullable = false)
+    private boolean isClubMember;
+
     @Builder
-    public StudentProfile(User user, String nickname, University university) {
+    public StudentProfile(User user, String nickname, University university, boolean isClubMember) {
         this.user = user;
         this.nickname = nickname;
         this.university = university;
+        this.isClubMember = isClubMember;
+    }
+
+    public void update(String nickname, boolean isClubMember, University university) {
+        if (nickname != null) {
+            this.nickname = nickname;
+        }
+        this.isClubMember = isClubMember;
+        if (university != null) {
+            this.university = university;
+        }
     }
 }

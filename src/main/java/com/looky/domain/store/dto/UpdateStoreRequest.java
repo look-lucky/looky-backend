@@ -4,7 +4,6 @@ import com.looky.domain.store.entity.StoreCategory;
 import com.looky.domain.store.entity.StoreMood;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.ToString;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -15,7 +14,6 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@ToString
 public class UpdateStoreRequest {
 
     private String name;

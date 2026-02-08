@@ -18,7 +18,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -35,7 +34,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/stores")
 @RequiredArgsConstructor
-@Slf4j
 public class StoreController {
 
         private final StoreService storeService;
@@ -71,7 +69,6 @@ public class StoreController {
                 @RequestPart @Valid UpdateStoreRequest request,
                 @RequestPart(required = false) List<MultipartFile> images
         ) throws IOException {
-                log.info("updateStore request: {}", request);
                 storeService.updateStore(storeId, principalDetails.getUser(), request, images);
                 return ResponseEntity.ok(CommonResponse.success(null));
         }

@@ -5,11 +5,15 @@ import com.looky.common.response.ErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 @RestControllerAdvice
 @Slf4j
@@ -95,9 +99,9 @@ public class GlobalExceptionHandler {
         }
 
         // 405 에러
-        @ExceptionHandler(org.springframework.web.HttpRequestMethodNotSupportedException.class)
+        @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
         public ResponseEntity<CommonResponse<ErrorResponse>> handleMethodNotSupportedException(
-                        org.springframework.web.HttpRequestMethodNotSupportedException e,
+                        HttpRequestMethodNotSupportedException e,
                         HttpServletRequest request) {
 
                 ErrorCode errorCode = ErrorCode.METHOD_NOT_ALLOWED;
@@ -110,9 +114,9 @@ public class GlobalExceptionHandler {
         }
 
         // 415 에러
-        @ExceptionHandler(org.springframework.web.HttpMediaTypeNotSupportedException.class)
+        @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
         public ResponseEntity<CommonResponse<ErrorResponse>> handleMediaTypeNotSupportedException(
-                        org.springframework.web.HttpMediaTypeNotSupportedException e,
+                        HttpMediaTypeNotSupportedException e,
                         HttpServletRequest request) {
 
                 ErrorCode errorCode = ErrorCode.UNSUPPORTED_MEDIA_TYPE;
@@ -120,6 +124,36 @@ public class GlobalExceptionHandler {
                 log.info("[UnsupportedMediaType] url: {} | message: {}", request.getRequestURI(), e.getMessage());
 
                 ErrorResponse errorResponse = ErrorResponse.of(errorCode, e.getMessage(), request.getRequestURI());
+
+                return ResponseEntity.status(errorCode.getHttpStatus()).body(CommonResponse.fail(errorResponse));
+        }
+
+        // JSON 파싱 에러 (예: Enum 값 불일치)
+        @ExceptionHandler(HttpMessageNotReadableException.class)
+        public ResponseEntity<CommonResponse<ErrorResponse>> handleHttpMessageNotReadableException(
+                        HttpMessageNotReadableException e,
+                        HttpServletRequest request) {
+
+                ErrorCode errorCode = ErrorCode.BAD_REQUEST;
+
+                log.info("[HttpMessageNotReadable] url: {} | message: {}", request.getRequestURI(), e.getMessage());
+
+                ErrorResponse errorResponse = ErrorResponse.of(errorCode, "잘못된 요청 데이터 형식입니다. (JSON 파싱 오류)", request.getRequestURI());
+
+                return ResponseEntity.status(errorCode.getHttpStatus()).body(CommonResponse.fail(errorResponse));
+        }
+
+        // 파라미터 타입 불일치 (예: Long 타입 파라미터에 문자열 입력)
+        @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+        public ResponseEntity<CommonResponse<ErrorResponse>> handleMethodArgumentTypeMismatchException(
+                        MethodArgumentTypeMismatchException e,
+                        HttpServletRequest request) {
+
+                ErrorCode errorCode = ErrorCode.BAD_REQUEST;
+
+                log.info("[MethodArgumentTypeMismatch] url: {} | message: {}", request.getRequestURI(), e.getMessage());
+
+                ErrorResponse errorResponse = ErrorResponse.of(errorCode, String.format("잘못된 파라미터 값입니다. (%s)", e.getName()), request.getRequestURI());
 
                 return ResponseEntity.status(errorCode.getHttpStatus()).body(CommonResponse.fail(errorResponse));
         }

@@ -118,6 +118,8 @@ public class StoreService {
         Store store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "상점을 찾을 수 없습니다."));
 
+        log.info("getStore - storeId: {}, categories: {}", storeId, store.getStoreCategories());
+
         Double averageRating = reviewRepository.findAverageRatingByStoreId(storeId);
         Long reviewCount = reviewRepository.countByStoreIdAndParentReviewIsNull(storeId);
 
@@ -264,6 +266,8 @@ public class StoreService {
             request.getHolidayEndsAt(),
             request.getIsSuspended()
         );
+
+        log.info("updateStore - new categories: {}", request.getStoreCategories());
 
         // 새 이미지가 존재하면 기존 것 모두 삭제 후 새로 등록
         if (images != null && !images.isEmpty()) {

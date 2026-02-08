@@ -100,6 +100,19 @@ public class ReviewController {
                 return ResponseEntity.ok(CommonResponse.success(PageResponse.from(reviews)));
         }
 
+        @Operation(summary = "[공통] 내 리뷰 목록 조회", description = "내가 작성한 리뷰 목록을 조회합니다.")
+        @ApiResponses(value = {
+                        @ApiResponse(responseCode = "200", description = "성공"),
+        })
+        @GetMapping("/reviews/my")
+        public ResponseEntity<CommonResponse<PageResponse<ReviewResponse>>> getMyReviews(
+                        @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,
+                        @Parameter(description = "페이징 정보") @PageableDefault(size = 10) Pageable pageable)
+        {
+                Page<ReviewResponse> reviews = reviewService.getMyReviews(principalDetails.getUser(), pageable);
+                return ResponseEntity.ok(CommonResponse.success(PageResponse.from(reviews)));
+        }
+
         @Operation(summary = "[공통] 상점 리뷰 통계", description = "상점의 평점 평균, 총 리뷰 수, 별점별 개수 분포를 조회합니다.")
         @ApiResponses(value = {
                         @ApiResponse(responseCode = "200", description = "통계 조회 성공"),

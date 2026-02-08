@@ -189,6 +189,11 @@ public class ReviewService {
                 .map(ReviewResponse::from);
     }
 
+    public Page<ReviewResponse> getMyReviews(User user, Pageable pageable) {
+        return reviewRepository.findByUserAndParentReviewIsNull(user, pageable)
+                .map(ReviewResponse::from);
+    }
+
     public ReviewStatsResponse getReviewStats(Long storeId) {
         // 평점 및 개수 산정 시 답글 제외
         Double avgRating = reviewRepository.findAverageRatingByStoreId(storeId);

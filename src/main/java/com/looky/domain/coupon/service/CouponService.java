@@ -58,6 +58,13 @@ public class CouponService {
                 .minOrderAmount(request.getMinOrderAmount())
                 .build();
 
+        if (request.getIssueStartsAt() != null && request.getIssueEndsAt() != null) {
+            if (request.getIssueEndsAt().isBefore(request.getIssueStartsAt())) {
+                throw new CustomException(ErrorCode.UNPROCESSABLE_ENTITY, "종료일은 시작일보다 빠를 수 없습니다.");
+            }
+        }
+
+
         Coupon savedCoupon = couponRepository.save(coupon);
 
         return savedCoupon.getId();
@@ -81,6 +88,12 @@ public class CouponService {
                 request.getBenefitType(),
                 request.getBenefitValue(),
                 request.getMinOrderAmount());
+
+        if (coupon.getIssueStartsAt() != null && coupon.getIssueEndsAt() != null) {
+            if (coupon.getIssueEndsAt().isBefore(coupon.getIssueStartsAt())) {
+                throw new CustomException(ErrorCode.UNPROCESSABLE_ENTITY, "종료일은 시작일보다 빠를 수 없습니다.");
+            }
+        }
     }
 
     @Transactional

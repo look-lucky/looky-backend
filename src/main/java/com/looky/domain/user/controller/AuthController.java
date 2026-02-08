@@ -165,7 +165,7 @@ public class AuthController {
                 return ResponseEntity.ok(CommonResponse.success(authService.checkUsernameAvailability(username)));
         }
 
-        @Operation(summary = "[공통] 회원 가입용 이메일 인증 발송", description = "회원 가입용 이메일 인증 코드를 전송합니다.")
+        @Operation(summary = "[공통] 회원 가입용 이메일 인증 발송", description = "회원 가입용 이메일 인증 코드를 전송합니다. (universityId 존재 시 도메인 검사 진행)")
         @PostMapping("email/send-code")
         public ResponseEntity<CommonResponse<Void>> send(@Valid @RequestBody SendEmailCodeRequest request) {
                 emailVerificationService.sendCode(request.getEmail(), request.getUniversityId());

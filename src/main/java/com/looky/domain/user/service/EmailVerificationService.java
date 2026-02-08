@@ -6,6 +6,7 @@ import com.looky.domain.organization.entity.University;
 import com.looky.domain.organization.repository.UniversityRepository;
 import com.looky.domain.user.entity.EmailVerification;
 import com.looky.domain.user.repository.EmailVerificationRepository;
+import com.looky.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,6 +27,7 @@ public class EmailVerificationService {
 
     private final EmailVerificationRepository emailVerificationRepository;
     private final UniversityRepository universityRepository;
+    private final UserRepository userRepository;
     private final JavaMailSender mailSender;
 
     @Value("${app.email.from}")
@@ -46,8 +48,9 @@ public class EmailVerificationService {
             validateEmailDomain(email, universityId);
         }
 
-        if (emailVerificationRepository.existsByEmailAndVerifiedTrue(email)) {
-            throw new CustomException(ErrorCode.BAD_REQUEST, "이미 인증된 이메일입니다.");
+        // 이미 가입된 이메일인지 확인 
+        if (userRepository.existsByEmail(email)) {
+            throw new CustomException(ErrorCode.DUPLICATE_RESOURCE, "이미 가입된 이메일입니다.");
         }
 
         sendCodeInternal(email);

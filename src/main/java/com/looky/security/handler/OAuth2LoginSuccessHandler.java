@@ -26,9 +26,6 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
     private final RefreshTokenService refreshTokenService;
     private final CookieUtil cookieUtil;
 
-    @Value("${app.redirect-uris.web}")
-    private String webRedirectUri;
-
     @Value("${app.redirect-uris.app}")
     private String appRedirectUri;
 
@@ -52,11 +49,10 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
         // Refresh Token 쿠키 설정
         response.addHeader("Set-Cookie", cookieUtil.createRefreshTokenCookie(refreshToken).toString());
 
-        // 요청 출처 판단 (origin 값이 app -> 앱 / 그 외 -> 웹)
-        String origin = request.getParameter("origin");
-        String targetUrl = "app".equals(origin) ? appRedirectUri : webRedirectUri;
+        // 무조건 앱으로 리다이렉트 (Web 소셜 로그인 미지원)
+        String targetUrl = appRedirectUri;
 
-        // 최종 URL 조립. 프론트엔드(웹 또는 앱)으로 리다이렉트 (Access Token은 쿼리 파라미터로 전달)
+        // 최종 URL 조립. 프론트엔드(앱)으로 리다이렉트 (Access Token은 쿼리 파라미터로 전달)
         String finalUrl = UriComponentsBuilder.fromUriString(targetUrl)
                 .queryParam("accessToken", accessToken)
                 .build().toUriString();

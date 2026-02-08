@@ -6,6 +6,8 @@ import com.looky.domain.store.dto.BizVerificationResponse;
 import com.looky.domain.store.dto.StoreResponse;
 import com.looky.domain.store.dto.StoreClaimRequest;
 import com.looky.domain.store.service.StoreClaimService;
+import com.looky.security.details.PrincipalDetails;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import java.util.List;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -47,10 +49,11 @@ public class StoreClaimController {
     @Operation(summary = "[점주] 상점 소유 요청 등록", description = "사장님이 상점에 대해 소유를 요청하여 심사 대상이 됩니다.")
     @PostMapping("/store-claims")
     public ResponseEntity<CommonResponse<Long>> createStoreClaims(
+            @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,
             @RequestPart @Valid StoreClaimRequest request,
             @Parameter(description = "사업자등록증 이미지") @RequestPart MultipartFile image
     ) throws IOException {
-        Long storeClaimId = storeClaimService.createStoreClaims(request, image);
+        Long storeClaimId = storeClaimService.createStoreClaims(principalDetails.getUser(), request, image);
         return ResponseEntity.status(HttpStatus.CREATED).body(CommonResponse.success(storeClaimId));
     }
 

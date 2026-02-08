@@ -39,13 +39,11 @@ public class StoreClaimVerificationService {
         }
         
         return claims.map(claim -> {
-            User user = userRepository.findById(claim.getUserId())
-                    .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+            String ownerName = ownerProfileRepository.findById(claim.getUserId())
+                    .map(OwnerProfile::getName)
+                    .orElse("Unknown");
 
-            OwnerProfile ownerProfile = ownerProfileRepository.findById(claim.getUserId())
-                    .orElseThrow(() -> new CustomException(ErrorCode.FORBIDDEN, "점주만 가게 점유 신청을 할 수 있습니다."));
-
-            return StoreClaimResponse.from(claim, ownerProfile.getName());
+            return StoreClaimResponse.from(claim, ownerName);
         });
     }
 

@@ -11,6 +11,8 @@ import com.looky.domain.store.entity.StoreClaimStatus;
 import com.looky.domain.store.repository.StoreClaimRepository;
 import com.looky.domain.store.repository.StoreRepository;
 import com.looky.domain.store.dto.StoreResponse;
+import com.looky.domain.user.entity.Role;
+import com.looky.domain.user.entity.User;
 import com.looky.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import java.util.List;
@@ -95,12 +97,16 @@ public class StoreClaimService {
     }
 
     // 상점 소유권 신청   
-    public Long createStoreClaims(StoreClaimRequest request, MultipartFile image) throws IOException {
+    public Long createStoreClaims(User user, StoreClaimRequest request, MultipartFile image) throws IOException {
 
+        User owner = userRepository.findById(user.getId())
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        if (owner.getRole() != Role.ROLE_OWNER) {
+             throw new CustomException(ErrorCode.FORBIDDEN, "점주만 가게 점유 신청을 할 수 있습니다.");
+        }
 
         storeRepository.findById(request.getStoreId()).orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "존재하지 않는 상점입니다."));
-
-        userRepository.findById(request.getUserId()).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
 
         if (storeClaimRepository.existsByStoreIdAndStatus(request.getStoreId(), StoreClaimStatus.PENDING)) {

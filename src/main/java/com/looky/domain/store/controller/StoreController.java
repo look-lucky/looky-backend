@@ -67,7 +67,7 @@ public class StoreController {
                 @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,
                 @Parameter(description = "상점 ID") @PathVariable Long storeId,
                 @RequestPart @Valid UpdateStoreRequest request,
-                @RequestPart List<MultipartFile> images
+                @RequestPart(required = false) List<MultipartFile> images
         ) throws IOException {
                 storeService.updateStore(storeId, principalDetails.getUser(), request, images);
                 return ResponseEntity.ok(CommonResponse.success(null));

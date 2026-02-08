@@ -50,6 +50,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.Collections;
 import com.looky.domain.coupon.repository.StudentCouponRepository;
+import com.looky.domain.organization.repository.UniversityRepository;
 
 @Service
 @RequiredArgsConstructor
@@ -68,6 +69,7 @@ public class StoreService {
     private final PartnershipRepository partnershipRepository;
     private final CouponRepository couponRepository;
     private final StudentCouponRepository studentCouponRepository;
+    private final UniversityRepository universityRepository;
 
     @Transactional
     public Long createStore(User user, CreateStoreRequest request, List<MultipartFile> images) throws IOException {
@@ -97,6 +99,14 @@ public class StoreService {
         uploadAndSaveImages(store, images);
 
         Store savedStore = storeRepository.save(store);
+
+        // 대학 연결
+        if (request.getUniversityIds() != null) {
+            for (Long universityId : request.getUniversityIds()) {
+                universityRepository.findById(universityId)
+                        .ifPresent(savedStore::addUniversity);
+            }
+        }
 
         // 초기 등급 계산 (SEED 할당)
         recalculateCloverGrade(savedStore);

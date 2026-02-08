@@ -348,7 +348,7 @@ create table review (
     store_id bigint not null,
     parent_review_id bigint,
     is_verified bit not null,
-    rating int not null,
+    rating int,
     content longtext,
     status enum ('BANNED','PUBLISHED','REPORTED','VERIFIED') not null,
     report_count int not null,

@@ -46,6 +46,8 @@ public class CreateStoreRequest {
 
     private List<StoreMood> storeMoods;
 
+    private List<Long> universityIds;
+
     public Store toEntity(User user) {
         return Store.builder()
                 .user(user)

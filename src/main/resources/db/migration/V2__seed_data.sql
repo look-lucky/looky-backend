@@ -341,4 +341,30 @@ INSERT INTO withdrawal_feedback (id, created_at, modified_at, detail_reason) VAL
 (1, NOW(), NOW(), '앱이 너무 느려요');
 INSERT INTO withdrawal_reason (feedback_id, reason) VALUES (1, 'INCONVENIENT');
 
+
+-- 4.x Additional Owner1 Stores
+-- Store 20 (Approved)
+INSERT INTO store (store_id, created_at, modified_at, name, biz_reg_no, road_address, jibun_address, latitude, longitude, store_phone, store_status, user_id, introduction, operating_hours, clover_grade) VALUES
+(20, NOW(), NOW(), '김가네 김밥', '123-45-67890', '전주시 덕진구 명륜3길 20', '덕진동1가 123-45', 35.846500, 127.129500, '063-222-2222', 'ACTIVE', 10, '맛있는 김밥', '{"0": [["09:00", "21:00"], null], "1": [["09:00", "21:00"], null], "2": [["09:00", "21:00"], null], "3": [["09:00", "21:00"], null], "4": [["09:00", "21:00"], null], "5": [["09:00", "21:00"], null], "6": [["09:00", "21:00"], null]}', 'SEED');
+INSERT INTO store_categories (store_id, category) VALUES (20, 'RESTAURANT');
+INSERT INTO store_university (store_id, university_id) VALUES (20, 1);
+INSERT INTO store_claim (created_at, modified_at, store_id, user_id, biz_reg_no, representative_name, store_name, store_phone, license_image_url, status) VALUES
+(NOW(), NOW(), 20, 10, '123-45-67890', '김사장', '김가네 김밥', '063-222-2222', 'https://example.com/license20.jpg', 'APPROVED');
+
+-- Store 21 (Approved)
+INSERT INTO store (store_id, created_at, modified_at, name, biz_reg_no, road_address, jibun_address, latitude, longitude, store_phone, store_status, user_id, introduction, operating_hours, clover_grade) VALUES
+(21, NOW(), NOW(), '이디야커피', '234-56-78901', '전주시 덕진구 명륜4길 21', '덕진동1가 123-46', 35.847500, 127.130500, '063-333-3333', 'ACTIVE', 10, '언제나 이디야', '{"0": [["08:00", "23:00"], null], "1": [["08:00", "23:00"], null], "2": [["08:00", "23:00"], null], "3": [["08:00", "23:00"], null], "4": [["08:00", "23:00"], null], "5": [["08:00", "23:00"], null], "6": [["08:00", "23:00"], null]}', 'SEED');
+INSERT INTO store_categories (store_id, category) VALUES (21, 'CAFE');
+INSERT INTO store_university (store_id, university_id) VALUES (21, 1);
+INSERT INTO store_claim (created_at, modified_at, store_id, user_id, biz_reg_no, representative_name, store_name, store_phone, license_image_url, status) VALUES
+(NOW(), NOW(), 21, 10, '234-56-78901', '김사장', '이디야커피', '063-333-3333', 'https://example.com/license21.jpg', 'APPROVED');
+
+-- Store 22 (Pending)
+INSERT INTO store (store_id, created_at, modified_at, name, biz_reg_no, road_address, jibun_address, latitude, longitude, store_phone, store_status, user_id, introduction, operating_hours, clover_grade) VALUES
+(22, NOW(), NOW(), '탕후루 왕가', '345-67-89012', '전주시 덕진구 명륜5길 22', '덕진동1가 123-47', 35.845500, 127.128500, '063-444-4444', 'UNCLAIMED', NULL, '달콤한 탕후루', '{"0": [["12:00", "22:00"], null], "1": [["12:00", "22:00"], null], "2": [["12:00", "22:00"], null], "3": [["12:00", "22:00"], null], "4": [["12:00", "22:00"], null], "5": [["12:00", "22:00"], null], "6": [["12:00", "22:00"], null]}', 'SEED');
+INSERT INTO store_categories (store_id, category) VALUES (22, 'ETC');
+INSERT INTO store_university (store_id, university_id) VALUES (22, 1);
+INSERT INTO store_claim (created_at, modified_at, store_id, user_id, biz_reg_no, representative_name, store_name, store_phone, license_image_url, status) VALUES
+(NOW(), NOW(), 22, 10, '345-67-89012', '김사장', '탕후루 왕가', '063-444-4444', 'https://example.com/license22.jpg', 'PENDING');
+
 SET FOREIGN_KEY_CHECKS = 1;

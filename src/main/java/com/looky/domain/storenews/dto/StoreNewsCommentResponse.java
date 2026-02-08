@@ -11,19 +11,21 @@ public class StoreNewsCommentResponse {
 
     private Long id;
     private Long userId;
+    private String nickname;
     private String content;
     private LocalDateTime createdAt;
     private boolean isMine;
 
-    public StoreNewsCommentResponse(StoreNewsComment comment, User currentUser) {
+    public StoreNewsCommentResponse(StoreNewsComment comment, User currentUser, String nickname) {
         this.id = comment.getId();
         this.userId = comment.getUser().getId();
+        this.nickname = nickname;
         this.content = comment.getContent();
         this.createdAt = comment.getCreatedAt();
         this.isMine = currentUser != null && comment.getUser().getId().equals(currentUser.getId());
     }
 
-    public static StoreNewsCommentResponse from(StoreNewsComment comment, User currentUser) {
-        return new StoreNewsCommentResponse(comment, currentUser);
+    public static StoreNewsCommentResponse from(StoreNewsComment comment, User currentUser, String nickname) {
+        return new StoreNewsCommentResponse(comment, currentUser, nickname);
     }
 }

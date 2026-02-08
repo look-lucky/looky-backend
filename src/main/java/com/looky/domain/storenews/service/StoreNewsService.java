@@ -20,6 +20,8 @@ import com.looky.domain.storenews.repository.StoreNewsLikeRepository;
 import com.looky.domain.storenews.repository.StoreNewsRepository;
 import com.looky.domain.user.entity.User;
 import com.looky.common.response.PageResponse;
+import com.looky.domain.user.repository.OwnerProfileRepository;
+import com.looky.domain.user.repository.StudentProfileRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -28,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -38,6 +41,8 @@ public class StoreNewsService {
     private final StoreNewsCommentRepository storeNewsCommentRepository;
     private final StoreNewsLikeRepository storeNewsLikeRepository;
     private final StoreRepository storeRepository;
+    private final StudentProfileRepository studentProfileRepository;
+    private final OwnerProfileRepository ownerProfileRepository;
     private final S3Service s3Service;
 
     @Transactional
@@ -179,8 +184,29 @@ public class StoreNewsService {
 
     public PageResponse<StoreNewsCommentResponse> getComments(Long newsId, Pageable pageable, User currentUser) {
         Page<StoreNewsComment> page = storeNewsCommentRepository.findByStoreNewsId(newsId, pageable);
-        Page<StoreNewsCommentResponse> responsePage = page
-                .map(comment -> StoreNewsCommentResponse.from(comment, currentUser));
+
+        // 댓글 작성자 ID 목록 추출
+        List<Long> userIds = page.getContent().stream()
+                .map(comment -> comment.getUser().getId())
+                .distinct()
+                .toList();
+        
+        // 닉네임 조회 (학생 프로필 & 점주 프로필)
+        Map<Long, String> nicknameMap = new java.util.HashMap<>();
+        
+        if (!userIds.isEmpty()) {
+            List<com.looky.domain.user.entity.StudentProfile> students = studentProfileRepository.findAllById(userIds);
+            students.forEach(p -> nicknameMap.put(p.getUserId(), p.getNickname()));
+            
+            List<com.looky.domain.user.entity.OwnerProfile> owners = ownerProfileRepository.findAllById(userIds);
+            owners.forEach(p -> nicknameMap.put(p.getUserId(), p.getName()));
+        }
+
+        Page<StoreNewsCommentResponse> responsePage = page.map(comment -> {
+            String nickname = nicknameMap.getOrDefault(comment.getUser().getId(), "알 수 없음");
+            return StoreNewsCommentResponse.from(comment, currentUser, nickname);
+        });
+        
         return PageResponse.from(responsePage);
     }
 

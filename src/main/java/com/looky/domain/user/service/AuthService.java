@@ -242,10 +242,10 @@ public class AuthService {
         // 토큰에서 UserId 추출
         Long userId = jwtTokenProvider.getUserId(refreshToken);
 
-        // Redis 비교
+        // DB 비교
         String storedToken = refreshTokenService.getByUserId(userId);
         if (storedToken == null || !storedToken.equals(refreshToken)) {
-            log.warn("[RefreshToken] Token mismatch or not found in Redis. userId={}", userId);
+            log.warn("[RefreshToken] Token mismatch or not found in RefreshToken Table. userId={}", userId);
             refreshTokenService.delete(userId);
             throw new CustomException(ErrorCode.INVALID_TOKEN, "리프레시 토큰이 만료되었거나 일치하지 않습니다.");
         }

@@ -4,7 +4,9 @@ import com.looky.common.exception.CustomException;
 import com.looky.common.exception.ErrorCode;
 import com.looky.domain.organization.entity.Organization;
 import com.looky.domain.organization.entity.UserOrganization;
+import com.looky.domain.organization.entity.University;
 import com.looky.domain.organization.repository.OrganizationRepository;
+import com.looky.domain.organization.repository.UniversityRepository;
 import com.looky.domain.organization.repository.UserOrganizationRepository;
 import com.looky.domain.partnership.dto.CreatePartnershipRequest;
 import com.looky.domain.partnership.dto.PartnershipResponse;
@@ -46,6 +48,7 @@ public class AdminPartnershipService {
     private final PartnershipRepository partnershipRepository;
     private final UserOrganizationRepository userOrganizationRepository;
     private final StoreUniversityRepository storeUniversityRepository;
+    private final UniversityRepository universityRepository;
 
     private static final String[] HEADERS = {
             "universityId", "storeId", "storeName", "branch", "roadAddress", "benefitDetail", "startDate", "endDate"
@@ -122,7 +125,13 @@ public class AdminPartnershipService {
     }
 
     // 엑셀 템플릿 내보내기 (특정 대학 소속 상점 리스트)
-    public byte[] exportPartnershipTemplate(Long universityId) throws IOException {
+    public PartnershipTemplateResult exportPartnershipTemplate(Long universityId) throws IOException {
+        University university = universityRepository.findById(universityId)
+                .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "대학을 찾을 수 없습니다."));
+
+        String domainPrefix = university.getEmailDomain().split("\\.")[0];
+        String filename = domainPrefix + "_partnership_template.xlsx";
+
         List<StoreUniversity> storeUniversities = storeUniversityRepository.findByUniversityId(universityId);
 
         try (Workbook workbook = new XSSFWorkbook(); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
@@ -147,8 +156,11 @@ public class AdminPartnershipService {
             }
 
             workbook.write(out);
-            return out.toByteArray();
+            return new PartnershipTemplateResult(out.toByteArray(), filename);
         }
+    }
+
+    public record PartnershipTemplateResult(byte[] content, String filename) {
     }
 
     // 엑셀 업로드 및 처리

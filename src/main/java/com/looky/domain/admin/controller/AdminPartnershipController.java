@@ -35,7 +35,7 @@ public class AdminPartnershipController {
 
     private final AdminPartnershipService adminPartnershipService;
 
-    @Operation(summary = "[관리자] 제휴 등록", description = "특정 대학의 특정 조직에 제휴를 등록합니다.")
+    @Operation(summary = "[관리자] 제휴 단건 등록", description = "특정 대학의 특정 조직에 제휴를 단건으로 등록합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "제휴 등록 성공"),
             @ApiResponse(responseCode = "400", description = "잘못된 요청 데이터", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class))),
@@ -103,19 +103,16 @@ public class AdminPartnershipController {
             @ApiResponse(responseCode = "200", description = "다운로드 성공"),
             @ApiResponse(responseCode = "403", description = "권한 없음", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class)))
     })
-    @GetMapping("/partnerships/template")
+    @GetMapping(value = "/partnerships/template", produces = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
     public ResponseEntity<byte[]> exportPartnershipTemplate(
             @Parameter(description = "대상 대학 ID") @RequestParam Long universityId,
             @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails) throws IOException {
-        byte[] excelContent = adminPartnershipService.exportPartnershipTemplate(universityId);
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
-        headers.setContentDispositionFormData("attachment", "partnership_template.xlsx");
+        var result = adminPartnershipService.exportPartnershipTemplate(universityId);
 
         return ResponseEntity.ok()
-                .headers(headers)
-                .body(excelContent);
+                .header(HttpHeaders.CONTENT_TYPE, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + result.filename() + "\"")
+                .body(result.content());
     }
 
     @Operation(summary = "[학생회/관리자] 제휴 엑셀로 등록", description = "엑셀 파일을 업로드하여 제휴 정보를 일괄 등록/수정합니다.")

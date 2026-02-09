@@ -22,6 +22,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.util.List;
+import com.looky.domain.user.dto.StudentInfoResponse;
 
 @Service
 @RequiredArgsConstructor
@@ -35,6 +37,7 @@ public class MyPageService {
     private final UserOrganizationRepository userOrganizationRepository;
     private final UniversityRepository universityRepository;
 
+    // 아이디 변경
     @Transactional
     public void changeUsername(Long userId, ChangeUsernameRequest request) {
         User user = userRepository.findById(userId)
@@ -64,6 +67,40 @@ public class MyPageService {
         user.updatePassword(passwordEncoder.encode(request.getNewPassword()));
     }
 
+    // 학생 프로필 조회
+    public StudentInfoResponse getStudentInfo(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        if (user.getRole() != Role.ROLE_STUDENT) {
+            throw new CustomException(ErrorCode.FORBIDDEN, "학생 회원만 이용 가능합니다.");
+        }
+
+        StudentProfile profile = studentProfileRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "학생 프로필을 찾을 수 없습니다."));
+
+        Long collegeId = null;
+        Long departmentId = null;
+
+        List<UserOrganization> userOrgs = userOrganizationRepository.findAllByUser(user);
+        for (UserOrganization uo : userOrgs) {
+            if (uo.getOrganization().getCategory() == OrganizationCategory.COLLEGE) {
+                collegeId = uo.getOrganization().getId();
+            } else if (uo.getOrganization().getCategory() == OrganizationCategory.DEPARTMENT) {
+                departmentId = uo.getOrganization().getId();
+            }
+        }
+
+        return StudentInfoResponse.builder()
+                .universityId(profile.getUniversity() != null ? profile.getUniversity().getId() : null)
+                .collegeId(collegeId)
+                .departmentId(departmentId)
+                .isClubMember(profile.getIsClubMember())
+                .build();
+    }
+
+
+    // 학생 프로필 수정
     @Transactional
     public void updateStudentProfile(Long userId, UpdateStudentProfileRequest request) {
         User user = userRepository.findById(userId)
@@ -89,6 +126,7 @@ public class MyPageService {
         profile.update(request.getNickname(), request.getIsClubMember() != null ? request.getIsClubMember() : profile.getIsClubMember(), null);
     }
 
+    // 대학 수정
     @Transactional
     public void updateUniversity(Long userId, UpdateUniversityRequest request) {
         User user = userRepository.findById(userId)
@@ -111,6 +149,7 @@ public class MyPageService {
         profile.update(null, profile.getIsClubMember(), university);
     }
 
+    // 사용자 조직 수정
     private void updateUserOrganization(User user, Long organizationId, OrganizationCategory category) {
         Organization organization = organizationRepository.findById(organizationId)
                 .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "해당 조직을 찾을 수 없습니다."));

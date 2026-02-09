@@ -21,6 +21,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import com.looky.domain.user.dto.StudentInfoResponse;
+import com.looky.domain.user.dto.OwnerInfoResponse;
 
 @Tag(name = "MyPage", description = "마이페이지 관련 API")
 @RestController
@@ -67,6 +68,18 @@ public class MyPageController {
     public ResponseEntity<CommonResponse<StudentInfoResponse>> getStudentInfo(
             @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails) {
         return ResponseEntity.ok(CommonResponse.success(myPageService.getStudentInfo(principalDetails.getUser().getId())));
+    }
+
+    @Operation(summary = "[점주] 내 정보 조회", description = "점주의 이름, 이메일, 아이디, 성별, 생년월일을 조회합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "조회 성공"),
+            @ApiResponse(responseCode = "403", description = "점주 회원이 아님", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = "점주 프로필 없음", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class)))
+    })
+    @GetMapping("/owner/profile")
+    public ResponseEntity<CommonResponse<OwnerInfoResponse>> getOwnerInfo(
+            @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails) {
+        return ResponseEntity.ok(CommonResponse.success(myPageService.getOwnerInfo(principalDetails.getUser().getId())));
     }
 
     @Operation(summary = "[학생] 프로필 수정", description = "학생의 프로필(닉네임, 단과대, 학과, 동아리 가입여부)을 수정합니다. 대학 변경은 별도 API 사용.")

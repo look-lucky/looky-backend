@@ -13,9 +13,11 @@ import com.looky.domain.user.dto.ChangePasswordRequest;
 import com.looky.domain.user.dto.ChangeUsernameRequest;
 import com.looky.domain.user.dto.UpdateStudentProfileRequest;
 import com.looky.domain.user.dto.UpdateUniversityRequest;
+import com.looky.domain.user.entity.OwnerProfile;
 import com.looky.domain.user.entity.Role;
 import com.looky.domain.user.entity.StudentProfile;
 import com.looky.domain.user.entity.User;
+import com.looky.domain.user.repository.OwnerProfileRepository;
 import com.looky.domain.user.repository.StudentProfileRepository;
 import com.looky.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +26,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import com.looky.domain.user.dto.StudentInfoResponse;
+import com.looky.domain.user.dto.OwnerInfoResponse;
 
 @Service
 @RequiredArgsConstructor
@@ -32,6 +35,7 @@ public class MyPageService {
 
     private final UserRepository userRepository;
     private final StudentProfileRepository studentProfileRepository;
+    private final OwnerProfileRepository ownerProfileRepository;
     private final PasswordEncoder passwordEncoder;
     private final OrganizationRepository organizationRepository;
     private final UserOrganizationRepository userOrganizationRepository;
@@ -96,6 +100,27 @@ public class MyPageService {
                 .collegeId(collegeId)
                 .departmentId(departmentId)
                 .isClubMember(profile.getIsClubMember())
+                .build();
+    }
+
+    // 점주 프로필 조회
+    public OwnerInfoResponse getOwnerInfo(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        if (user.getRole() != Role.ROLE_OWNER) {
+            throw new CustomException(ErrorCode.FORBIDDEN, "점주 회원만 이용 가능합니다.");
+        }
+
+        OwnerProfile profile = ownerProfileRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "점주 프로필을 찾을 수 없습니다."));
+
+        return OwnerInfoResponse.builder()
+                .name(profile.getName())
+                .email(user.getEmail())
+                .username(user.getUsername())
+                .gender(user.getGender())
+                .birthDate(user.getBirthDate())
                 .build();
     }
 

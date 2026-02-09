@@ -1,5 +1,15 @@
 package com.looky.security.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.looky.security.oauth.AppleOAuth2UserInfo;
+import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
+import java.util.Collections;
+import java.util.HashMap;
+import lombok.extern.slf4j.Slf4j;
+
 import com.looky.domain.user.entity.Role;
 import com.looky.domain.user.entity.SocialType;
 import com.looky.domain.user.entity.User;
@@ -18,21 +28,33 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Map;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
     private final UserRepository userRepository;
+    private final ObjectMapper objectMapper;
 
     @Override
     @Transactional
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
 
-        // 리소스 서버에서 받아온 유저 정보 할당
-        OAuth2User oAuth2User = super.loadUser(userRequest);
-
         // 어떤 소셜 서비스인지 확인
         String registrationId = userRequest.getClientRegistration().getRegistrationId();
+
+        OAuth2User oAuth2User;
+
+        if (registrationId.equals("apple")) {
+            // Apple 로그인인 경우, id_token을 디코딩하여 유저 정보 추출
+            String idToken = userRequest.getAdditionalParameters().get("id_token").toString();
+            Map<String, Object> attributes = decodeJwtTokenPayload(idToken);
+            // DefaultOAuth2User를 생성하여 반환합니다. (attributes에는 Apple id_token의 claims가 포함됨)
+            oAuth2User = new DefaultOAuth2User(Collections.emptyList(), attributes, "sub");
+        } else {
+            // Apple 외 (Google, Kakao)는 리소스 서버에서 받아온 유저 정보 할당 (기본 로직)
+            oAuth2User = super.loadUser(userRequest);
+        }
 
         OAuth2UserInfo userInfo = extractUserInfo(registrationId, oAuth2User.getAttributes());
 
@@ -48,6 +70,8 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             return new GoogleOAuth2UserInfo(attributes);
         } else if ("kakao".equals(registrationId)) {
             return new KakaoOAuth2UserInfo(attributes);
+        } else if ("apple".equals(registrationId)) {
+            return new AppleOAuth2UserInfo(attributes);
         }
         throw new IllegalArgumentException("지원하지 않는 소셜 로그인입니다.");
     }
@@ -74,5 +98,20 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                 .build();
 
         return userRepository.save(newSocialUser);
+    }
+
+    // JWT 토큰의 Payload를 디코딩하여 Map 형태로 반환합니다.
+    @SuppressWarnings("unchecked")
+    public Map<String, Object> decodeJwtTokenPayload(String jwtToken) {
+        Map<String, Object> jwtClaims = new HashMap<>();
+        try {
+            String[] parts = jwtToken.split("\\.");
+            Base64.Decoder decoder = Base64.getUrlDecoder();
+            String payload = new String(decoder.decode(parts[1]), StandardCharsets.UTF_8);
+            jwtClaims = objectMapper.readValue(payload, Map.class);
+        } catch (JsonProcessingException e) {
+            log.error("Failed to decode JWT token", e);
+        }
+        return jwtClaims;
     }
 }

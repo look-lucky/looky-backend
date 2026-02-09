@@ -23,6 +23,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.List;
+import com.looky.security.client.AppleAccessTokenResponseClient;
 
 @Configuration
 @EnableWebSecurity
@@ -34,6 +35,7 @@ public class SecurityConfig {
         private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
         private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
         private final CustomAccessDeniedHandler customAccessDeniedHandler;
+        private final AppleAccessTokenResponseClient appleAccessTokenResponseClient;
 
         @Bean
         public PasswordEncoder passwordEncoder() {
@@ -95,6 +97,9 @@ public class SecurityConfig {
                 http.oauth2Login(oauth2 -> oauth2
                         .userInfoEndpoint(userInfo -> userInfo
                                         .userService(customOAuth2UserService) // 유저 정보 로드 서비스
+                        )
+                        .tokenEndpoint(token -> token
+                                .accessTokenResponseClient(appleAccessTokenResponseClient)
                         )
                         .successHandler(oAuth2LoginSuccessHandler) // 로그인 성공 시 핸들러
                 );

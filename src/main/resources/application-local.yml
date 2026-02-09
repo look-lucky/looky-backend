@@ -41,7 +41,7 @@ spring:
           apple:
             client-id: ${APPLE_SERVICE_ID}
             client-secret: "TEMP_SECRET" # 자바 코드에서 동적으로 만들어 넣을 거라 임시로 채워둠
-            redirect-uri: "http://localhost:8080/login/oauth2/code/kakao"
+            redirect-uri: "http://localhost:8080/login/oauth2/code/apple"
             authorization-grant-type: authorization_code
             scope: name,email
             client-name: Apple

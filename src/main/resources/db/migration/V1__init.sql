@@ -125,8 +125,6 @@ create table store (
     introduction longtext,
     operating_hours longtext,
     store_status enum ('ACTIVE','BANNED','UNCLAIMED') not null,
-    holiday_starts_at date,
-    holiday_ends_at date,
     is_suspended bit default 0 not null,
     clover_grade enum ('SEED','SPROUT','THREE_LEAF') default 'SEED' not null,
     user_id bigint,
@@ -142,6 +140,12 @@ create table store_categories (
 create table store_moods (
     store_id bigint not null,
     mood enum ('GROUP_GATHERING','LATE_NIGHT','ROMANTIC','SOLO_DINING'),
+    foreign key (store_id) references store (store_id)
+);
+
+create table store_holidays (
+    store_id bigint not null,
+    holiday_date date,
     foreign key (store_id) references store (store_id)
 );
 

@@ -11,9 +11,9 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class VerifyEmailCodeRequest {
+
     @NotBlank
     @Email
-    @Pattern(regexp = "^[A-Za-z0-9._%+-]+@jbnu\\.ac\\.kr$")
     private String email;
 
     @NotBlank

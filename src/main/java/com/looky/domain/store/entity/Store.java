@@ -78,11 +78,10 @@ public class Store extends BaseEntity {
     @OneToMany(mappedBy = "store", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<StoreImage> images = new ArrayList<>();
 
-    @Column(name = "holiday_starts_at")
-    private LocalDate holidayStartsAt; // 휴무 시작일
-
-    @Column(name = "holiday_ends_at")
-    private LocalDate holidayEndsAt; // 휴무 종료일
+    @ElementCollection
+    @CollectionTable(name = "store_holidays", joinColumns = @JoinColumn(name = "store_id"))
+    @Column(name = "holiday_date")
+    private List<LocalDate> holidayDates = new ArrayList<>(); // 휴무일 리스트
 
     @Column(nullable = false)
     private Boolean isSuspended = false; // 영업 중지 여부
@@ -92,7 +91,7 @@ public class Store extends BaseEntity {
     private CloverGrade cloverGrade = CloverGrade.SEED; // 클로버 등급 (Default: SEED)
 
     @Builder
-    public Store(User user, String name, String branch, String roadAddress, String jibunAddress, String bizRegNo, Double latitude, Double longitude, String storePhone, String introduction, String operatingHours, Set<StoreCategory> storeCategories, Set<StoreMood> storeMoods, StoreStatus storeStatus, Boolean needToCheck, String checkReason, LocalDate holidayStartsAt, LocalDate holidayEndsAt, Boolean isSuspended) {
+    public Store(User user, String name, String branch, String roadAddress, String jibunAddress, String bizRegNo, Double latitude, Double longitude, String storePhone, String introduction, String operatingHours, Set<StoreCategory> storeCategories, Set<StoreMood> storeMoods, StoreStatus storeStatus, Boolean needToCheck, String checkReason, List<LocalDate> holidayDates, Boolean isSuspended) {
         this.user = user;
         this.name = name;
         this.branch = branch;
@@ -109,12 +108,11 @@ public class Store extends BaseEntity {
         this.storeStatus = storeStatus != null ? storeStatus : StoreStatus.UNCLAIMED;
         this.needToCheck = needToCheck;
         this.checkReason = checkReason;
-        this.holidayStartsAt = holidayStartsAt;
-        this.holidayEndsAt = holidayEndsAt;
+        this.holidayDates = holidayDates != null ? holidayDates : new ArrayList<>();
         this.isSuspended = isSuspended != null ? isSuspended : false;
     }
 
-    public void updateStore(String name, String branch, String roadAddress, String jibunAddress, Double latitude, Double longitude, String phone, String introduction, String operatingHours, Set<StoreCategory> storeCategories, Set<StoreMood> storeMoods, LocalDate holidayStartsAt, LocalDate holidayEndsAt, Boolean isSuspended) {
+    public void updateStore(String name, String branch, String roadAddress, String jibunAddress, Double latitude, Double longitude, String phone, String introduction, String operatingHours, Set<StoreCategory> storeCategories, Set<StoreMood> storeMoods, List<LocalDate> holidayDates, Boolean isSuspended) {
         this.name = name;
         this.branch = branch;
         this.roadAddress = roadAddress;
@@ -124,7 +122,8 @@ public class Store extends BaseEntity {
         this.storePhone = phone;
         this.introduction = introduction;
         this.operatingHours = operatingHours;
-        
+        this.isSuspended = isSuspended;
+
         if (storeCategories != null) {
             this.storeCategories.clear(); // JPA 영속성 컨텍스트 유지를 위해 컬렉션 전체 교체 대신 내용물 교체
             this.storeCategories.addAll(storeCategories);
@@ -134,9 +133,11 @@ public class Store extends BaseEntity {
             this.storeMoods.addAll(storeMoods);
         }
         
-        this.holidayStartsAt = holidayStartsAt;
-        this.holidayEndsAt = holidayEndsAt;
-        this.isSuspended = isSuspended;
+        if (holidayDates != null) {
+            this.holidayDates.clear();
+            this.holidayDates.addAll(holidayDates);
+        }
+        
     }
 
     @OneToMany(mappedBy = "store", cascade = CascadeType.ALL, orphanRemoval = true)

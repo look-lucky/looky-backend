@@ -267,8 +267,7 @@ public class StoreService {
                     ? (request.getStoreMoods().get() == null ? new HashSet<>() : new HashSet<>(request.getStoreMoods().get()))
                     : null,
             
-            request.getHolidayStartsAt().orElse(store.getHolidayStartsAt()),
-            request.getHolidayEndsAt().orElse(store.getHolidayEndsAt()),
+            request.getHolidayDates().orElse(store.getHolidayDates()),
             request.getIsSuspended().orElse(store.getIsSuspended())
         );
 

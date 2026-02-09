@@ -90,7 +90,8 @@ public class AdminStoreService {
                             store.getOperatingHours(),
                             store.getStoreCategories(),
                             store.getStoreMoods(),
-                            null, null, null
+                            store.getHolidayDates(),
+                            store.getIsSuspended()
                     );
                 } else { // 가게가 존재하지 않는 경우 -> 생성
                     store = Store.builder()

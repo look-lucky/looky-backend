@@ -48,11 +48,8 @@ public class StoreUpdateRequest {
     @Schema(description = "가게 분위기 목록")
     private JsonNullable<List<StoreMood>> storeMoods = JsonNullable.undefined();
 
-    @Schema(description = "휴무 시작일")
-    private JsonNullable<LocalDate> holidayStartsAt = JsonNullable.undefined();
-
-    @Schema(description = "휴무 종료일")
-    private JsonNullable<LocalDate> holidayEndsAt = JsonNullable.undefined();
+    @Schema(description = "휴무일 목록")
+    private JsonNullable<List<LocalDate>> holidayDates = JsonNullable.undefined();
 
     @Schema(description = "영업 중지 여부", example = "false")
     private JsonNullable<Boolean> isSuspended = JsonNullable.undefined();

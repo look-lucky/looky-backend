@@ -33,8 +33,7 @@ public class StoreResponse {
     private List<String> imageUrls; // 0번 째 값이 썸네일
     private Double averageRating;
     private Integer reviewCount;
-    private LocalDate holidayStartsAt;
-    private LocalDate holidayEndsAt;
+    private List<LocalDate> holidayDates;
     private Boolean isSuspended;
     private Boolean isPartnership; // 제휴 여부
     private Boolean hasCoupon; // 쿠폰 보유 여부
@@ -59,8 +58,7 @@ public class StoreResponse {
                 .imageUrls(store.getImages().stream().map(StoreImage::getImageUrl).collect(Collectors.toList()))
                 .averageRating(averageRating != null ? averageRating : 0.0)
                 .reviewCount(reviewCount != null ? reviewCount : 0)
-                .holidayStartsAt(store.getHolidayStartsAt())
-                .holidayEndsAt(store.getHolidayEndsAt())
+                .holidayDates(store.getHolidayDates())
                 .isSuspended(store.getIsSuspended())
                 .isPartnership(isPartnership)
                 .hasCoupon(hasCoupon)

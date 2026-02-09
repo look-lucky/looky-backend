@@ -85,14 +85,14 @@ public class EventService {
                 .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "이벤트를 찾을 수 없습니다."));
 
         event.update(
-                request.getTitle(),
-                request.getDescription(),
-                request.getEventTypes() != null ? new HashSet<>(request.getEventTypes()) : null,
-                request.getLatitude(),
-                request.getLongitude(),
-                request.getStartDateTime(),
-                request.getEndDateTime(),
-                request.getStatus()
+                request.getTitle().orElse(event.getTitle()),
+                request.getDescription().orElse(event.getDescription()),
+                request.getEventTypes().isPresent() ? (request.getEventTypes().get() != null ? new HashSet<>(request.getEventTypes().get()) : new HashSet<>()) : null,
+                request.getLatitude().orElse(event.getLatitude()),
+                request.getLongitude().orElse(event.getLongitude()),
+                request.getStartDateTime().orElse(event.getStartDateTime()),
+                request.getEndDateTime().orElse(event.getEndDateTime()),
+                request.getStatus().orElse(event.getStatus())
         );
 
         // 새 이미지가 있으면 기존 이미지 삭제 후 새로 업로드

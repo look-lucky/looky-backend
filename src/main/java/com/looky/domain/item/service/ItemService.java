@@ -112,29 +112,41 @@ public class ItemService {
             imageUrl = s3Service.uploadFile(image);
         }
 
-        ItemCategory itemCategory = null;
+        // NotNull 필드 제거하는지 체크
+        if (request.getName().isPresent() && request.getName().get() == null) {
+             throw new CustomException(ErrorCode.BAD_REQUEST, "상품명은 필수입니다.");
+        }
+        if (request.getPrice().isPresent() && request.getPrice().get() == null) {
+             throw new CustomException(ErrorCode.BAD_REQUEST, "가격은 필수입니다.");
+        }
 
-        if (request.getRemoveItemCategory() != null && request.getRemoveItemCategory()) { // 카테고리 삭제
-            item.removeItemCategory();
-        } else if (request.getItemCategoryId() != null) { // 카테고리 변경
-            itemCategory = itemCategoryRepository.findById(request.getItemCategoryId())
-                    .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "카테고리를 찾을 수 없습니다."));
+        ItemCategory itemCategory = item.getItemCategory();
 
-            if (!Objects.equals(itemCategory.getStore().getId(), item.getStore().getId())) {
-                throw new CustomException(ErrorCode.BAD_REQUEST, "해당 매장의 카테고리가 아닙니다.");
+        if (request.getItemCategoryId().isPresent()) {
+            Long newCategoryId = request.getItemCategoryId().get();
+            if (newCategoryId == null) { // 명시적 null인 경우 카테고리 제거
+                itemCategory = null;
+            } else {
+                ItemCategory newCategory = itemCategoryRepository.findById(newCategoryId)
+                        .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "카테고리를 찾을 수 없습니다."));
+
+                if (!Objects.equals(newCategory.getStore().getId(), item.getStore().getId())) {
+                    throw new CustomException(ErrorCode.BAD_REQUEST, "해당 매장의 카테고리가 아닙니다.");
+                }
+                itemCategory = newCategory;
             }
         }
 
         item.updateItem(
-                request.getName(),
-                request.getPrice(),
-                request.getDescription(),
+                request.getName().orElse(item.getName()),
+                request.getPrice().orElse(item.getPrice()),
+                request.getDescription().orElse(item.getDescription()),
                 imageUrl,
-                request.getIsSoldOut(),
-                request.getItemOrder(),
-                request.getIsRepresentative(),
-                request.getIsHidden(),
-                request.getBadge(),
+                request.getIsSoldOut().orElse(item.getIsSoldOut()),
+                request.getItemOrder().orElse(item.getItemOrder()),
+                request.getIsRepresentative().orElse(item.getIsRepresentative()),
+                request.getIsHidden().orElse(item.getIsHidden()),
+                request.getBadge().orElse(item.getBadge()),
                 itemCategory
         );
         

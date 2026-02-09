@@ -71,31 +71,19 @@ public class Event extends BaseEntity {
     }
 
     public void update(String title, String description, Set<EventType> eventTypes, Double latitude, Double longitude, LocalDateTime startDateTime, LocalDateTime endDateTime, EventStatus status) {
-        if (title != null) {
-            this.title = title;
-        }
-        if (description != null) {
-            this.description = description;
-        }
+        this.title = title;
+        this.description = description;
+        
         if (eventTypes != null) {
-            this.eventTypes.clear();
+            this.eventTypes.clear(); // JPA 영속성 컨텍스트 유지를 위해 컬렉션 전체 교체 대신 내용물 교체
             this.eventTypes.addAll(eventTypes);
         }
-        if (latitude != null) {
-            this.latitude = latitude;
-        }
-        if (longitude != null) {
-            this.longitude = longitude;
-        }
-        if (startDateTime != null) {
-            this.startDateTime = startDateTime;
-        }
-        if (endDateTime != null) {
-            this.endDateTime = endDateTime;
-        }
-        if (status != null) {
-            this.status = status;
-        }
+
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.startDateTime = startDateTime;
+        this.endDateTime = endDateTime;
+        this.status = status;
     }
 
     public void addImage(EventImage image) {

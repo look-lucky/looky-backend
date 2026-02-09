@@ -78,16 +78,16 @@ public class CouponService {
         validateStoreOwner(coupon.getStore(), user);
 
         coupon.updateCoupon(
-                request.getTitle(),
-                request.getDescription(),
-                request.getIssueStartsAt(),
-                request.getIssueEndsAt(),
-                request.getTotalQuantity(),
-                request.getLimitPerUser(),
-                request.getStatus(),
-                request.getBenefitType(),
-                request.getBenefitValue(),
-                request.getMinOrderAmount());
+                request.getTitle().orElse(coupon.getTitle()),
+                request.getDescription().orElse(coupon.getDescription()),
+                request.getIssueStartsAt().orElse(coupon.getIssueStartsAt()),
+                request.getIssueEndsAt().orElse(coupon.getIssueEndsAt()),
+                request.getTotalQuantity().orElse(coupon.getTotalQuantity()),
+                request.getLimitPerUser().orElse(coupon.getLimitPerUser()),
+                request.getStatus().orElse(coupon.getStatus()),
+                request.getBenefitType().orElse(coupon.getBenefitType()),
+                request.getBenefitValue().orElse(coupon.getBenefitValue()),
+                request.getMinOrderAmount().orElse(coupon.getMinOrderAmount()));
 
         if (coupon.getIssueStartsAt() != null && coupon.getIssueEndsAt() != null) {
             if (coupon.getIssueEndsAt().isBefore(coupon.getIssueStartsAt())) {

@@ -18,7 +18,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class CreateStoreRequest {
+public class StoreCreateRequest {
 
     @NotBlank(message = "가게 이름은 필수입니다.")
     private String name;

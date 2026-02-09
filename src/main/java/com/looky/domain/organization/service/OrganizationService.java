@@ -100,15 +100,30 @@ public class OrganizationService {
                         throw new CustomException(ErrorCode.FORBIDDEN, "본인이 생성한 소속만 수정할 수 있습니다.");
                 }
 
-                Organization parent = null;
-
-                // 학과일 때
-                if (request.getParentId() != null) {
-                        parent = organizationRepository.findById(request.getParentId())
-                                        .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "단과대학을 찾을 수 없습니다."));
+                if (request.getCategory().isPresent() && request.getCategory().get() == null) {
+                    throw new CustomException(ErrorCode.BAD_REQUEST, "카테고리는 필수입니다.");
+                }
+                if (request.getName().isPresent() && (request.getName().get() == null || request.getName().get().isBlank())) {
+                    throw new CustomException(ErrorCode.BAD_REQUEST, "소속 이름은 필수입니다.");
                 }
 
-                organization.update(request.getCategory(), request.getName(), request.getExpiresAt(), parent);
+                Organization parent = organization.getParent();
+                if (request.getParentId().isPresent()) {
+                    Long newParentId = request.getParentId().get();
+                    if (newParentId == null) {
+                        parent = null;
+                    } else {
+                        parent = organizationRepository.findById(newParentId)
+                                .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "단과대학을 찾을 수 없습니다."));
+                    }
+                }
+
+                organization.update(
+                    request.getCategory().orElse(organization.getCategory()),
+                    request.getName().orElse(organization.getName()),
+                    request.getExpiresAt().orElse(organization.getExpiresAt()),
+                    parent
+                );
         }
 
         @Transactional

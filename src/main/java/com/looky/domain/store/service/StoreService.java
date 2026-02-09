@@ -72,7 +72,7 @@ public class StoreService {
     private final UniversityRepository universityRepository;
 
     @Transactional
-    public Long createStore(User user, CreateStoreRequest request, List<MultipartFile> images) throws IOException {
+    public Long createStore(User user, StoreCreateRequest request, List<MultipartFile> images) throws IOException {
 
         User owner = userRepository.findByUsername(user.getUsername())
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
@@ -225,7 +225,7 @@ public class StoreService {
     }
     
     @Transactional
-    public void updateStore(Long storeId, User user, UpdateStoreRequest request, List<MultipartFile> images)
+    public void updateStore(Long storeId, User user, StoreUpdateRequest request, List<MultipartFile> images)
             throws IOException {
         User owner = userRepository.findByUsername(user.getUsername())
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
@@ -239,7 +239,7 @@ public class StoreService {
             throw new CustomException(ErrorCode.FORBIDDEN, "본인 소유의 가게가 아닙니다.");
         }
 
-        if (!store.getName().equals(request.getName()) && storeRepository.existsByName(request.getName())) {
+        if (request.getName().isPresent() && request.getName().get() != null && !store.getName().equals(request.getName().get()) && storeRepository.existsByName(request.getName().get())) {
             throw new CustomException(ErrorCode.DUPLICATE_RESOURCE, "이미 존재하는 상점 이름입니다.");
         }
 
@@ -249,20 +249,27 @@ public class StoreService {
         }
 
         store.updateStore(
-            request.getName(),
-            request.getBranch(),
-            request.getRoadAddress(),
-            request.getJibunAddress(),
-            request.getLatitude(),
-            request.getLongitude(),
-            request.getPhone(),
-            request.getIntroduction(),
-            request.getOperatingHours(),
-            request.getStoreCategories() != null ? new HashSet<>(request.getStoreCategories()) : null,
-            request.getStoreMoods() != null ? new HashSet<>(request.getStoreMoods()) : null,
-            request.getHolidayStartsAt(),
-            request.getHolidayEndsAt(),
-            request.getIsSuspended()
+            request.getName().orElse(store.getName()),
+            request.getBranch().orElse(store.getBranch()),
+            request.getRoadAddress().orElse(store.getRoadAddress()),
+            request.getJibunAddress().orElse(store.getJibunAddress()),
+            request.getLatitude().orElse(store.getLatitude()),
+            request.getLongitude().orElse(store.getLongitude()),
+            request.getPhone().orElse(store.getStorePhone()),
+            request.getIntroduction().orElse(store.getIntroduction()),
+            request.getOperatingHours().orElse(store.getOperatingHours()),
+            
+            request.getStoreCategories().isPresent()
+                    ? (request.getStoreCategories().get() == null ? new HashSet<>() : new HashSet<>(request.getStoreCategories().get()))
+                    : null,
+            
+            request.getStoreMoods().isPresent()
+                    ? (request.getStoreMoods().get() == null ? new HashSet<>() : new HashSet<>(request.getStoreMoods().get()))
+                    : null,
+            
+            request.getHolidayStartsAt().orElse(store.getHolidayStartsAt()),
+            request.getHolidayEndsAt().orElse(store.getHolidayEndsAt()),
+            request.getIsSuspended().orElse(store.getIsSuspended())
         );
 
         // 새 이미지가 존재하면 기존 것 모두 삭제 후 새로 등록

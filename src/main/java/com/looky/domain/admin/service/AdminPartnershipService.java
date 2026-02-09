@@ -96,7 +96,11 @@ public class AdminPartnershipService {
                 .findById(partnershipId)
                 .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "제휴 정보를 찾을 수 없습니다."));
 
-        partnership.updateBenefit(request.getBenefit(), request.getStartsAt(), request.getEndsAt());
+        partnership.updateBenefit(
+            request.getBenefit().orElse(partnership.getBenefit()), 
+            request.getStartsAt().orElse(partnership.getStartsAt()), 
+            request.getEndsAt().orElse(partnership.getEndsAt())
+        );
     }
 
     // 제휴 삭제 (Admin)

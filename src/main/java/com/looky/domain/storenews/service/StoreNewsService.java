@@ -112,12 +112,27 @@ public class StoreNewsService {
             throw new CustomException(ErrorCode.FORBIDDEN);
         }
 
-        // 이미지 유효성 검사 (최대 5장, 10MB)
         if (images != null && !images.isEmpty()) {
             FileValidator.validateImageFiles(images, 5, 10 * 1024 * 1024);
         }
 
-        news.update(request.getTitle(), request.getContent());
+        String title = news.getTitle();
+        if (request.getTitle().isPresent()) {
+            title = request.getTitle().get();
+            if (title == null || title.isBlank()) { // Explicit null or empty string check
+                 throw new CustomException(ErrorCode.BAD_REQUEST, "제목은 필수입니다.");
+            }
+        }
+
+        String content = news.getContent();
+        if (request.getContent().isPresent()) {
+            content = request.getContent().get();
+            if (content == null || content.isBlank()) {
+                 throw new CustomException(ErrorCode.BAD_REQUEST, "내용은 필수입니다.");
+            }
+        }
+
+        news.update(title, content);
 
         if (images != null) {
             for (StoreNewsImage oldImage : news.getImages()) {

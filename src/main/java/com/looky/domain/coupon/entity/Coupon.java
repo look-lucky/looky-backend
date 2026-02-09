@@ -64,25 +64,15 @@ public class Coupon extends BaseEntity {
     }
 
     public void updateCoupon(String title, String description, LocalDateTime issueStartsAt, LocalDateTime issueEndsAt, Integer totalQuantity, Integer limitPerUser, CouponStatus status, CouponBenefitType benefitType, String benefitValue, Integer minOrderAmount) {
-        if (title != null)
-            this.title = title;
-        if (description != null)
-            this.description = description;
-        if (issueStartsAt != null)
-            this.issueStartsAt = issueStartsAt;
-        if (issueEndsAt != null)
-            this.issueEndsAt = issueEndsAt;
-        if (totalQuantity != null)
-            this.totalQuantity = totalQuantity;
-        if (limitPerUser != null)
-            this.limitPerUser = limitPerUser;
-        if (status != null)
-            this.status = status;
-        if (benefitType != null)
-            this.benefitType = benefitType;
-        if (benefitValue != null)
-            this.benefitValue = benefitValue;
-        if (minOrderAmount != null)
-            this.minOrderAmount = minOrderAmount;
+        this.title = title;
+        this.description = description;
+        this.issueStartsAt = issueStartsAt;
+        this.issueEndsAt = issueEndsAt;
+        this.totalQuantity = totalQuantity;
+        this.limitPerUser = limitPerUser;
+        this.status = status;
+        this.benefitType = benefitType;
+        this.benefitValue = benefitValue;
+        this.minOrderAmount = minOrderAmount;
     }
 }

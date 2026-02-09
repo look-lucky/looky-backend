@@ -123,6 +123,7 @@ public class ReviewService {
     @Transactional
     public void updateReview(Long reviewId, User user, UpdateReviewRequest request, List<MultipartFile> images)
             throws IOException {
+
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "해당 리뷰를 찾을 수 없습니다."));
 
@@ -130,19 +131,26 @@ public class ReviewService {
             throw new CustomException(ErrorCode.FORBIDDEN);
         }
 
-        // 업데이트 시 검증 로직 단순화 (기존 값을 유지하거나, 필요 시 재검증 로직 추가)
-        // 여기서는 기존 isVerified 상태 유지 혹은 coupon check 다시 수행
+        // 학생 리뷰인 경우 인증 상태 업데이트 체크
+        Boolean isVerified = review.getIsVerified();
         Store store = review.getStore();
-        boolean isVerified = review.isVerified();
-        
-        // 학생이고 일반 리뷰(답글 아님)인 경우에만 인증 상태 업데이트 체크? 
-        // 단순히 기존 로직 유지
-        if (review.getParentReview() == null && user.getRole() == Role.ROLE_STUDENT) {
-             isVerified = studentCouponRepository.existsByUserAndCoupon_StoreAndStatus(user, store,
-                    CouponUsageStatus.USED);
+
+        if (user.getRole() == Role.ROLE_STUDENT) {
+             isVerified = studentCouponRepository.existsByUserAndCoupon_StoreAndStatus(user, store, CouponUsageStatus.USED);
         }
 
-        review.updateReview(request.getContent(), request.getRating(), isVerified);
+        if (request.getRating().isPresent()) {
+            Integer rating = request.getRating().get();
+            if (rating != null && (rating < 1 || rating > 5)) {
+                throw new CustomException(ErrorCode.BAD_REQUEST, "평점은 1점 이상 5점 이하여야 합니다.");
+            }
+        }
+
+        review.updateReview(
+                request.getContent().orElse(review.getContent()),
+                request.getRating().orElse(review.getRating()),
+                isVerified
+        );
 
         // 새 이미지가 존재하면 기존 것 모두 삭제 후 새로 등록
         if (images != null && !images.isEmpty()) {

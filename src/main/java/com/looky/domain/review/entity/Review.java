@@ -32,7 +32,7 @@ public class Review extends BaseEntity {
     private Review parentReview; // 답글인 경우 원본 리뷰 ID
 
     @Column(nullable = false)
-    private boolean isVerified; // 구매인증여부 (쿠폰사용여부로 판단)
+    private Boolean isVerified; // 구매인증여부 (쿠폰사용여부로 판단)
 
     @Column(nullable = true)
     private Integer rating;
@@ -72,12 +72,9 @@ public class Review extends BaseEntity {
     }
 
     public void updateReview(String content, Integer rating, Boolean isVerified) {
-        if (content != null) {
-            this.content = content;
-        }
-        if (rating != null) {
-            this.rating = rating;
-        }
+        this.content = content;
+        this.rating = rating;
+        
         if (isVerified != null) {
             this.isVerified = isVerified;
         }

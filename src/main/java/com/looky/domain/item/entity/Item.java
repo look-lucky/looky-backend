@@ -31,13 +31,13 @@ public class Item extends BaseEntity {
 
     private String imageUrl;
 
-    private boolean isSoldOut = false;
+    private Boolean isSoldOut = false;
 
     private Integer itemOrder;
 
-    private boolean isRepresentative = false;
+    private Boolean isRepresentative = false;
 
-    private boolean isHidden = false;
+    private Boolean isHidden = false;
 
     @Enumerated(EnumType.STRING)
     private ItemBadge badge;
@@ -47,8 +47,21 @@ public class Item extends BaseEntity {
     private ItemCategory itemCategory;
 
     @Builder
-    public Item(Store store, String name, int price, String description, String imageUrl, boolean isSoldOut, Integer itemOrder, boolean isRepresentative, boolean isHidden, ItemBadge badge, ItemCategory itemCategory) {
+    public Item(Store store, String name, int price, String description, String imageUrl, Boolean isSoldOut, Integer itemOrder, Boolean isRepresentative, Boolean isHidden, ItemBadge badge, ItemCategory itemCategory) {
         this.store = store;
+        this.name = name;
+        this.price = price;
+        this.description = description;
+        this.imageUrl = imageUrl;
+        this.isSoldOut = isSoldOut != null ? isSoldOut : false;
+        this.itemOrder = itemOrder;
+        this.isRepresentative = isRepresentative != null ? isRepresentative : false;
+        this.isHidden = isHidden != null ? isHidden : false;
+        this.badge = badge;
+        this.itemCategory = itemCategory;
+    }
+
+    public void updateItem(String name, Integer price, String description, String imageUrl, Boolean isSoldOut, Integer itemOrder, Boolean isRepresentative, Boolean isHidden, ItemBadge badge, ItemCategory itemCategory) {
         this.name = name;
         this.price = price;
         this.description = description;
@@ -59,42 +72,5 @@ public class Item extends BaseEntity {
         this.isHidden = isHidden;
         this.badge = badge;
         this.itemCategory = itemCategory;
-    }
-
-    public void updateItem(String name, Integer price, String description, String imageUrl, Boolean isSoldOut, Integer itemOrder, Boolean isRepresentative, Boolean isHidden, ItemBadge badge, ItemCategory itemCategory) {
-        if (name != null) {
-            this.name = name;
-        }
-        if (price != null) {
-            this.price = price;
-        }
-        if (description != null) {
-            this.description = description;
-        }
-        if (imageUrl != null) {
-            this.imageUrl = imageUrl;
-        }
-        if (isSoldOut != null) {
-            this.isSoldOut = isSoldOut;
-        }
-        if (itemOrder != null) {
-            this.itemOrder = itemOrder;
-        }
-        if (isRepresentative != null) {
-            this.isRepresentative = isRepresentative;
-        }
-        if (isHidden != null) {
-            this.isHidden = isHidden;
-        }
-        if (badge != null) {
-            this.badge = badge;
-        }
-        if (itemCategory != null) {
-            this.itemCategory = itemCategory;
-        }
-    }
-
-    public void removeItemCategory() {
-        this.itemCategory = null;
     }
 }

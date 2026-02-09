@@ -115,50 +115,28 @@ public class Store extends BaseEntity {
     }
 
     public void updateStore(String name, String branch, String roadAddress, String jibunAddress, Double latitude, Double longitude, String phone, String introduction, String operatingHours, Set<StoreCategory> storeCategories, Set<StoreMood> storeMoods, LocalDate holidayStartsAt, LocalDate holidayEndsAt, Boolean isSuspended) {
-        if (name != null) {
-            this.name = name;
-        }
-        if (branch != null) {
-            this.branch = branch;
-        }
-        if (roadAddress != null) {
-            this.roadAddress = roadAddress;
-        }
-        if (jibunAddress != null) {
-            this.jibunAddress = jibunAddress;
-        }
-        if (latitude != null) {
-            this.latitude = latitude;
-        }
-        if (longitude != null) {
-            this.longitude = longitude;
-        }
-        if (phone != null) {
-            this.storePhone = phone;
-        }
-        if (introduction != null) {
-            this.introduction = introduction;
-        }
-        if (operatingHours != null) {
-            this.operatingHours = operatingHours;
-        }
+        this.name = name;
+        this.branch = branch;
+        this.roadAddress = roadAddress;
+        this.jibunAddress = jibunAddress;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.storePhone = phone;
+        this.introduction = introduction;
+        this.operatingHours = operatingHours;
+        
         if (storeCategories != null) {
-            this.storeCategories.clear();
+            this.storeCategories.clear(); // JPA 영속성 컨텍스트 유지를 위해 컬렉션 전체 교체 대신 내용물 교체
             this.storeCategories.addAll(storeCategories);
         }
         if (storeMoods != null) {
-            this.storeMoods.clear();
+            this.storeMoods.clear(); // JPA 영속성 컨텍스트 유지를 위해 컬렉션 전체 교체 대신 내용물 교체
             this.storeMoods.addAll(storeMoods);
         }
-        if (holidayStartsAt != null) {
-            this.holidayStartsAt = holidayStartsAt;
-        }
-        if (holidayEndsAt != null) {
-            this.holidayEndsAt = holidayEndsAt;
-        }
-        if (isSuspended != null) {
-            this.isSuspended = isSuspended;
-        }
+        
+        this.holidayStartsAt = holidayStartsAt;
+        this.holidayEndsAt = holidayEndsAt;
+        this.isSuspended = isSuspended;
     }
 
     @OneToMany(mappedBy = "store", cascade = CascadeType.ALL, orphanRemoval = true)

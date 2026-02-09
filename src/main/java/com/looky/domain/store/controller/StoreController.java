@@ -51,7 +51,7 @@ public class StoreController {
         public ResponseEntity<CommonResponse<Long>> createStore(
                 @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,
                 @Parameter(description = "상품 이미지 목록") @RequestPart List<MultipartFile> images,
-                @RequestPart @Valid CreateStoreRequest request
+                @RequestPart @Valid StoreCreateRequest request
         ) throws IOException {
                 Long storeId = storeService.createStore(principalDetails.getUser(), request, images);
                 return ResponseEntity.status(HttpStatus.CREATED).body(CommonResponse.success(storeId));
@@ -68,7 +68,7 @@ public class StoreController {
         public ResponseEntity<CommonResponse<Void>> updateStore(
                 @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,
                 @Parameter(description = "상점 ID") @PathVariable Long storeId,
-                @RequestPart @Valid UpdateStoreRequest request,
+                @RequestPart @Valid StoreUpdateRequest request,
                 @RequestPart(required = false) List<MultipartFile> images
         ) throws IOException {
                 log.info("Update Store Request: storeId={}, images={}", storeId, images != null ? images.size() : "null");

@@ -28,10 +28,10 @@ public class ItemResponse {
                 .price(item.getPrice())
                 .description(item.getDescription())
                 .imageUrl(item.getImageUrl())
-                .isSoldOut(item.isSoldOut())
+                .isSoldOut(item.getIsSoldOut() != null ? item.getIsSoldOut() : false)
                 .itemOrder(item.getItemOrder())
-                .isRepresentative(item.isRepresentative())
-                .isHidden(item.isHidden())
+                .isRepresentative(item.getIsRepresentative() != null ? item.getIsRepresentative() : false)
+                .isHidden(item.getIsHidden() != null ? item.getIsHidden() : false)
                 .badge(item.getBadge())
                 .build();
     }

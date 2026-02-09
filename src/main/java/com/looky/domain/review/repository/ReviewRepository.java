@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import com.looky.domain.user.entity.User;
+import java.util.List;
 
 public interface ReviewRepository extends JpaRepository<Review, Long> {
     @EntityGraph(attributePaths = { "user" })
@@ -28,4 +29,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     Double findAverageRatingByStoreId(@Param("storeId") Long storeId);
 
     Long countByStoreIdAndRatingAndParentReviewIsNull(Long storeId, Integer rating);
+
+    @EntityGraph(attributePaths = { "user", "store" })
+    List<Review> findByParentReviewIn(List<Review> parentReviews);
 }

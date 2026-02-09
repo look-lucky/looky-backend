@@ -3,14 +3,13 @@ package com.looky.domain.review.dto;
 import com.looky.domain.review.entity.Review;
 import com.looky.domain.review.entity.ReviewImage;
 import com.looky.domain.user.entity.Role;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -27,6 +26,7 @@ public class ReviewResponse {
     private int likeCount;
     private boolean isOwnerReply;
     private List<String> imageUrls;
+    private List<ReviewResponse> children;
 
     public static ReviewResponse from(Review review) {
         return ReviewResponse.builder()

@@ -180,19 +180,45 @@ public class ReviewService {
         reviewRepository.delete(review);
     }
 
+    // 특정 상점 리뷰 목록 조회
     public Page<ReviewResponse> getReviews(Long storeId, Pageable pageable) {
         Store store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "해당 상점을 찾을 수 없습니다."));
 
-        return reviewRepository.findByStore(store, pageable)
-                .map(ReviewResponse::from);
+        // 1. 부모 리뷰만 페이징 조회
+        Page<Review> parentReviews = reviewRepository.findByStoreAndParentReviewIsNull(store, pageable);
+
+        // 2. 조회된 부모 리뷰들의 ID 수집
+        List<Review> parents = parentReviews.getContent();
+        if (parents.isEmpty()) {
+            return parentReviews.map(ReviewResponse::from);
+        }
+
+        // 3. 부모 리뷰들에 대한 답글 일괄 조회
+        List<Review> replies = reviewRepository.findByParentReviewIn(parents);
+
+        // 4. 답글을 부모 리뷰 ID로 그룹화
+        java.util.Map<Long, List<Review>> repliesByParentId = replies.stream()
+                .collect(java.util.stream.Collectors.groupingBy(reply -> reply.getParentReview().getId()));
+
+        // 5. ReviewResponse로 변환 및 답글 매핑
+        return parentReviews.map(review -> {
+            ReviewResponse response = ReviewResponse.from(review);
+            List<Review> childReviews = repliesByParentId.getOrDefault(review.getId(), java.util.Collections.emptyList());
+            response.setChildren(childReviews.stream()
+                    .map(ReviewResponse::from)
+                    .toList());
+            return response;
+        });
     }
 
+    // 내가 작성한 리뷰 목록 조회
     public Page<ReviewResponse> getMyReviews(User user, Pageable pageable) {
         return reviewRepository.findByUserAndParentReviewIsNull(user, pageable)
                 .map(ReviewResponse::from);
     }
 
+    // 특정 상점 리뷰 통계 조회
     public ReviewStatsResponse getReviewStats(Long storeId) {
         // 평점 및 개수 산정 시 답글 제외
         Double avgRating = reviewRepository.findAverageRatingByStoreId(storeId);

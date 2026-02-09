@@ -19,6 +19,7 @@ public class StoreResponse {
     private Long id;
     private Long userId; // Owner ID
     private String name;
+    private String branch; // 지점명
     private String roadAddress; // 도로명 주소
     private String jibunAddress; // 지번 주소
     private Double latitude;
@@ -44,6 +45,7 @@ public class StoreResponse {
                 .id(store.getId())
                 .userId(store.getUser() != null ? store.getUser().getId() : null)
                 .name(store.getName())
+                .branch(store.getBranch())
                 .roadAddress(store.getRoadAddress())
                 .jibunAddress(store.getJibunAddress())
                 .latitude(store.getLatitude())

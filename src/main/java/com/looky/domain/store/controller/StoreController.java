@@ -50,7 +50,7 @@ public class StoreController {
         @PostMapping
         public ResponseEntity<CommonResponse<Long>> createStore(
                 @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,
-                @Parameter(description = "상품 이미지 목록") @RequestPart List<MultipartFile> images,
+                @Parameter(description = "상품 이미지 목록") @RequestPart(required = false) List<MultipartFile> images,
                 @RequestPart @Valid StoreCreateRequest request
         ) throws IOException {
                 Long storeId = storeService.createStore(principalDetails.getUser(), request, images);

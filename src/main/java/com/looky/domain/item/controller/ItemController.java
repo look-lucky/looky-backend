@@ -45,7 +45,7 @@ public class ItemController {
                 @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,
                 @Parameter(description = "상품 ID") @PathVariable Long storeId,
                 @Parameter(description = "상품 이미지") @RequestPart MultipartFile image,
-                @RequestPart @Valid CreateItemRequest request
+                @RequestPart(required = false) @Valid CreateItemRequest request
         ) throws IOException {
                 Long itemId = itemService.createItem(storeId, principalDetails.getUser(), request, image);
                 return ResponseEntity.status(HttpStatus.CREATED).body(CommonResponse.success(itemId));
@@ -88,8 +88,8 @@ public class ItemController {
         @PatchMapping("/items/{itemId}")
         public ResponseEntity<CommonResponse<Void>> updateItem(
                 @Parameter(description = "상품 ID") @PathVariable Long itemId,
-                @Parameter(description = "변경할 상품 이미지") @RequestPart MultipartFile image,
-                @RequestPart @Valid UpdateItemRequest request,
+                @Parameter(description = "변경할 상품 이미지") @RequestPart(required = false) MultipartFile image,
+                @RequestPart(required = false) @Valid UpdateItemRequest request,
                 @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails
         ) throws IOException {
 

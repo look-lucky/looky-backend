@@ -20,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import com.looky.domain.user.dto.StudentInfoResponse;
 
 @Tag(name = "MyPage", description = "마이페이지 관련 API")
 @RestController
@@ -63,7 +64,7 @@ public class MyPageController {
             @ApiResponse(responseCode = "404", description = "학생 프로필 없음", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class)))
     })
     @GetMapping("/student/profile")
-    public ResponseEntity<CommonResponse<com.looky.domain.user.dto.StudentInfoResponse>> getStudentInfo(
+    public ResponseEntity<CommonResponse<StudentInfoResponse>> getStudentInfo(
             @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails) {
         return ResponseEntity.ok(CommonResponse.success(myPageService.getStudentInfo(principalDetails.getUser().getId())));
     }

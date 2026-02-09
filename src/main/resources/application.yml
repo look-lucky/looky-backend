@@ -49,10 +49,9 @@ app:
     from: ${SPRING_MAIL_USERNAME}
     verification:
       ttl-minutes: 5
-  redirect-uris: # 소셜 로그인 리다이렉트 URI
-    web: "http://localhost:5173/oauth/callback" # 웹에서 요청 시
+  redirect-uris: # 소셜 로그인 리다이렉트 URI (백엔드 -> 앱)
     app: "rnapp://auth/callback"                # 앱에서 요청 시
-    
+
 # JWT 정책
 jwt:
   secret: ${JWT_SECRET}

@@ -3,6 +3,9 @@
 .env.dev
 .env.prod
 
+*.p8
+src/main/resources/key/
+
 .claude
 db_data/
 redis_data/

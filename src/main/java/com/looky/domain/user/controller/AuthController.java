@@ -6,24 +6,25 @@ import com.looky.common.util.CookieUtil;
 import com.looky.domain.user.dto.*;
 import com.looky.domain.user.service.AuthService;
 import com.looky.domain.user.service.EmailVerificationService;
-
+import com.looky.security.details.PrincipalDetails;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import com.looky.security.details.PrincipalDetails;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+@Slf4j
 @Tag(name = "Auth", description = "인증 관련 API")
 @RestController
 @RequestMapping("/api/auth")
@@ -168,6 +169,7 @@ public class AuthController {
         @Operation(summary = "[공통] 회원 가입용 이메일 인증 발송", description = "회원 가입용 이메일 인증 코드를 전송합니다. (universityId 존재 시 도메인 검사 진행)")
         @PostMapping("email/send-code")
         public ResponseEntity<CommonResponse<Void>> send(@Valid @RequestBody SendEmailCodeRequest request) {
+                log.info("email verification request received: email={}, universityId={}", request.getEmail(), request.getUniversityId());
                 emailVerificationService.sendCode(request.getEmail(), request.getUniversityId());
                 return ResponseEntity.ok(CommonResponse.success(null));
         }
@@ -175,6 +177,7 @@ public class AuthController {
         @Operation(summary = "[공통] 회원 가입용 이메일 인증 확인", description = "회원 가입용 이메일 인증 코드를 검증합니다. (true: 검증 (일치) 완료, false: 검증 실패 (코드 불일치 및 이미 등록된 이메일)")
         @PostMapping("email/verify")
         public ResponseEntity<CommonResponse<Void>> verify(@Valid @RequestBody VerifyEmailCodeRequest request) {
+                log.info("email verification check request received: email={}, code={}", request.getEmail(), request.getCode());
                 emailVerificationService.verifyCode(request.getEmail(), request.getCode());
                 return ResponseEntity.ok(CommonResponse.success(null));
         }

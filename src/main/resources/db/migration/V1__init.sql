@@ -22,7 +22,7 @@ create table user (
     gender tinyint check (gender between 0 and 2),
     birth_date date,
     role enum ('ROLE_ADMIN','ROLE_COUNCIL','ROLE_GUEST','ROLE_OWNER','ROLE_STUDENT') not null,
-    social_type enum ('FIREBASE','GOOGLE','KAKAO','LOCAL','NAVER'),
+    social_type enum ('GOOGLE','KAKAO','LOCAL'),
     social_id varchar(255),
     email varchar(255),
     deleted bit not null,

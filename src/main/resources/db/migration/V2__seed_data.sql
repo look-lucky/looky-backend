@@ -42,24 +42,24 @@ INSERT INTO owner_profile (user_id, name) VALUES
 INSERT INTO user (user_id, created_at, modified_at, username, password, role, deleted, gender, birth_date, social_type, social_id, email) VALUES 
 (101, NOW(), NOW(), 'student1', '$2a$10$GRLdNijSQMUvl/au9ofL.eDwmoohzzS7.rmjMaJJJwal3vSRl0ep2', 'ROLE_STUDENT', 0, 0, '2000-01-01', 'KAKAO', 'kakao_101', 'student1@jbnu.ac.kr'),
 (102, NOW(), NOW(), 'student2', '$2a$10$GRLdNijSQMUvl/au9ofL.eDwmoohzzS7.rmjMaJJJwal3vSRl0ep2', 'ROLE_STUDENT', 0, 1, '2001-02-02', 'KAKAO', 'kakao_102', 'student2@jbnu.ac.kr'),
-(103, NOW(), NOW(), 'student3', '$2a$10$GRLdNijSQMUvl/au9ofL.eDwmoohzzS7.rmjMaJJJwal3vSRl0ep2', 'ROLE_STUDENT', 0, 0, '2002-03-03', 'NAVER', 'naver_103', 'student3@jbnu.ac.kr'),
+(103, NOW(), NOW(), 'student3', '$2a$10$GRLdNijSQMUvl/au9ofL.eDwmoohzzS7.rmjMaJJJwal3vSRl0ep2', 'ROLE_STUDENT', 0, 0, '2002-03-03', 'APPLE', 'apple_103', 'student3@jbnu.ac.kr'),
 (104, NOW(), NOW(), 'student4', '$2a$10$GRLdNijSQMUvl/au9ofL.eDwmoohzzS7.rmjMaJJJwal3vSRl0ep2', 'ROLE_STUDENT', 0, 1, '2000-04-04', 'GOOGLE', 'google_104', 'student4@jbnu.ac.kr'),
 (105, NOW(), NOW(), 'student5', '$2a$10$GRLdNijSQMUvl/au9ofL.eDwmoohzzS7.rmjMaJJJwal3vSRl0ep2', 'ROLE_STUDENT', 0, 0, '2003-05-05', 'LOCAL', NULL, 'student5@jbnu.ac.kr'),
 (106, NOW(), NOW(), 'student6', '$2a$10$GRLdNijSQMUvl/au9ofL.eDwmoohzzS7.rmjMaJJJwal3vSRl0ep2', 'ROLE_STUDENT', 0, 1, '2001-06-06', 'LOCAL', NULL, 'student6@jbnu.ac.kr'),
 (107, NOW(), NOW(), 'student7', '$2a$10$GRLdNijSQMUvl/au9ofL.eDwmoohzzS7.rmjMaJJJwal3vSRl0ep2', 'ROLE_STUDENT', 0, 0, '2002-07-07', 'KAKAO', 'kakao_107', 'student7@jbnu.ac.kr'),
-(108, NOW(), NOW(), 'student8', '$2a$10$GRLdNijSQMUvl/au9ofL.eDwmoohzzS7.rmjMaJJJwal3vSRl0ep2', 'ROLE_STUDENT', 0, 1, '2000-08-08', 'NAVER', 'naver_108', 'student8@jbnu.ac.kr'),
+(108, NOW(), NOW(), 'student8', '$2a$10$GRLdNijSQMUvl/au9ofL.eDwmoohzzS7.rmjMaJJJwal3vSRl0ep2', 'ROLE_STUDENT', 0, 1, '2000-08-08', 'APPLE', 'apple_108', 'student8@jbnu.ac.kr'),
 (109, NOW(), NOW(), 'student9', '$2a$10$GRLdNijSQMUvl/au9ofL.eDwmoohzzS7.rmjMaJJJwal3vSRl0ep2', 'ROLE_STUDENT', 0, 0, '2003-09-09', 'GOOGLE', 'google_109', 'student9@jbnu.ac.kr'),
 (110, NOW(), NOW(), 'student10', '$2a$10$GRLdNijSQMUvl/au9ofL.eDwmoohzzS7.rmjMaJJJwal3vSRl0ep2', 'ROLE_STUDENT', 0, 1, '2001-10-10', 'LOCAL', NULL, 'student10@jbnu.ac.kr'),
 (111, NOW(), NOW(), 'student11', '$2a$10$GRLdNijSQMUvl/au9ofL.eDwmoohzzS7.rmjMaJJJwal3vSRl0ep2', 'ROLE_STUDENT', 0, 0, '2002-11-11', 'KAKAO', 'kakao_111', 'student11@jbnu.ac.kr'),
-(112, NOW(), NOW(), 'student12', '$2a$10$GRLdNijSQMUvl/au9ofL.eDwmoohzzS7.rmjMaJJJwal3vSRl0ep2', 'ROLE_STUDENT', 0, 1, '2000-12-12', 'NAVER', 'naver_112', 'student12@jbnu.ac.kr'),
+(112, NOW(), NOW(), 'student12', '$2a$10$GRLdNijSQMUvl/au9ofL.eDwmoohzzS7.rmjMaJJJwal3vSRl0ep2', 'ROLE_STUDENT', 0, 1, '2000-12-12', 'APPLE', 'apple_112', 'student12@jbnu.ac.kr'),
 (113, NOW(), NOW(), 'student13', '$2a$10$GRLdNijSQMUvl/au9ofL.eDwmoohzzS7.rmjMaJJJwal3vSRl0ep2', 'ROLE_STUDENT', 0, 0, '2003-01-13', 'GOOGLE', 'google_113', 'student13@jbnu.ac.kr'),
 (114, NOW(), NOW(), 'student14', '$2a$10$GRLdNijSQMUvl/au9ofL.eDwmoohzzS7.rmjMaJJJwal3vSRl0ep2', 'ROLE_STUDENT', 0, 1, '2001-02-14', 'LOCAL', NULL, 'student14@jbnu.ac.kr'),
 (115, NOW(), NOW(), 'student15', '$2a$10$GRLdNijSQMUvl/au9ofL.eDwmoohzzS7.rmjMaJJJwal3vSRl0ep2', 'ROLE_STUDENT', 0, 0, '2002-03-15', 'KAKAO', 'kakao_115', 'student15@jbnu.ac.kr'),
-(116, NOW(), NOW(), 'student16', '$2a$10$GRLdNijSQMUvl/au9ofL.eDwmoohzzS7.rmjMaJJJwal3vSRl0ep2', 'ROLE_STUDENT', 0, 1, '2000-04-16', 'NAVER', 'naver_116', 'student16@jbnu.ac.kr'),
+(116, NOW(), NOW(), 'student16', '$2a$10$GRLdNijSQMUvl/au9ofL.eDwmoohzzS7.rmjMaJJJwal3vSRl0ep2', 'ROLE_STUDENT', 0, 1, '2000-04-16', 'APPLE', 'apple_116', 'student16@jbnu.ac.kr'),
 (117, NOW(), NOW(), 'student17', '$2a$10$GRLdNijSQMUvl/au9ofL.eDwmoohzzS7.rmjMaJJJwal3vSRl0ep2', 'ROLE_STUDENT', 0, 0, '2003-05-17', 'GOOGLE', 'google_117', 'student17@jbnu.ac.kr'),
 (118, NOW(), NOW(), 'student18', '$2a$10$GRLdNijSQMUvl/au9ofL.eDwmoohzzS7.rmjMaJJJwal3vSRl0ep2', 'ROLE_STUDENT', 0, 1, '2001-06-18', 'LOCAL', NULL, 'student18@jbnu.ac.kr'),
 (119, NOW(), NOW(), 'student19', '$2a$10$GRLdNijSQMUvl/au9ofL.eDwmoohzzS7.rmjMaJJJwal3vSRl0ep2', 'ROLE_STUDENT', 0, 0, '2002-07-19', 'KAKAO', 'kakao_119', 'student19@jbnu.ac.kr'),
-(120, NOW(), NOW(), 'student20', '$2a$10$GRLdNijSQMUvl/au9ofL.eDwmoohzzS7.rmjMaJJJwal3vSRl0ep2', 'ROLE_STUDENT', 0, 1, '2000-08-20', 'NAVER', 'naver_120', 'student20@jbnu.ac.kr');
+(120, NOW(), NOW(), 'student20', '$2a$10$GRLdNijSQMUvl/au9ofL.eDwmoohzzS7.rmjMaJJJwal3vSRl0ep2', 'ROLE_STUDENT', 0, 1, '2000-08-20', 'APPLE', 'apple_120', 'student20@jbnu.ac.kr');
 
 INSERT INTO student_profile (user_id, nickname, university_id) VALUES 
 (101, '멋진학생1', 1), (102, '이쁜학생2', 1), (103, '공부왕3', 1), (104, '코딩천재4', 1), (105, '맛집탐방5', 1),

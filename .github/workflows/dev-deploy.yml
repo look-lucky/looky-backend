@@ -38,22 +38,30 @@ jobs:
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/looky-backend:dev
 
-      - name: EC2 Deploy (Dev - Port 8081)
+      - name: EC2 Deploy
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USERNAME }}
-          key: ${{ secrets.EC2_SSH_KEY }}
+          password: ${{ secrets.EC2_PASSWORD }}
           port: 22
           envs: ENV_FILE
           script: |
             echo "$ENV_FILE" | base64 -d > .env.dev
+            
+            sudo docker network create looky-net || true
+            
             sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/looky-backend:dev
+            
             sudo docker stop looky-dev || true
             sudo docker rm looky-dev || true
-            sudo docker run -d --name looky-dev -p 8080:8080 \
+            
+            sudo docker run -d --name looky-dev \
+              --network looky-net \
+              -p 8080:8080 \
               --env-file .env.dev \
               ${{ secrets.DOCKERHUB_USERNAME }}/looky-backend:dev
+            
             sudo docker image prune -f
         env:
           ENV_FILE: ${{ secrets.ENV_FILE }}

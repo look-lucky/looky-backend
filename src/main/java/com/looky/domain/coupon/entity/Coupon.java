@@ -48,6 +48,9 @@ public class Coupon extends BaseEntity {
     private String benefitValue; // 혜택 값 (할인 금액, 할인율, 서비스 내용 등)
     private Integer minOrderAmount; // 최소 주문 금액
 
+    @Column(nullable = false)
+    private Integer downloadCount = 0; // 현재 발급된 수량 (다운로드 수)
+
     @Builder
     public Coupon(Store store, String title, String description, LocalDateTime issueStartsAt, LocalDateTime issueEndsAt, Integer totalQuantity, Integer limitPerUser, CouponStatus status, CouponBenefitType benefitType, String benefitValue, Integer minOrderAmount) {
         this.store = store;

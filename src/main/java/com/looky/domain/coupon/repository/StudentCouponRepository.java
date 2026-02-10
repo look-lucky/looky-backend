@@ -42,4 +42,8 @@ public interface StudentCouponRepository extends JpaRepository<StudentCoupon, Lo
     boolean existsByUserAndCoupon_StoreAndStatus(User user, Store store, CouponUsageStatus status);
 
     List<StudentCoupon> findByUserAndCouponIn(User user, List<Coupon> coupons);
+
+    // 쿠폰 사용 횟수 조회 (점주용)
+    @Query("SELECT sc.coupon.id, COUNT(sc) FROM StudentCoupon sc WHERE sc.coupon IN :coupons AND sc.status = :status GROUP BY sc.coupon.id")
+    List<Object[]> countByCouponInAndStatus(@Param("coupons") List<Coupon> coupons, @Param("status") CouponUsageStatus status);
 }

@@ -252,6 +252,7 @@ create table coupon (
     benefit_type enum ('FIXED_DISCOUNT','PERCENTAGE_DISCOUNT','SERVICE_GIFT') not null,
     benefit_value varchar(255),
     min_order_amount int,
+    download_count int default 0 not null,
     store_id bigint not null,
     foreign key (store_id) references store (store_id)
 );
@@ -266,7 +267,7 @@ create table student_coupon (
     last_modified_by varchar(255),
     verification_code varchar(4),
     status enum ('ACTIVATED','EXPIRED','UNUSED','USED') not null,
-    issued_at datetime(6),
+    downloaded_at datetime(6),
     activated_at datetime(6),
     used_at datetime(6),
     expires_at datetime(6) not null,

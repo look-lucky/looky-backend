@@ -16,6 +16,7 @@ import com.looky.domain.user.entity.Role;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -106,8 +107,8 @@ public class CouponService {
         couponRepository.delete(coupon);
     }
 
-    @Transactional
-    public void verifyAndUseCoupon(Long storeId, User owner, String verificationCode) {
+    @Transactional(readOnly = true)
+    public VerifyCouponResponse verifyCouponCode(Long storeId, User owner, String verificationCode) {
         Store store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "가게를 찾을 수 없습니다."));
 
@@ -118,13 +119,44 @@ public class CouponService {
                 storeId, verificationCode, CouponUsageStatus.ACTIVATED
         ).orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "유효하지 않은 코드이거나 활성화되지 않은 쿠폰입니다."));
 
+        if (studentCoupon.getExpiresAt().isBefore(LocalDateTime.now())) {
+            throw new CustomException(ErrorCode.UNPROCESSABLE_ENTITY, "만료된 쿠폰입니다.");
+        }
+
+        // 학생 닉네임 조회
+        String nickname = studentProfileRepository.findById(studentCoupon.getUser().getId())
+                .map(StudentProfile::getNickname)
+                .orElse("알 수 없는 사용자");
+        
+        return VerifyCouponResponse.from(studentCoupon, nickname);
+    }
+
+    @Transactional
+    public void useCoupon(Long storeId, User owner, Long studentCouponId) {
+        Store store = storeRepository.findById(storeId)
+                .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "가게를 찾을 수 없습니다."));
+
+        validateStoreOwner(store, owner);
+
+        StudentCoupon studentCoupon = studentCouponRepository.findById(studentCouponId)
+                .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "쿠폰을 찾을 수 없습니다."));
+
+        // 내 가게 쿠폰인지 확인 (조금 더 안전하게 교차 검증)
+        if (!Objects.equals(studentCoupon.getCoupon().getStore().getId(), storeId)) {
+             throw new CustomException(ErrorCode.FORBIDDEN, "해당 상점의 쿠폰이 아닙니다.");
+        }
+
+        if (studentCoupon.getStatus() != CouponUsageStatus.ACTIVATED) {
+             throw new CustomException(ErrorCode.UNPROCESSABLE_ENTITY, "활성화된 쿠폰만 사용할 수 있습니다. (현재 상태: " + studentCoupon.getStatus() + ")");
+        }
+
         // 사용 처리
         studentCoupon.use();
     }
 
     // --- 학생용 ---
 
-    // 오늘 발급한 쿠폰 조회
+    // 오늘의 신규 쿠폰 조회
     public List<CouponResponse> getTodayCoupons(User user) {
         if (user.getRole() != Role.ROLE_STUDENT) {
             throw new CustomException(ErrorCode.FORBIDDEN, "학생만 이용 가능한 서비스입니다.");
@@ -153,7 +185,7 @@ public class CouponService {
 
             responses.forEach(response -> {
                 if (issuedCouponIds.contains(response.getId())) {
-                    response.setIsIssued(true);
+                    response.setIsDownloaded(true);
                 }
             });
         }
@@ -167,25 +199,40 @@ public class CouponService {
                 .map(CouponResponse::from)
                 .collect(Collectors.toList());
 
-        // 학생인 경우에만 발급 여부 확인
-        if (user.getRole() == Role.ROLE_STUDENT && !coupons.isEmpty()) {
-            List<StudentCoupon> issuedCoupons = studentCouponRepository.findByUserAndCouponIn(user, coupons);
-            List<Long> issuedCouponIds = issuedCoupons.stream()
-                    .map(sc -> sc.getCoupon().getId())
-                    .collect(Collectors.toList());
+        if (!coupons.isEmpty()) {
+            // 점주인 경우에만 사용 수량 조회
+            if (user.getRole() == Role.ROLE_OWNER) {
+                // 사용 수량 조회 (일괄)
+                List<Object[]> counts = studentCouponRepository.countByCouponInAndStatus(coupons, CouponUsageStatus.USED);
+                Map<Long, Long> usedCountMap = counts.stream()
+                        .collect(Collectors.toMap(row -> (Long) row[0], row -> (Long) row[1]));
 
-            responses.forEach(response -> {
-                if (issuedCouponIds.contains(response.getId())) {
-                    response.setIsIssued(true);
-                }
-            });
+                responses.forEach(response -> 
+                    response.setUsedCount(usedCountMap.getOrDefault(response.getId(), 0L))
+                );
+            }
+
+            // 학생인 경우에만 발급 여부 확인
+            if (user.getRole() == Role.ROLE_STUDENT) {
+                List<StudentCoupon> issuedCoupons = studentCouponRepository.findByUserAndCouponIn(user, coupons);
+                List<Long> issuedCouponIds = issuedCoupons.stream()
+                        .map(sc -> sc.getCoupon().getId())
+                        .collect(Collectors.toList());
+
+                responses.forEach(response -> {
+                    if (issuedCouponIds.contains(response.getId())) {
+                        response.setIsDownloaded(true);
+                    }
+                });
+            }
         }
 
         return responses;
     }
 
+    // 학생 쿠폰 발급 (다운로드)
     @Transactional
-    public IssueCouponResponse issueCoupon(Long couponId, User user) {
+    public IssueCouponResponse downloadCoupon(Long couponId, User user) {
         Coupon coupon = couponRepository.findById(couponId)
                 .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "쿠폰을 찾을 수 없습니다."));
 
@@ -193,17 +240,30 @@ public class CouponService {
         if (coupon.getStatus() != CouponStatus.ACTIVE) {
             throw new CustomException(ErrorCode.UNPROCESSABLE_ENTITY, "발급 가능한 상태가 아닙니다.");
         }
+
         LocalDateTime now = LocalDateTime.now();
         if (coupon.getIssueStartsAt() != null && now.isBefore(coupon.getIssueStartsAt())) {
             throw new CustomException(ErrorCode.UNPROCESSABLE_ENTITY, "발급 기간이 아닙니다.");
         }
+
         if (coupon.getIssueEndsAt() != null && now.isAfter(coupon.getIssueEndsAt())) {
             throw new CustomException(ErrorCode.UNPROCESSABLE_ENTITY, "발급 기간이 지났습니다.");
         }
 
+
         Integer userCount = studentCouponRepository.countByCouponAndUser(coupon, user);
         if (userCount >= coupon.getLimitPerUser()) {
             throw new CustomException(ErrorCode.UNPROCESSABLE_ENTITY, "인당 발급 한도를 초과했습니다.");
+        }
+
+        // Lazy Loading 초기화 (incrementDownloadCount 실행 시 영속성 컨텍스트가 초기화되므로 미리 로딩)
+        String storeName = coupon.getStore().getName();
+
+        // 발급 수량 증가 (Atomic Update)
+        int updatedRows = couponRepository.incrementDownloadCount(couponId);
+        
+        if (updatedRows == 0) {
+            throw new CustomException(ErrorCode.UNPROCESSABLE_ENTITY, "선착순 마감되었습니다.");
         }
 
         StudentCoupon studentCoupon = StudentCoupon.builder()
@@ -215,7 +275,7 @@ public class CouponService {
 
         studentCouponRepository.save(studentCoupon);
 
-        return IssueCouponResponse.from(studentCoupon);
+        return IssueCouponResponse.from(studentCoupon, storeName);
     }
 
     @Transactional

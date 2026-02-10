@@ -23,6 +23,10 @@ public class IssueCouponResponse {
     private String storeName;
 
     public static IssueCouponResponse from(StudentCoupon studentCoupon) {
+        return from(studentCoupon, studentCoupon.getCoupon().getStore().getName());
+    }
+
+    public static IssueCouponResponse from(StudentCoupon studentCoupon, String storeName) {
         Coupon coupon = studentCoupon.getCoupon();
         return IssueCouponResponse.builder()
                 .studentCouponId(studentCoupon.getId())
@@ -34,7 +38,7 @@ public class IssueCouponResponse {
                 .description(coupon.getDescription())
                 .benefitType(coupon.getBenefitType())
                 .benefitValue(coupon.getBenefitValue())
-                .storeName(coupon.getStore().getName())
+                .storeName(storeName)
                 .build();
     }
 }

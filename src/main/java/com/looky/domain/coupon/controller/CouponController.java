@@ -81,19 +81,38 @@ public class CouponController {
                 return ResponseEntity.status(HttpStatus.NO_CONTENT).body(CommonResponse.success(null));
         }
 
-        @Operation(summary = "[점주] 쿠폰 사용 확인 (코드 검증)", description = "손님이 제시한 4자리 코드를 입력하여 사용 처리합니다.")
+        @Operation(summary = "[점주] 쿠폰 코드 조회 (검증)", description = "손님이 제시한 4자리 코드를 입력하여 혜택 및 사용자 정보를 확인합니다. (상태 변경 없음)")
         @ApiResponses(value = {
-                @ApiResponse(responseCode = "200", description = "쿠폰 사용 완료"),
-                @ApiResponse(responseCode = "404", description = "유효하지 않은 코드 또는 활성화되지 않은 쿠폰", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class)))
+                @ApiResponse(responseCode = "200", description = "쿠폰 조회 성공"),
+                @ApiResponse(responseCode = "404", description = "유효하지 않은 코드 또는 활성화되지 않은 쿠폰", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class))),
+                @ApiResponse(responseCode = "422", description = "만료된 쿠폰", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class)))
         })
-        @PostMapping("/stores/{storeId}/coupons/verify")
-        public ResponseEntity<CommonResponse<Void>> verifyCoupon(
+        @PostMapping("/stores/{storeId}/coupons/verify ")
+        public ResponseEntity<CommonResponse<VerifyCouponResponse>> verifyCoupon(
                 @Parameter(description = "상점 ID") @PathVariable Long storeId,
                 @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,
                 @RequestBody @Valid VerifyCouponRequest request
         )
         {
-                couponService.verifyAndUseCoupon(storeId, principalDetails.getUser(), request.getCode());
+                VerifyCouponResponse response = couponService.verifyCouponCode(storeId, principalDetails.getUser(), request.getCode());
+                return ResponseEntity.ok(CommonResponse.success(response));
+        }
+
+        @Operation(summary = "[점주] 쿠폰 사용 확정", description = "조회된 쿠폰을 실제로 사용 처리합니다.")
+        @ApiResponses(value = {
+                @ApiResponse(responseCode = "200", description = "쿠폰 사용 완료"),
+                @ApiResponse(responseCode = "404", description = "쿠폰 없음", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class))),
+                @ApiResponse(responseCode = "403", description = "권한 없음", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class))),
+                @ApiResponse(responseCode = "422", description = "활성화되지 않은 쿠폰", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class)))
+        })
+        @PostMapping("/stores/{storeId}/coupons/{studentCouponId}/use")
+        public ResponseEntity<CommonResponse<Void>> useCoupon(
+                @Parameter(description = "상점 ID") @PathVariable Long storeId,
+                @Parameter(description = "학생 쿠폰 ID") @PathVariable Long studentCouponId,
+                @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails
+        )
+        {
+                couponService.useCoupon(storeId, principalDetails.getUser(), studentCouponId);
                 return ResponseEntity.ok(CommonResponse.success(null));
         }
 
@@ -130,19 +149,19 @@ public class CouponController {
                 return ResponseEntity.ok(CommonResponse.success(response));
         }
 
-        @Operation(summary = "[학생] 쿠폰 발급", description = "사용자가 쿠폰을 발급받습니다.")
+        @Operation(summary = "[학생] 쿠폰 다운로드", description = "사용자가 쿠폰을 다운로드받습니다.")
         @ApiResponses(value = {
-                        @ApiResponse(responseCode = "200", description = "쿠폰 발급 성공"),
+                        @ApiResponse(responseCode = "200", description = "쿠폰 다운로드 성공"),
                         @ApiResponse(responseCode = "404", description = "쿠폰 없음", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class))),
                         @ApiResponse(responseCode = "422", description = "재고 소진 / 발급 기간 아님 / 한도 초과", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class)))
         })
-        @PostMapping("/coupons/{couponId}/issue")
-        public ResponseEntity<CommonResponse<IssueCouponResponse>> issueCoupon(
+        @PostMapping("/coupons/{couponId}/download")
+        public ResponseEntity<CommonResponse<IssueCouponResponse>> downloadCoupon(
                 @Parameter(description = "쿠폰 ID") @PathVariable Long couponId,
                 @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails
         )
         {
-                IssueCouponResponse response = couponService.issueCoupon(couponId, principalDetails.getUser());
+                IssueCouponResponse response = couponService.downloadCoupon(couponId, principalDetails.getUser());
                 return ResponseEntity.ok(CommonResponse.success(response));
         }
 

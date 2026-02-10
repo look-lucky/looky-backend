@@ -16,6 +16,7 @@ import com.looky.domain.user.entity.Role;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -124,7 +125,7 @@ public class CouponService {
 
     // --- 학생용 ---
 
-    // 오늘 발급한 쿠폰 조회
+    // 오늘의 신규 쿠폰 조회
     public List<CouponResponse> getTodayCoupons(User user) {
         if (user.getRole() != Role.ROLE_STUDENT) {
             throw new CustomException(ErrorCode.FORBIDDEN, "학생만 이용 가능한 서비스입니다.");
@@ -167,18 +168,32 @@ public class CouponService {
                 .map(CouponResponse::from)
                 .collect(Collectors.toList());
 
-        // 학생인 경우에만 발급 여부 확인
-        if (user.getRole() == Role.ROLE_STUDENT && !coupons.isEmpty()) {
-            List<StudentCoupon> issuedCoupons = studentCouponRepository.findByUserAndCouponIn(user, coupons);
-            List<Long> issuedCouponIds = issuedCoupons.stream()
-                    .map(sc -> sc.getCoupon().getId())
-                    .collect(Collectors.toList());
+        if (!coupons.isEmpty()) {
+            // 점주인 경우에만 사용 수량 조회
+            if (user.getRole() == Role.ROLE_OWNER) {
+                // 사용 수량 조회 (일괄)
+                List<Object[]> counts = studentCouponRepository.countByCouponInAndStatus(coupons, CouponUsageStatus.USED);
+                Map<Long, Long> usedCountMap = counts.stream()
+                        .collect(Collectors.toMap(row -> (Long) row[0], row -> (Long) row[1]));
 
-            responses.forEach(response -> {
-                if (issuedCouponIds.contains(response.getId())) {
-                    response.setIsIssued(true);
-                }
-            });
+                responses.forEach(response -> 
+                    response.setUsedCount(usedCountMap.getOrDefault(response.getId(), 0L))
+                );
+            }
+
+            // 학생인 경우에만 발급 여부 확인
+            if (user.getRole() == Role.ROLE_STUDENT) {
+                List<StudentCoupon> issuedCoupons = studentCouponRepository.findByUserAndCouponIn(user, coupons);
+                List<Long> issuedCouponIds = issuedCoupons.stream()
+                        .map(sc -> sc.getCoupon().getId())
+                        .collect(Collectors.toList());
+
+                responses.forEach(response -> {
+                    if (issuedCouponIds.contains(response.getId())) {
+                        response.setIsIssued(true);
+                    }
+                });
+            }
         }
 
         return responses;

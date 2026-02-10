@@ -5,9 +5,11 @@ import com.looky.domain.coupon.entity.CouponBenefitType;
 import com.looky.domain.coupon.entity.CouponStatus;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.Setter;
 import java.time.LocalDateTime;
 
 @Getter
+@Setter
 @Builder
 public class CouponResponse {
     private Long id;
@@ -22,6 +24,8 @@ public class CouponResponse {
     private CouponBenefitType benefitType;
     private String benefitValue;
     private Integer minOrderAmount;
+
+    private Long usedCount; // 사용 완료된 수량 (점주용)
     private Boolean isIssued; // 발급 여부 (학생용)
 
     public static CouponResponse from(Coupon coupon) {

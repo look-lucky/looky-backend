@@ -334,7 +334,7 @@ INSERT INTO store_report (store_report_id, created_at, modified_at, detail, stor
 INSERT INTO store_report_reason (store_report_id, reason) VALUES (1, 'ETC');
 
 INSERT INTO review_report (review_report_id, created_at, modified_at, review_id, reporter_id, reason, detail) VALUES
-(1, NOW(), NOW(), 5, 101, 'SPAM', '광고 같아요');
+(1, NOW(), NOW(), 5, 101, 'COMMERCIAL_PROMOTION', '광고 같아요');
 
 -- 13. Withdrawal Feedback
 INSERT INTO withdrawal_feedback (id, created_at, modified_at, detail_reason) VALUES

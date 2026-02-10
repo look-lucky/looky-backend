@@ -391,7 +391,7 @@ create table review_report (
     last_modified_by varchar(255),
     review_id bigint not null,
     reporter_id bigint not null,
-    reason enum ('INAPPROPRIATE_CONTENT','IRRELEVANT','OTHER','SPAM') not null,
+    reason enum ('MALICIOUS_SLANDER','INAPPROPRIATE_CONTENT','RIGHTS_VIOLATION','PRIVACY_INFRINGEMENT','COMMERCIAL_PROMOTION','FRAUDULENT_REVIEW','OTHER') not null,
     detail varchar(500),
     foreign key (review_id) references review (review_id),
     foreign key (reporter_id) references user (user_id)

@@ -49,14 +49,14 @@ jobs:
           script: |
             echo "$ENV_FILE" | base64 -d > .env.dev
             
-            sudo docker network create looky-net || true
+            docker network create looky-net || true
             
-            sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/looky-backend:dev
+            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/looky-backend:dev
             
-            sudo docker stop looky-dev || true
-            sudo docker rm looky-dev || true
+            docker stop looky-dev || true
+            docker rm looky-dev || true
             
-            sudo docker run -d --name looky-dev \
+            docker run -d --name looky-dev \
               --network looky-net \
               -p 8080:8080 \
               --env-file .env.dev \

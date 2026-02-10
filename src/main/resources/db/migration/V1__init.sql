@@ -267,7 +267,7 @@ create table student_coupon (
     last_modified_by varchar(255),
     verification_code varchar(4),
     status enum ('ACTIVATED','EXPIRED','UNUSED','USED') not null,
-    downloaded_at datetime(6),
+    issued_at datetime(6),
     activated_at datetime(6),
     used_at datetime(6),
     expires_at datetime(6) not null,

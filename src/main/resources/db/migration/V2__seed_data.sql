@@ -235,7 +235,7 @@ INSERT INTO coupon (coupon_id, created_at, modified_at, title, description, issu
 (5, NOW(), NOW(), '선착순 1명 무료', '빨리 오세요', '2026-02-01', '2026-02-28', 0, 1, 'ACTIVE', 'FIXED_DISCOUNT', '5000', 0, 0, 5);
 
 -- 5.5 Student Coupons
-INSERT INTO student_coupon (student_coupon_id, created_at, modified_at, verification_code, status, downloaded_at, activated_at, used_at, expires_at, user_id, coupon_id) VALUES
+INSERT INTO student_coupon (student_coupon_id, created_at, modified_at, verification_code, status, issued_at, activated_at, used_at, expires_at, user_id, coupon_id) VALUES
 (1, NOW(), NOW(), '1111', 'UNUSED', '2026-02-10 10:00:00', NULL, NULL, '2026-03-10 10:00:00', 101, 1),
 (2, NOW(), NOW(), '2222', 'USED', '2026-02-10 10:00:00', '2026-02-11 12:00:00', '2026-02-11 12:30:00', '2026-03-10 10:00:00', 102, 1),
 (3, NOW(), NOW(), '3333', 'UNUSED', '2026-01-10 10:00:00', NULL, NULL, '2026-12-31 23:59:59', 101, 2);

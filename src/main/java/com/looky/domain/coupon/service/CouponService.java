@@ -308,4 +308,12 @@ public class CouponService {
             throw new CustomException(ErrorCode.FORBIDDEN, "가게 주인이 아닙니다.");
         }
     }
+
+    @Transactional
+    public int resetExpiredCoupons() {
+        // 현재 시간보다 30분 이전 ( = 활성화된 지 30분이 지남)
+        LocalDateTime threshold = LocalDateTime.now().minusMinutes(30);
+
+        return studentCouponRepository.resetExpiredCoupons(threshold);
+    }
 }

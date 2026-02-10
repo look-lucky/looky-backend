@@ -17,12 +17,13 @@ spring:
       hibernate:
         format_sql: true # 쿼리 가독성 향상
 
-#  flyway:
-#    enabled: false # 로컬에선 JPA UPDATE 사용
   flyway:
-    enabled: true
-    baseline-on-migrate: true
-    validate-on-migrate: true
+    enabled: false # 로컬에선 JPA UPDATE 사용
+
+#  flyway:
+#    enabled: true
+#    baseline-on-migrate: true
+#    validate-on-migrate: true
 
   security:
     oauth2:

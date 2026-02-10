@@ -62,6 +62,6 @@ jobs:
               --env-file .env.dev \
               ${{ secrets.DOCKERHUB_USERNAME }}/looky-backend:dev
             
-            sudo docker image prune -f
+            docker image prune -f
         env:
           ENV_FILE: ${{ secrets.ENV_FILE }}

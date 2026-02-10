@@ -269,11 +269,13 @@ public class AuthService {
 
     @Transactional
     public AuthTokens completeSocialSignup(Long userId, CompleteSocialSignupRequest request) {
+        log.info("completeSocialSignup userId: {}, request: {}", userId, request);
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         if (user.getRole() != Role.ROLE_GUEST) {
+            log.error("completeSocialSignup already complete. userId: {}, role: {}", userId, user.getRole());
             throw new CustomException(ErrorCode.STATE_CONFLICT, "이미 가입이 완료된 회원입니다.");
         }
 

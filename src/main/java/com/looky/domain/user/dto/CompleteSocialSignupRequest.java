@@ -4,11 +4,13 @@ import com.looky.domain.user.entity.Gender;
 import com.looky.domain.user.entity.Role;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 import java.time.LocalDate;
 
 @Getter
 @Setter
+@ToString
 public class CompleteSocialSignupRequest {
     private Role role;
 

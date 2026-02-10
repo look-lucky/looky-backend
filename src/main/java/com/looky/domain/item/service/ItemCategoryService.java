@@ -3,6 +3,7 @@ package com.looky.domain.item.service;
 import com.looky.common.exception.CustomException;
 import com.looky.common.exception.ErrorCode;
 import com.looky.domain.item.entity.ItemCategory;
+import com.looky.domain.item.dto.ItemCategoryResponse;
 import com.looky.domain.item.repository.ItemCategoryRepository;
 import com.looky.domain.item.repository.ItemRepository;
 import com.looky.domain.store.entity.Store;
@@ -15,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -28,7 +30,12 @@ public class ItemCategoryService {
 
     @Transactional
     public Long createItemCategory(Long storeId, User user, String name) {
-        Store store = getStoreAndValidateOwner(storeId, user);
+        Store store = storeRepository.findById(storeId)
+                .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "해당 상점을 찾을 수 없습니다."));
+
+        if (!store.getUser().getId().equals(user.getId())) {
+            throw new CustomException(ErrorCode.FORBIDDEN);
+        }
         
         ItemCategory itemCategory = ItemCategory.builder()
                 .store(store)
@@ -38,8 +45,10 @@ public class ItemCategoryService {
         return itemCategoryRepository.save(itemCategory).getId();
     }
 
-    public List<ItemCategory> getItemCategories(Long storeId) {
-        return itemCategoryRepository.findByStoreId(storeId);
+    public List<ItemCategoryResponse> getItemCategories(Long storeId) {
+        return itemCategoryRepository.findByStoreId(storeId).stream()
+                .map(ItemCategoryResponse::from)
+                .collect(Collectors.toList());
     }
 
     @Transactional

@@ -2,7 +2,7 @@ package com.looky.domain.item.controller;
 
 import com.looky.common.response.CommonResponse;
 import com.looky.common.response.SwaggerErrorResponse;
-import com.looky.domain.item.entity.ItemCategory;
+import com.looky.domain.item.dto.ItemCategoryResponse;
 import com.looky.domain.item.service.ItemCategoryService;
 import com.looky.security.details.PrincipalDetails;
 import io.swagger.v3.oas.annotations.Operation;
@@ -46,10 +46,10 @@ public class ItemCategoryController {
 
     @Operation(summary = "[공통] 상품 카테고리 목록 조회", description = "매장의 상품 카테고리 목록을 조회합니다.")
     @GetMapping
-    public ResponseEntity<CommonResponse<List<ItemCategory>>> getItemCategories(
+    public ResponseEntity<CommonResponse<List<ItemCategoryResponse>>> getItemCategories(
             @PathVariable Long storeId
     ) {
-        List<ItemCategory> categories = itemCategoryService.getItemCategories(storeId);
+        List<ItemCategoryResponse> categories = itemCategoryService.getItemCategories(storeId);
         return ResponseEntity.ok(CommonResponse.success(categories));
     }
 

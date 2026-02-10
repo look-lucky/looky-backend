@@ -26,7 +26,7 @@ spring:
             client-id: ${GOOGLE_CLIENT_ID}
             client-secret: ${GOOGLE_CLIENT_SECRET}
             scope: profile,email
-            redirect-uri: "https://api.looky.kr/login/oauth2/code/google"
+            redirect-uri: "https://dev-api.looky.kr/login/oauth2/code/google"
           kakao:
             client-id: ${KAKAO_CLIENT_ID}
             client-secret: ${KAKAO_CLIENT_SECRET}
@@ -38,7 +38,7 @@ spring:
           apple:
             client-id: ${APPLE_SERVICE_ID}
             client-secret: "TEMP_SECRET" # 자바 코드에서 동적으로 만들어 넣을 거라 임시로 채워둠
-            redirect-uri: "https://api.looky.kr/login/oauth2/code/apple"
+            redirect-uri: "https://dev-api.looky.kr/login/oauth2/code/apple"
             authorization-grant-type: authorization_code
             scope: name,email
             client-name: Apple

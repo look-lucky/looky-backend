@@ -7,5 +7,6 @@ public enum ReportReason {
     PRIVACY_INFRINGEMENT,   // 초상권 침해 또는 개인정보 노출
     COMMERCIAL_PROMOTION,   // 서비스나 메뉴 등 대가를 목적으로 작성된 리뷰
     FRAUDULENT_REVIEW,      // 리뷰 작성 대행업체를 통해 게재된 허위 리뷰
+    IRRELEVANT,             // 다른 매장 리뷰
     OTHER                   // 기타 (상세 사유 필수 입력)
 }

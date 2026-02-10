@@ -85,13 +85,17 @@ public class MyPageService {
 
         Long collegeId = null;
         Long departmentId = null;
+        String collegeName = null;
+        String departmentName = null;
 
         List<UserOrganization> userOrgs = userOrganizationRepository.findAllByUser(user);
         for (UserOrganization uo : userOrgs) {
             if (uo.getOrganization().getCategory() == OrganizationCategory.COLLEGE) {
                 collegeId = uo.getOrganization().getId();
+                collegeName = uo.getOrganization().getName();
             } else if (uo.getOrganization().getCategory() == OrganizationCategory.DEPARTMENT) {
                 departmentId = uo.getOrganization().getId();
+                departmentName = uo.getOrganization().getName();
             }
         }
 
@@ -99,6 +103,9 @@ public class MyPageService {
                 .universityId(profile.getUniversity() != null ? profile.getUniversity().getId() : null)
                 .collegeId(collegeId)
                 .departmentId(departmentId)
+                .universityName(profile.getUniversity() != null ? profile.getUniversity().getName() : null)
+                .collegeName(collegeName)
+                .departmentName(departmentName)
                 .isClubMember(profile.getIsClubMember())
                 .build();
     }

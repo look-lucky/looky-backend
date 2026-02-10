@@ -9,5 +9,8 @@ public class StudentInfoResponse {
     private Long universityId;
     private Long collegeId;
     private Long departmentId;
+    private String universityName;
+    private String collegeName;
+    private String departmentName;
     private Boolean isClubMember;
 }

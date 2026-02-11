@@ -96,7 +96,7 @@ public class OrganizationService {
                                 .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "소속을 찾을 수 없습니다."));
 
                 // 학생회인 경우 본인 소유 확인
-                if (user.getRole() == Role.ROLE_COUNCIL || !Objects.equals(organization.getUser().getId(), user.getId())) {
+                if (user.getRole() == Role.ROLE_COUNCIL && !Objects.equals(organization.getUser().getId(), user.getId())) {
                         throw new CustomException(ErrorCode.FORBIDDEN, "본인이 생성한 소속만 수정할 수 있습니다.");
                 }
 
@@ -132,7 +132,7 @@ public class OrganizationService {
                                 .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "소속을 찾을 수 없습니다."));
 
                 // 학생회인 경우 본인 소유 확인
-                if (user.getRole() == Role.ROLE_COUNCIL || !Objects.equals(organization.getUser().getId(), user.getId())) {
+                if (user.getRole() == Role.ROLE_COUNCIL && !Objects.equals(organization.getUser().getId(), user.getId())) {
                         throw new CustomException(ErrorCode.FORBIDDEN, "본인이 생성한 소속만 삭제할 수 있습니다.");
                 }
 

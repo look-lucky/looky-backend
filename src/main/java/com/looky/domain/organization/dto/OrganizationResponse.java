@@ -16,6 +16,8 @@ public class OrganizationResponse {
     private String universityName;
     private OrganizationCategory category;
     private String name;
+    private Long parentId;
+    private String parentName;
     private LocalDateTime expiresAt;
 
     public static OrganizationResponse from(Organization organization) {
@@ -26,6 +28,8 @@ public class OrganizationResponse {
                 .universityName(organization.getUniversity().getName())
                 .category(organization.getCategory())
                 .name(organization.getName())
+                .parentId(organization.getParent() != null ? organization.getParent().getId() : null)
+                .parentName(organization.getParent() != null ? organization.getParent().getName() : null)
                 .expiresAt(organization.getExpiresAt())
                 .build();
     }

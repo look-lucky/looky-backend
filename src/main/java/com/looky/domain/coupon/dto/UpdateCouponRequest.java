@@ -16,8 +16,6 @@ public class UpdateCouponRequest {
     @Schema(description = "쿠폰명", example = "신규 가입 감사 쿠폰 (수정)")
     private JsonNullable<String> title = JsonNullable.undefined();
 
-    @Schema(description = "쿠폰 설명", example = "모든 가입자 대상 10% 할인 쿠폰")
-    private JsonNullable<String> description = JsonNullable.undefined();
 
     @Schema(description = "발급 시작 일시")
     private JsonNullable<LocalDateTime> issueStartsAt = JsonNullable.undefined();

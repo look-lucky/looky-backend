@@ -243,7 +243,6 @@ create table coupon (
     created_by varchar(255),
     last_modified_by varchar(255),
     title varchar(255) not null,
-    description longtext,
     issue_starts_at datetime(6),
     issue_ends_at datetime(6),
     total_quantity int,

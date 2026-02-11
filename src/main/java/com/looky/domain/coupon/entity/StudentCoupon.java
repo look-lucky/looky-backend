@@ -8,7 +8,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
-import java.util.concurrent.ThreadLocalRandom;
+
 
 @Entity
 @Getter
@@ -53,7 +53,7 @@ public class StudentCoupon extends BaseEntity {
         this.expiresAt = expiresAt;
     }
 
-    public String activate() {
+    public String activate(String verificationCode) {
         if (this.status != CouponUsageStatus.UNUSED) {
             throw new CustomException(ErrorCode.STATE_CONFLICT, "이미 사용 중이거나 사용된 쿠폰입니다.");
         }
@@ -63,7 +63,7 @@ public class StudentCoupon extends BaseEntity {
             throw new CustomException(ErrorCode.STATE_CONFLICT, "만료된 쿠폰입니다.");
         }
 
-        this.verificationCode = generateRandomCode();
+        this.verificationCode = verificationCode;
         this.status = CouponUsageStatus.ACTIVATED;
         this.activatedAt = LocalDateTime.now();
 
@@ -78,9 +78,4 @@ public class StudentCoupon extends BaseEntity {
         this.usedAt = LocalDateTime.now();
     }
 
-    // 0000 ~ 9999 랜덤 생성
-    private String generateRandomCode() {
-        int number = ThreadLocalRandom.current().nextInt(0, 10000);
-        return String.format("%04d", number);
-    }
 }

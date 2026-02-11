@@ -15,7 +15,7 @@ public class CouponResponse {
     private Long id;
     private Long storeId;
     private String title;
-    private String description;
+
     private LocalDateTime issueStartsAt;
     private LocalDateTime issueEndsAt;
     private Integer totalQuantity;
@@ -33,7 +33,7 @@ public class CouponResponse {
                 .id(coupon.getId())
                 .storeId(coupon.getStore().getId())
                 .title(coupon.getTitle())
-                .description(coupon.getDescription())
+
                 .issueStartsAt(coupon.getIssueStartsAt())
                 .issueEndsAt(coupon.getIssueEndsAt())
                 .totalQuantity(coupon.getTotalQuantity())

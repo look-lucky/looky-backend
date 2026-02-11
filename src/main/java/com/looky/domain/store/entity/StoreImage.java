@@ -30,4 +30,8 @@ public class StoreImage {
         this.imageUrl = imageUrl;
         this.orderIndex = orderIndex;
     }
+
+    public void updateOrderIndex(int orderIndex) {
+        this.orderIndex = orderIndex;
+    }
 }

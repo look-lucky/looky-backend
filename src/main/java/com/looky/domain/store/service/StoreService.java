@@ -243,11 +243,6 @@ public class StoreService {
             throw new CustomException(ErrorCode.DUPLICATE_RESOURCE, "이미 존재하는 상점 이름입니다.");
         }
 
-        // 새 이미지 유효성 검사 (최대 3장, 10MB)
-        if (images != null && !images.isEmpty()) {
-            FileValidator.validateImageFiles(images, 3, 10 * 1024 * 1024);
-        }
-
         store.updateStore(
             request.getName().orElse(store.getName()),
             request.getBranch().orElse(store.getBranch()),
@@ -271,19 +266,39 @@ public class StoreService {
             request.getIsSuspended().orElse(store.getIsSuspended())
         );
 
-        // 새 이미지가 존재하면 기존 것 모두 삭제 후 새로 등록
-        if (images != null && !images.isEmpty()) {
+        // 1. 이미지 삭제 처리 (preserveImageIds 기준)
+        if (request.getPreserveImageIds().isPresent()) {
+            List<Long> preserveIds = request.getPreserveImageIds().get();
+            // preserveIds가 null이면 빈 리스트로 처리 (모두 삭제)
+            List<Long> finalPreserveIds = preserveIds != null ? preserveIds : Collections.emptyList();
 
-            // S3 파일 삭제
-            for (StoreImage oldImage : store.getImages()) {
-                s3Service.deleteFile(oldImage.getImageUrl());
+            List<StoreImage> imagesToDelete = store.getImages().stream()
+                    .filter(img -> !finalPreserveIds.contains(img.getId()))
+                    .toList();
+
+            for (StoreImage img : imagesToDelete) {
+                s3Service.deleteFile(img.getImageUrl());
+                store.removeImage(img);
             }
+        }
 
-            // DB 삭제
-            store.getImages().clear();
+        // 2. 새 이미지 추가 및 전체 개수 검증
+        int currentImageCount = store.getImages().size(); // 삭제 후 남은 개수
+        int newImageCount = (images != null) ? images.size() : 0;
 
-            // 새 이미지 업로드
+        if (currentImageCount + newImageCount > 3) {
+            throw new CustomException(ErrorCode.BAD_REQUEST, "이미지는 최대 3장까지 등록할 수 있습니다.");
+        }
+
+        // 새 이미지 업로드 및 저장
+        if (newImageCount > 0) {
+            FileValidator.validateImageFiles(images, 3, 10 * 1024 * 1024);
             uploadAndSaveImages(store, images);
+        }
+
+        // 3. 인덱스 재정렬 (중간 삭제 시 빈 번호 채우기 위함)
+        for (int i = 0; i < store.getImages().size(); i++) {
+             store.getImages().get(i).updateOrderIndex(i);
         }
         
         // 등급 재계산

@@ -23,6 +23,9 @@ public class UpdateCouponRequest {
     @Schema(description = "발급 종료 일시")
     private JsonNullable<LocalDateTime> issueEndsAt = JsonNullable.undefined();
 
+    @Schema(description = "발급 후 유효 기간 (일 단위)")
+    private JsonNullable<Integer> validDays = JsonNullable.undefined();
+
     @Schema(description = "총 발행 수량 (null일 경우 무제한)", example = "100")
     private JsonNullable<Integer> totalQuantity = JsonNullable.undefined();
 

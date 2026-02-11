@@ -29,6 +29,9 @@ public class Coupon extends BaseEntity {
     private LocalDateTime issueStartsAt; // 쿠폰 노출/발급 시작일
     private LocalDateTime issueEndsAt; // 쿠폰 노출/발급 종료일
 
+    @Column(nullable = false)
+    private Integer validDays; // 발급 후 유효 기간 (일 단위)
+
     private Integer totalQuantity; // 총 발행 한도 (null이면 무한대)
 
     @Column(nullable = false)
@@ -49,11 +52,12 @@ public class Coupon extends BaseEntity {
     private Integer downloadCount = 0; // 현재 발급된 수량 (다운로드 수)
 
     @Builder
-    public Coupon(Store store, String title, LocalDateTime issueStartsAt, LocalDateTime issueEndsAt, Integer totalQuantity, Integer limitPerUser, CouponStatus status, CouponBenefitType benefitType, String benefitValue, Integer minOrderAmount) {
+    public Coupon(Store store, String title, LocalDateTime issueStartsAt, LocalDateTime issueEndsAt, Integer validDays, Integer totalQuantity, Integer limitPerUser, CouponStatus status, CouponBenefitType benefitType, String benefitValue, Integer minOrderAmount) {
         this.store = store;
         this.title = title;
         this.issueStartsAt = issueStartsAt;
         this.issueEndsAt = issueEndsAt;
+        this.validDays = validDays;
         this.totalQuantity = totalQuantity;
         this.limitPerUser = limitPerUser;
         this.status = status;
@@ -62,10 +66,11 @@ public class Coupon extends BaseEntity {
         this.minOrderAmount = minOrderAmount;
     }
 
-    public void updateCoupon(String title, LocalDateTime issueStartsAt, LocalDateTime issueEndsAt, Integer totalQuantity, Integer limitPerUser, CouponStatus status, CouponBenefitType benefitType, String benefitValue, Integer minOrderAmount) {
+    public void updateCoupon(String title, LocalDateTime issueStartsAt, LocalDateTime issueEndsAt, Integer validDays, Integer totalQuantity, Integer limitPerUser, CouponStatus status, CouponBenefitType benefitType, String benefitValue, Integer minOrderAmount) {
         this.title = title;
         this.issueStartsAt = issueStartsAt;
         this.issueEndsAt = issueEndsAt;
+        this.validDays = validDays;
         this.totalQuantity = totalQuantity;
         this.limitPerUser = limitPerUser;
         this.status = status;
@@ -76,5 +81,9 @@ public class Coupon extends BaseEntity {
 
     public void increaseDownloadCount() {
         this.downloadCount++;
+    }
+
+    public void expire() {
+        this.status = CouponStatus.EXPIRED;
     }
 }

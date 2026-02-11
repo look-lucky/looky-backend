@@ -217,22 +217,22 @@ INSERT INTO partnership (created_at, modified_at, benefit, starts_at, ends_at, s
 
 -- 5.4 Coupons
 -- Active Coupon (Store 1, Store 2)
-INSERT INTO coupon (coupon_id, created_at, modified_at, title, issue_starts_at, issue_ends_at, total_quantity, limit_per_user, status, benefit_type, benefit_value, min_order_amount, download_count, store_id) VALUES 
-(1, NOW(), NOW(), '신학기 1000원 할인 쿠폰', '2026-02-01', '2026-03-31', 100, 1, 'ACTIVE', 'FIXED_DISCOUNT', '1000', 10000, 2, 1),
-(2, NOW(), NOW(), '감자튀김 무료 증정', '2026-01-01', '2026-12-31', 50, 1, 'ACTIVE', 'SERVICE_GIFT', '감자튀김', 15000, 1, 2);
+INSERT INTO coupon (coupon_id, created_at, modified_at, title, issue_starts_at, issue_ends_at, valid_days, total_quantity, limit_per_user, status, benefit_type, benefit_value, min_order_amount, download_count, store_id) VALUES 
+(1, NOW(), NOW(), '신학기 1000원 할인 쿠폰', '2026-02-01', '2026-03-31', 30, 100, 1, 'ACTIVE', 'FIXED_DISCOUNT', '1000', 10000, 2, 1),
+(2, NOW(), NOW(), '감자튀김 무료 증정', '2026-01-01', '2026-12-31', 7, 50, 1, 'ACTIVE', 'SERVICE_GIFT', '감자튀김', 15000, 1, 2);
 
 -- Expired Coupon (Store 1)
-INSERT INTO coupon (coupon_id, created_at, modified_at, title, issue_starts_at, issue_ends_at, total_quantity, limit_per_user, status, benefit_type, benefit_value, min_order_amount, download_count, store_id) VALUES 
-(3, NOW(), NOW(), '지난 겨울 할인', '2025-12-01', '2025-12-31', 100, 1, 'EXPIRED', 'PERCENTAGE_DISCOUNT', '10', 0, 0, 1);
+INSERT INTO coupon (coupon_id, created_at, modified_at, title, issue_starts_at, issue_ends_at, valid_days, total_quantity, limit_per_user, status, benefit_type, benefit_value, min_order_amount, download_count, store_id) VALUES 
+(3, NOW(), NOW(), '지난 겨울 할인', '2025-12-01', '2025-12-31', 30, 100, 1, 'EXPIRED', 'PERCENTAGE_DISCOUNT', '10', 0, 0, 1);
 
 -- Scheduled Coupon (Store 3)
-INSERT INTO coupon (coupon_id, created_at, modified_at, title, issue_starts_at, issue_ends_at, total_quantity, limit_per_user, status, benefit_type, benefit_value, min_order_amount, download_count, store_id) VALUES 
-(4, NOW(), NOW(), '3월 개강 이벤트', '2026-03-02', '2026-03-31', 200, 1, 'SCHEDULED', 'FIXED_DISCOUNT', '500', 0, 0, 3);
+INSERT INTO coupon (coupon_id, created_at, modified_at, title, issue_starts_at, issue_ends_at, valid_days, total_quantity, limit_per_user, status, benefit_type, benefit_value, min_order_amount, download_count, store_id) VALUES 
+(4, NOW(), NOW(), '3월 개강 이벤트', '2026-03-02', '2026-03-31', 14, 200, 1, 'ACTIVE', 'FIXED_DISCOUNT', '500', 0, 0, 3);
 
 -- Active but Sold Out Coupon (Store 4 - no store owner user_id but coupon exists? Let's assign to Store 2 instead)
 -- Let's make Store 5 have a sold out coupon
-INSERT INTO coupon (coupon_id, created_at, modified_at, title, issue_starts_at, issue_ends_at, total_quantity, limit_per_user, status, benefit_type, benefit_value, min_order_amount, download_count, store_id) VALUES 
-(5, NOW(), NOW(), '선착순 1명 무료', '2026-02-01', '2026-02-28', 0, 1, 'ACTIVE', 'FIXED_DISCOUNT', '5000', 0, 0, 5);
+INSERT INTO coupon (coupon_id, created_at, modified_at, title, issue_starts_at, issue_ends_at, valid_days, total_quantity, limit_per_user, status, benefit_type, benefit_value, min_order_amount, download_count, store_id) VALUES 
+(5, NOW(), NOW(), '선착순 1명 무료', '2026-02-01', '2026-02-28', 1, 0, 1, 'ACTIVE', 'FIXED_DISCOUNT', '5000', 0, 0, 5);
 
 -- 5.5 Student Coupons
 INSERT INTO student_coupon (student_coupon_id, created_at, modified_at, verification_code, status, issued_at, activated_at, used_at, expires_at, user_id, coupon_id) VALUES

@@ -24,9 +24,17 @@ public class StoreNewsImage extends BaseEntity {
     @Column(nullable = false)
     private String imageUrl;
 
+    @Column(nullable = false)
+    private int orderIndex;
+
     @Builder
-    public StoreNewsImage(String imageUrl) {
+    public StoreNewsImage(String imageUrl, int orderIndex) {
         this.imageUrl = imageUrl;
+        this.orderIndex = orderIndex;
+    }
+
+    public void updateOrderIndex(int orderIndex) {
+        this.orderIndex = orderIndex;
     }
 
     public void setStoreNews(StoreNews storeNews) {

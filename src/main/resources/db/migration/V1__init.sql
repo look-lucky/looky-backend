@@ -434,6 +434,7 @@ create table store_news_image (
     last_modified_by varchar(255),
     store_news_id bigint not null,
     image_url varchar(255) not null,
+    order_index int not null,
     foreign key (store_news_id) references store_news (id)
 );
 

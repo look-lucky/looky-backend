@@ -30,7 +30,7 @@ public class Coupon extends BaseEntity {
     private LocalDateTime issueEndsAt; // 쿠폰 노출/발급 종료일
 
     @Column(nullable = false)
-    private Integer validDays; // 발급 후 유효 기간 (일 단위)
+    private Integer validDays; // 발급 후 유효 기간 (일 단위. 0이면 발급 종료일과 동일)
 
     private Integer totalQuantity; // 총 발행 한도 (null이면 무한대)
 

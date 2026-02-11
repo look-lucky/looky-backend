@@ -83,9 +83,9 @@ public class ItemController {
 
         @Operation(summary = "[점주] 상품 수정", description = "상품 정보를 수정합니다. (본인 상점만 가능)")
         @ApiResponses(value = {
-                        @ApiResponse(responseCode = "200", description = "상품 수정 성공"),
-                        @ApiResponse(responseCode = "403", description = "권한 없음 (본인 소유 상점 아님)", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class))),
-                        @ApiResponse(responseCode = "404", description = "상품 없음", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class)))
+                @ApiResponse(responseCode = "200", description = "상품 수정 성공"),
+                @ApiResponse(responseCode = "403", description = "권한 없음 (본인 소유 상점 아님)", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class))),
+                @ApiResponse(responseCode = "404", description = "상품 없음", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class)))
         })
         @PatchMapping(value = "/items/{itemId}", consumes = MULTIPART_FORM_DATA_VALUE)
         public ResponseEntity<CommonResponse<Void>> updateItem(

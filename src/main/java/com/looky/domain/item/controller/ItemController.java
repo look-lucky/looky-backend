@@ -44,7 +44,7 @@ public class ItemController {
         public ResponseEntity<CommonResponse<Long>> createItem(
                 @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,
                 @Parameter(description = "상품 ID") @PathVariable Long storeId,
-                @Parameter(description = "상품 이미지") @RequestPart MultipartFile image,
+                @Parameter(description = "상품 이미지") @RequestPart(required = false) MultipartFile image,
                 @RequestPart(required = false) @Valid CreateItemRequest request
         ) throws IOException {
                 Long itemId = itemService.createItem(storeId, principalDetails.getUser(), request, image);

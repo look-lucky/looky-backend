@@ -324,6 +324,11 @@ INSERT INTO store_news_comment (id, created_at, modified_at, store_news_id, user
 (2, NOW(), NOW(), 1, 102, '무슨 메뉴인가요?'),
 (3, NOW(), NOW(), 2, 104, '헉 헛걸음할뻔');
 
+INSERT INTO store_news_image (id, created_at, modified_at, store_news_id, image_url, order_index) VALUES
+(1, NOW(), NOW(), 1, 'https://example.com/news1_1.jpg', 0),
+(2, NOW(), NOW(), 1, 'https://example.com/news1_2.jpg', 1),
+(3, NOW(), NOW(), 2, 'https://example.com/news2_1.jpg', 0);
+
 -- 10. Store Claims
 INSERT INTO store_claim (store_claim_request_id, created_at, modified_at, store_id, user_id, biz_reg_no, representative_name, store_name, store_phone, license_image_url, status, reject_reason, admin_memo) VALUES
 (1, NOW(), NOW(), 4, 15, '123-45-78901', '박사장', '컴포즈커피 전북대구정문점', '010-0000-0000', 'https://example.com/license1.jpg', 'PENDING', NULL, '검토 중'),

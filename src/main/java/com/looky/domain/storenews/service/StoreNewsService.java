@@ -11,6 +11,7 @@ import com.looky.domain.storenews.dto.CreateStoreNewsRequest;
 import com.looky.domain.storenews.dto.StoreNewsCommentResponse;
 import com.looky.domain.storenews.dto.StoreNewsResponse;
 import com.looky.domain.storenews.dto.UpdateStoreNewsRequest;
+import java.util.Collections;
 import com.looky.domain.storenews.entity.StoreNews;
 import com.looky.domain.storenews.entity.StoreNewsComment;
 import com.looky.domain.storenews.entity.StoreNewsImage;
@@ -65,10 +66,14 @@ public class StoreNewsService {
                 .build();
 
         if (images != null && !images.isEmpty()) {
+            int currentOrderIndex = 0;
             for (MultipartFile file : images) {
                 if (file != null && !file.isEmpty()) {
                     String imageUrl = s3Service.uploadFile(file);
-                    storeNews.addImage(StoreNewsImage.builder().imageUrl(imageUrl).build());
+                    storeNews.addImage(StoreNewsImage.builder()
+                            .imageUrl(imageUrl)
+                            .orderIndex(currentOrderIndex++)
+                            .build());
                 }
             }
         }
@@ -134,18 +139,49 @@ public class StoreNewsService {
 
         news.update(title, content);
 
-        if (images != null) {
-            for (StoreNewsImage oldImage : news.getImages()) {
-                s3Service.deleteFile(oldImage.getImageUrl());
-            }
-            news.clearImages();
+        // 1. 이미지 삭제 처리 (preserveImageIds 기준)
+        if (request.getPreserveImageIds().isPresent()) {
+            List<Long> preserveIds = request.getPreserveImageIds().get();
+            List<Long> finalPreserveIds = preserveIds != null ? preserveIds : Collections.emptyList();
 
+            List<StoreNewsImage> imagesToDelete = news.getImages().stream()
+                    .filter(img -> !finalPreserveIds.contains(img.getId()))
+                    .toList();
+
+            for (StoreNewsImage img : imagesToDelete) {
+                s3Service.deleteFile(img.getImageUrl());
+                news.removeImage(img);
+            }
+        }
+
+        // 2. 새 이미지 추가 및 전체 개수 검증
+        int currentImageCount = news.getImages().size();
+        int newImageCount = 0;
+        if (images != null) {
+            newImageCount = (int) images.stream().filter(img -> img != null && !img.isEmpty()).count();
+        }
+
+        if (currentImageCount + newImageCount > 5) {
+             throw new CustomException(ErrorCode.BAD_REQUEST, "이미지는 최대 5장까지 등록할 수 있습니다.");
+        }
+
+        // 새 이미지 업로드 및 저장
+        if (images != null && !images.isEmpty()) {
+            int currentOrderIndex = news.getImages().size();
             for (MultipartFile file : images) {
                 if (file != null && !file.isEmpty()) {
                     String imageUrl = s3Service.uploadFile(file);
-                    news.addImage(StoreNewsImage.builder().imageUrl(imageUrl).build());
+                    news.addImage(StoreNewsImage.builder()
+                            .imageUrl(imageUrl)
+                            .orderIndex(currentOrderIndex++)
+                            .build());
                 }
             }
+        }
+
+        // 3. 인덱스 재정렬
+        for (int i = 0; i < news.getImages().size(); i++) {
+             news.getImages().get(i).updateOrderIndex(i);
         }
     }
 

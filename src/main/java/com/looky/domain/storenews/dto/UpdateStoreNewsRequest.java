@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.openapitools.jackson.nullable.JsonNullable;
+import java.util.List;
 
 @Getter
 @NoArgsConstructor
@@ -16,4 +17,8 @@ public class UpdateStoreNewsRequest {
     @Schema(description = "소식 내용", example = "오늘 하루만 전 메뉴 20% 할인합니다.")
     private JsonNullable<String> content = JsonNullable.undefined();
 
+    @Schema(description = "유지할 이미지 ID 목록 (누락된 ID는 삭제됨)")
+    private JsonNullable<List<Long>> preserveImageIds = JsonNullable.undefined();
 }
+
+

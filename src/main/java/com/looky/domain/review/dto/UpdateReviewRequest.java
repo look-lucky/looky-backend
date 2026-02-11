@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.openapitools.jackson.nullable.JsonNullable;
+import java.util.List;
 
 @Getter
 @NoArgsConstructor
@@ -15,4 +16,7 @@ public class UpdateReviewRequest {
 
     @Schema(description = "별점 (1~5)", example = "5")
     private JsonNullable<Integer> rating = JsonNullable.undefined();
+
+    @Schema(description = "유지할 이미지 ID 목록 (누락된 ID는 삭제됨)")
+    private JsonNullable<List<Long>> preserveImageIds = JsonNullable.undefined();
 }

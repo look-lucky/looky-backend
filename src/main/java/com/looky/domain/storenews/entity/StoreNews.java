@@ -63,6 +63,11 @@ public class StoreNews extends BaseEntity {
         this.images.clear();
     }
 
+    public void removeImage(StoreNewsImage image) {
+        this.images.remove(image);
+        image.setStoreNews(null);
+    }
+
     public void increaseLikeCount() {
         this.likeCount++;
     }

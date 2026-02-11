@@ -13,4 +13,5 @@ public class StudentInfoResponse {
     private String collegeName;
     private String departmentName;
     private Boolean isClubMember;
+    private String username;
 }

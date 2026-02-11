@@ -107,6 +107,7 @@ public class MyPageService {
                 .collegeName(collegeName)
                 .departmentName(departmentName)
                 .isClubMember(profile.getIsClubMember())
+                .username(user.getUsername())
                 .build();
     }
 

@@ -44,7 +44,7 @@ public class OrganizationController {
         return ResponseEntity.ok(CommonResponse.success(responses));
     }
 
-    // --- 학생회 ---
+    // --- 관리자, 학생회 ---
 
     @Operation(summary = "[학생회] 특정 대학에 소속 등록", description = "대학에 새로운 소속(단과대, 학과 등)을 등록합니다.")
     @PostMapping("/universities/{universityId}/organizations")

@@ -284,8 +284,15 @@ public class CouponService {
         }
         coupon.increaseDownloadCount(); // Dirty Checking으로 업데이트
 
-        // 만료일 설정 (다운로드 받은 시간 + 쿠폰 유효 기간 -> 해당 일의 23:59:59까지)
-        LocalDateTime expirationDate = now.plusDays(coupon.getValidDays()).with(LocalTime.MAX);
+        // 만료일 설정
+        LocalDateTime expirationDate;
+        if (coupon.getValidDays() == 0) {
+            // 유효기간이 0일이면, 쿠폰 발급 종료일과 동일하게 설정
+            expirationDate = coupon.getIssueEndsAt();
+        } else {
+            // 그 외(1일 이상)이면, 다운로드 받은 날 + 유효기간의 23:59:59까지
+            expirationDate = now.plusDays(coupon.getValidDays()).with(LocalTime.MAX);
+        }
 
         StudentCoupon studentCoupon = StudentCoupon.builder()
                 .user(user)

@@ -8,8 +8,8 @@ spring:
   # 업로드 제한
   servlet:
     multipart:
-      max-file-size: 50MB    # 개별 파일 용량
-      max-request-size: 50MB # 요청 전체 용량
+      max-file-size: 20MB    # 개별 파일 용량 (Spring 차원 제한 - 넉넉하게 설정 후 로직에서 10MB 체크)
+      max-request-size: 100MB # 요청 전체 용량 (여러 이미지 업로드 고려하여 증설)
 
   #  문서화 (Swagger)
   springdoc:

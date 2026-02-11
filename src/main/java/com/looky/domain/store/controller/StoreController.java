@@ -71,7 +71,15 @@ public class StoreController {
                 @RequestPart @Valid StoreUpdateRequest request,
                 @RequestPart(required = false) List<MultipartFile> images
         ) throws IOException {
-                log.info("Update Store Request: storeId={}, images={}", storeId, images != null ? images.size() : "null");
+                if (images != null) {
+                    log.info("Update Store Request: storeId={}, images count={}", storeId, images.size());
+                    for (MultipartFile img : images) {
+                        log.info("Received Image: name={}, originalFilename={}, size={}, contentType={}", 
+                                img.getName(), img.getOriginalFilename(), img.getSize(), img.getContentType());
+                    }
+                } else {
+                    log.info("Update Store Request: storeId={}, images=null", storeId);
+                }
                 storeService.updateStore(storeId, principalDetails.getUser(), request, images);
                 return ResponseEntity.ok(CommonResponse.success(null));
         }

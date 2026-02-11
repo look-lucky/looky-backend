@@ -53,5 +53,8 @@ public class StoreUpdateRequest {
 
     @Schema(description = "영업 중지 여부", example = "false")
     private JsonNullable<Boolean> isSuspended = JsonNullable.undefined();
+
+    @Schema(description = "유지할 이미지 ID 목록 (누락된 ID는 삭제됨)")
+    private JsonNullable<List<Long>> preserveImageIds = JsonNullable.undefined();
 }
 

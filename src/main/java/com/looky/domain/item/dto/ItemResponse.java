@@ -19,6 +19,8 @@ public class ItemResponse {
     private boolean isRepresentative;
     private boolean isHidden;
     private ItemBadge badge;
+    private Long categoryId;
+    private String categoryName;
 
     public static ItemResponse from(Item item) {
         return ItemResponse.builder()
@@ -33,6 +35,8 @@ public class ItemResponse {
                 .isRepresentative(item.getIsRepresentative() != null ? item.getIsRepresentative() : false)
                 .isHidden(item.getIsHidden() != null ? item.getIsHidden() : false)
                 .badge(item.getBadge())
+                .categoryId(item.getItemCategory() != null ? item.getItemCategory().getId() : null)
+                .categoryName(item.getItemCategory() != null ? item.getItemCategory().getName() : null)
                 .build();
     }
 }

@@ -57,8 +57,9 @@ public interface CouponRepository extends JpaRepository<Coupon, Long> {
     // 쿠폰 다운로드 시 다운로드 수 증가 (선착순 마감 처리, 동시성 제어)
     // @Modifying: UPDATE/DELETE 쿼리임을 명시
     // clearAutomatically = true: 쿼리 실행 후 영속성 컨텍스트(1차 캐시)를 비워서 DB와 동기화 (조회 시 최신 데이터 보장)
+    // 반환값 0 : "ID가 없거나" OR "수량 제한이 있는데 다 찼다" / 반환값 1 : 성공적으로 다운로드 수 증가
     @Modifying(clearAutomatically = true)
     @Query("UPDATE Coupon c SET c.downloadCount = c.downloadCount + 1 " +
-           "WHERE c.id = :id AND c.downloadCount < c.totalQuantity")
+           "WHERE c.id = :id AND (c.totalQuantity IS NULL OR c.downloadCount < c.totalQuantity)")
     int incrementDownloadCount(@Param("id") Long id);
 }

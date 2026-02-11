@@ -28,11 +28,10 @@ public class Coupon extends BaseEntity {
     @Lob
     private String description;
 
-    private LocalDateTime issueStartsAt; // 예약 발행 시 사용
+    private LocalDateTime issueStartsAt; // 쿠폰 노출/발급 시작일
     private LocalDateTime issueEndsAt; // 쿠폰 노출/발급 종료일
 
-    @Column(nullable = false)
-    private Integer totalQuantity; // 총 발행 한도
+    private Integer totalQuantity; // 총 발행 한도 (null이면 무한대)
 
     @Column(nullable = false)
     private Integer limitPerUser;

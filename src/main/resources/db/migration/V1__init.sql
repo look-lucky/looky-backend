@@ -246,7 +246,7 @@ create table coupon (
     description longtext,
     issue_starts_at datetime(6),
     issue_ends_at datetime(6),
-    total_quantity int not null,
+    total_quantity int,
     limit_per_user int not null,
     status enum ('ACTIVE','DRAFT','EXPIRED','SCHEDULED','STOPPED') not null,
     benefit_type enum ('FIXED_DISCOUNT','PERCENTAGE_DISCOUNT','SERVICE_GIFT') not null,

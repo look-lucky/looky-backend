@@ -19,7 +19,7 @@ public class CreateCouponRequest {
     @NotBlank(message = "쿠폰명은 필수입니다.")
     private String title;
 
-    private String description;
+
 
     private LocalDateTime issueStartsAt;
     private LocalDateTime issueEndsAt;

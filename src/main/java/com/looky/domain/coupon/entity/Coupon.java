@@ -25,8 +25,6 @@ public class Coupon extends BaseEntity {
     @Column(nullable = false)
     private String title;
 
-    @Lob
-    private String description;
 
     private LocalDateTime issueStartsAt; // 쿠폰 노출/발급 시작일
     private LocalDateTime issueEndsAt; // 쿠폰 노출/발급 종료일
@@ -51,10 +49,9 @@ public class Coupon extends BaseEntity {
     private Integer downloadCount = 0; // 현재 발급된 수량 (다운로드 수)
 
     @Builder
-    public Coupon(Store store, String title, String description, LocalDateTime issueStartsAt, LocalDateTime issueEndsAt, Integer totalQuantity, Integer limitPerUser, CouponStatus status, CouponBenefitType benefitType, String benefitValue, Integer minOrderAmount) {
+    public Coupon(Store store, String title, LocalDateTime issueStartsAt, LocalDateTime issueEndsAt, Integer totalQuantity, Integer limitPerUser, CouponStatus status, CouponBenefitType benefitType, String benefitValue, Integer minOrderAmount) {
         this.store = store;
         this.title = title;
-        this.description = description;
         this.issueStartsAt = issueStartsAt;
         this.issueEndsAt = issueEndsAt;
         this.totalQuantity = totalQuantity;
@@ -65,9 +62,8 @@ public class Coupon extends BaseEntity {
         this.minOrderAmount = minOrderAmount;
     }
 
-    public void updateCoupon(String title, String description, LocalDateTime issueStartsAt, LocalDateTime issueEndsAt, Integer totalQuantity, Integer limitPerUser, CouponStatus status, CouponBenefitType benefitType, String benefitValue, Integer minOrderAmount) {
+    public void updateCoupon(String title, LocalDateTime issueStartsAt, LocalDateTime issueEndsAt, Integer totalQuantity, Integer limitPerUser, CouponStatus status, CouponBenefitType benefitType, String benefitValue, Integer minOrderAmount) {
         this.title = title;
-        this.description = description;
         this.issueStartsAt = issueStartsAt;
         this.issueEndsAt = issueEndsAt;
         this.totalQuantity = totalQuantity;
@@ -76,5 +72,9 @@ public class Coupon extends BaseEntity {
         this.benefitType = benefitType;
         this.benefitValue = benefitValue;
         this.minOrderAmount = minOrderAmount;
+    }
+
+    public void increaseDownloadCount() {
+        this.downloadCount++;
     }
 }

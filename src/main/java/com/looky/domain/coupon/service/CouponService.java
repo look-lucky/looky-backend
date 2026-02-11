@@ -48,7 +48,6 @@ public class CouponService {
         Coupon coupon = Coupon.builder()
                 .store(store)
                 .title(request.getTitle())
-                .description(request.getDescription())
                 .issueStartsAt(request.getIssueStartsAt())
                 .issueEndsAt(request.getIssueEndsAt())
                 .totalQuantity(request.getTotalQuantity())
@@ -80,7 +79,6 @@ public class CouponService {
 
         coupon.updateCoupon(
                 request.getTitle().orElse(coupon.getTitle()),
-                request.getDescription().orElse(coupon.getDescription()),
                 request.getIssueStartsAt().orElse(coupon.getIssueStartsAt()),
                 request.getIssueEndsAt().orElse(coupon.getIssueEndsAt()),
                 request.getTotalQuantity().orElse(coupon.getTotalQuantity()),
@@ -233,7 +231,8 @@ public class CouponService {
     // 학생 쿠폰 발급 (다운로드)
     @Transactional
     public IssueCouponResponse downloadCoupon(Long couponId, User user) {
-        Coupon coupon = couponRepository.findById(couponId)
+        // 비관적 락을 사용하여 동시성 이슈 해결 (User Limit, Total Quantity Race Condition)
+        Coupon coupon = couponRepository.findByIdWithLock(couponId)
                 .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "쿠폰을 찾을 수 없습니다."));
 
         // Validation
@@ -250,33 +249,34 @@ public class CouponService {
             throw new CustomException(ErrorCode.UNPROCESSABLE_ENTITY, "발급 기간이 지났습니다.");
         }
 
-
+        // 인당 발급 한도 체크 (Lock 안에서 수행되므로 안전)
         Integer userCount = studentCouponRepository.countByCouponAndUser(coupon, user);
         if (userCount >= coupon.getLimitPerUser()) {
             throw new CustomException(ErrorCode.UNPROCESSABLE_ENTITY, "인당 발급 한도를 초과했습니다.");
         }
 
-        // Lazy Loading 초기화 (incrementDownloadCount 실행 시 영속성 컨텍스트가 초기화되므로 미리 로딩)
-        String storeName = coupon.getStore().getName();
-
-        // 발급 수량 증가 (Atomic Update)
-        int updatedRows = couponRepository.incrementDownloadCount(couponId);
-        
-        // 다운로드 수 증가 실패
-        if (updatedRows == 0) {
+        // 총 발행 한도 체크 & 증가 (Lock 안에서 수행되므로 안전)
+        if (coupon.getTotalQuantity() != null && coupon.getDownloadCount() >= coupon.getTotalQuantity()) {
             throw new CustomException(ErrorCode.UNPROCESSABLE_ENTITY, "선착순 마감되었습니다.");
+        }
+        coupon.increaseDownloadCount(); // Dirty Checking으로 업데이트
+
+        // 만료일 로직 개선: Min(발급일 + 30일, 쿠폰 종료일)
+        LocalDateTime expirationDate = now.plusDays(30);
+        if (coupon.getIssueEndsAt() != null && coupon.getIssueEndsAt().isBefore(expirationDate)) {
+            expirationDate = coupon.getIssueEndsAt();
         }
 
         StudentCoupon studentCoupon = StudentCoupon.builder()
                 .user(user)
                 .coupon(coupon)
                 .status(CouponUsageStatus.UNUSED)
-                .expiresAt(now.plusDays(30))
+                .expiresAt(expirationDate)
                 .build();
 
         studentCouponRepository.save(studentCoupon);
 
-        return IssueCouponResponse.from(studentCoupon, storeName);
+        return IssueCouponResponse.from(studentCoupon, coupon.getStore().getName());
     }
 
     @Transactional
@@ -292,7 +292,21 @@ public class CouponService {
             throw new CustomException(ErrorCode.UNPROCESSABLE_ENTITY, "만료된 쿠폰입니다.");
         }
 
-        return studentCoupon.activate();
+        // 중복 방지 코드 생성 (최대 5회 시도)
+        String verificationCode = generateUniqueVerificationCode(studentCoupon.getCoupon().getStore().getId());
+        
+        studentCoupon.activate(verificationCode);
+        return verificationCode;
+    }
+    
+    private String generateUniqueVerificationCode(Long storeId) {
+        for (int i = 0; i < 5; i++) {
+            String code = String.format("%04d", java.util.concurrent.ThreadLocalRandom.current().nextInt(0, 10000));
+            if (!studentCouponRepository.existsByCoupon_Store_IdAndVerificationCodeAndStatus(storeId, code, CouponUsageStatus.ACTIVATED)) {
+                return code;
+            }
+        }
+        throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR, "인증 코드 생성에 실패했습니다. 다시 시도해주세요.");
     }
 
     public List<IssueCouponResponse> getMyCoupons(User user) {

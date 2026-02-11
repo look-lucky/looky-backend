@@ -165,7 +165,7 @@ public class AuthService {
 
         userRepository.save(user);
 
-        createStudentProfile(user, request.getUniversityId(), request.getNickname(), request.getCollegeId(), request.getDepartmentId());
+        createStudentProfile(user, request.getNickname(), request.getUniversityId(), request.getCollegeId(), request.getDepartmentId(), request.getIsClubMember());
 
         return user.getId();
     }
@@ -285,7 +285,7 @@ public class AuthService {
         if (request.getRole() == Role.ROLE_STUDENT) {
             // 학생 로직
             user.updateEmail(request.getEmail());
-            createStudentProfile(user, request.getUniversityId(), request.getNickname(), request.getCollegeId(), request.getDepartmentId());
+            createStudentProfile(user,  request.getNickname(), request.getUniversityId(), request.getCollegeId(), request.getDepartmentId(), request.getIsClubMember());
         } else if (request.getRole() == Role.ROLE_OWNER) {
             // 점주 로직
             user.updateEmail(request.getEmail()); // 소셜 가입 시 이메일 업데이트 필요
@@ -326,7 +326,7 @@ public class AuthService {
         refreshTokenService.delete(user.getId());
     }
     
-    private void createStudentProfile(User user, Long universityId, String nickname, Long collegeId, Long departmentId) {
+    private void createStudentProfile(User user, String nickname, Long universityId, Long collegeId, Long departmentId, Boolean isClubMember) {
 
         University university = universityRepository.findById(universityId)
                 .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "해당 대학을 찾을 수 없습니다."));
@@ -360,9 +360,6 @@ public class AuthService {
                 .university(university)
                 .build();
         studentProfileRepository.save(profile);
-
-
-
     }
 
     private void createOwnerProfile(User user, String name) {

@@ -23,5 +23,5 @@ public class StudentSignupRequest {
     private Long universityId;
     private Long collegeId; 
     private Long departmentId; 
-
+    private Boolean isClubMember;
 }

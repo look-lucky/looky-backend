@@ -262,6 +262,7 @@ public class CouponService {
         // 발급 수량 증가 (Atomic Update)
         int updatedRows = couponRepository.incrementDownloadCount(couponId);
         
+        // 다운로드 수 증가 실패
         if (updatedRows == 0) {
             throw new CustomException(ErrorCode.UNPROCESSABLE_ENTITY, "선착순 마감되었습니다.");
         }

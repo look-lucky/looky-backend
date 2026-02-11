@@ -81,6 +81,21 @@ public class CouponController {
                 return ResponseEntity.status(HttpStatus.NO_CONTENT).body(CommonResponse.success(null));
         }
 
+        @Operation(summary = "[점주] 쿠폰 수동 만료", description = "점주가 자신의 쿠폰을 수동으로 만료시킵니다.")
+        @ApiResponses(value = {
+                @ApiResponse(responseCode = "200", description = "쿠폰 만료 성공"),
+                @ApiResponse(responseCode = "403", description = "권한 없음 (본인 소유 상점 아님)", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class))),
+                @ApiResponse(responseCode = "404", description = "쿠폰 없음", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class)))
+        })
+        @PostMapping("/coupons/{couponId}/expire")
+        public ResponseEntity<CommonResponse<Void>> expireCoupon(
+                @Parameter(description = "쿠폰 ID") @PathVariable Long couponId,
+                @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails
+        ) {
+            couponService.expireCoupon(couponId, principalDetails.getUser());
+            return ResponseEntity.ok(CommonResponse.success(null));
+        }
+
         @Operation(summary = "[점주] 쿠폰 코드 조회 (검증)", description = "손님이 제시한 4자리 코드를 입력하여 혜택 및 사용자 정보를 확인합니다. (상태 변경 없음)")
         @ApiResponses(value = {
                 @ApiResponse(responseCode = "200", description = "쿠폰 조회 성공"),

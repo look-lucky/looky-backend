@@ -53,6 +53,7 @@ public class StudentCoupon extends BaseEntity {
         this.expiresAt = expiresAt;
     }
 
+    // 활성화 처리
     public String activate(String verificationCode) {
         if (this.status != CouponUsageStatus.UNUSED) {
             throw new CustomException(ErrorCode.STATE_CONFLICT, "이미 사용 중이거나 사용된 쿠폰입니다.");
@@ -70,12 +71,21 @@ public class StudentCoupon extends BaseEntity {
         return this.verificationCode;
     }
 
+    // 사용 처리
     public void use() {
         if (this.status != CouponUsageStatus.ACTIVATED) {
-            throw new CustomException(ErrorCode.STATE_CONFLICT, "만료된 쿠폰입니다.");
+            throw new CustomException(ErrorCode.STATE_CONFLICT, "활성화되지 않은 쿠폰입니다.");
         }
         this.status = CouponUsageStatus.USED;
         this.usedAt = LocalDateTime.now();
+    }
+    
+    // 만료 처리
+    public void expire() {
+        if (this.status == CouponUsageStatus.EXPIRED) {
+            throw new CustomException(ErrorCode.STATE_CONFLICT, "이미 만료된 쿠폰입니다.");
+        }
+        this.status = CouponUsageStatus.EXPIRED;
     }
 
 }

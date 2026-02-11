@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Optional;
 
 
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -61,5 +62,10 @@ public interface CouponRepository extends JpaRepository<Coupon, Long> {
             @Param("storeId") Long storeId,
             @Param("now") LocalDateTime now
     );
+
+    // ACTIVE 쿠폰 중 발급 가능 기간 지난 쿠폰 EXPIRED로 설정
+    @Modifying
+    @Query("UPDATE Coupon c SET c.status = 'EXPIRED' WHERE c.status = 'ACTIVE' AND c.issueEndsAt < :now")
+    void expireByIssueEndsAt(@Param("now") LocalDateTime now);
 
 }

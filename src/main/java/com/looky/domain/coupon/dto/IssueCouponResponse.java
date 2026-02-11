@@ -20,6 +20,7 @@ public class IssueCouponResponse {
 
     private CouponBenefitType benefitType;
     private String benefitValue;
+    private Integer minOrderAmount;
     private String storeName;
 
     public static IssueCouponResponse from(StudentCoupon studentCoupon) {
@@ -38,6 +39,7 @@ public class IssueCouponResponse {
 
                 .benefitType(coupon.getBenefitType())
                 .benefitValue(coupon.getBenefitValue())
+                .minOrderAmount(coupon.getMinOrderAmount())
                 .storeName(storeName)
                 .build();
     }

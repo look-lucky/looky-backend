@@ -11,13 +11,8 @@ import java.util.TimeZone;
 @EnableJpaAuditing
 public class LookyApplication {
 
-    @PostConstruct
-    public void started() {
-        // 기본 타임존을 서울로 설정
-        TimeZone.setDefault(TimeZone.getTimeZone("Asia/Seoul"));
-    }
-
     public static void main(String[] args) {
+        TimeZone.setDefault(TimeZone.getTimeZone("Asia/Seoul"));
         SpringApplication.run(LookyApplication.class, args);
     }
 

@@ -223,7 +223,7 @@ INSERT INTO coupon (coupon_id, created_at, modified_at, title, issue_starts_at, 
 
 -- Expired Coupon (Store 1)
 INSERT INTO coupon (coupon_id, created_at, modified_at, title, issue_starts_at, issue_ends_at, valid_days, total_quantity, limit_per_user, status, benefit_type, benefit_value, min_order_amount, download_count, store_id) VALUES 
-(3, NOW(), NOW(), '지난 겨울 할인', '2026-02-21', '2026-12-31', 30, 100, 1, 'EXPIRED', 'PERCENTAGE_DISCOUNT', '10', 0, 0, 1);
+(3, NOW(), NOW(), '지난 겨울 할인', '2025-02-21', '2025-12-31', 30, 100, 1, 'EXPIRED', 'PERCENTAGE_DISCOUNT', '10', 0, 0, 1);
 
 -- Scheduled Coupon (Store 3)
 INSERT INTO coupon (coupon_id, created_at, modified_at, title, issue_starts_at, issue_ends_at, valid_days, total_quantity, limit_per_user, status, benefit_type, benefit_value, min_order_amount, download_count, store_id) VALUES 

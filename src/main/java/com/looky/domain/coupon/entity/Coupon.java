@@ -86,4 +86,8 @@ public class Coupon extends BaseEntity {
     public void expire() {
         this.status = CouponStatus.EXPIRED;
     }
+
+    public void expireByWithdrawal() {
+        this.status = CouponStatus.WITHDRAWN_BY_OWNER;
+    }
 }

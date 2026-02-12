@@ -182,6 +182,24 @@ public class Store extends BaseEntity {
         this.representativeName = representativeName;
     }
 
+    public void unclaim() {
+        this.user = null;
+        this.bizRegNo = null;
+        this.storePhone = null;
+        this.representativeName = null;
+        this.storeStatus = StoreStatus.UNCLAIMED;
+        this.needToCheck = false;
+        this.checkReason = null;
+        this.introduction = null;
+        this.operatingHours = null;
+        this.storeCategories.clear();
+        this.storeMoods.clear();
+        this.images.clear();
+        this.holidayDates.clear();
+        this.isSuspended = false;
+        this.cloverGrade = CloverGrade.SEED;
+    }
+
     public void markAsNeedCheck(String reason) {
         this.needToCheck = true;
         this.checkReason = reason;

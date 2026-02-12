@@ -249,7 +249,7 @@ create table coupon (
     valid_days int not null,
     total_quantity int,
     limit_per_user int not null,
-    status enum ('ACTIVE','EXPIRED') not null,
+    status enum ('ACTIVE','EXPIRED','WITHDRAWN_BY_OWNER') not null,
     benefit_type enum ('FIXED_DISCOUNT','PERCENTAGE_DISCOUNT','SERVICE_GIFT') not null,
     benefit_value varchar(255),
     min_order_amount int,

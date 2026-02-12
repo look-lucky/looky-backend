@@ -120,6 +120,7 @@ create table store (
     latitude double,
     longitude double,
     store_phone varchar(255),
+    representative_name varchar(255),
     need_to_check bit,
     check_reason varchar(255),
     introduction longtext,

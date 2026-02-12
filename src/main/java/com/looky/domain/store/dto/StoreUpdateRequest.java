@@ -36,6 +36,10 @@ public class StoreUpdateRequest {
     @Schema(description = "가게 전화번호", example = "02-1234-5678")
     private JsonNullable<String> phone = JsonNullable.undefined();
 
+    @Schema(description = "대표자명", example = "홍길동")
+    private JsonNullable<String> representativeName = JsonNullable.undefined();
+
+
     @Schema(description = "가게 소개", example = "맛있는 커피와 디저트가 있는 공간입니다.")
     private JsonNullable<String> introduction = JsonNullable.undefined();
 

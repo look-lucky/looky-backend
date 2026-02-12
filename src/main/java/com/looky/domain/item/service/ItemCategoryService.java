@@ -62,6 +62,10 @@ public class ItemCategoryService {
              throw new CustomException(ErrorCode.BAD_REQUEST, "해당 매장의 카테고리가 아닙니다.");
         }
         
+        if (name == null || name.isBlank()) {
+             throw new CustomException(ErrorCode.BAD_REQUEST, "카테고리 이름은 필수입니다.");
+        }
+        
         category.updateName(name);
     }
 

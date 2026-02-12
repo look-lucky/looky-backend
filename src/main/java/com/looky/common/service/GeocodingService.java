@@ -90,7 +90,7 @@ public class GeocodingService {
             // DB 업데이트
             Store store = storeRepository.findById(storeId).orElse(null);
             if (store != null) {
-                store.updateStore(null, null, null, null, latitude, longitude, null, null, null, null, null, null, null);
+                store.updateLocation(latitude, longitude);
                 log.info("[Geocoding] Updated location for storeId={}: lat={}, lng={}", storeId, latitude, longitude);
             }
 

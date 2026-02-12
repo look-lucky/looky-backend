@@ -1,6 +1,7 @@
 package com.looky.domain.user.dto;
 
 import com.looky.domain.user.entity.Gender;
+import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -13,6 +14,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @Builder
 public class OwnerSignupRequest {
+    @Pattern(regexp = "^[a-zA-Z0-9]{6,16}$", message = "아이디는 영문, 숫자 포함 6자 이상 16자 이하여야 합니다.")
     private String username; // 아이디 (이메일X)
     private String password;
     private String email;

@@ -223,16 +223,16 @@ INSERT INTO coupon (coupon_id, created_at, modified_at, title, issue_starts_at, 
 
 -- Expired Coupon (Store 1)
 INSERT INTO coupon (coupon_id, created_at, modified_at, title, issue_starts_at, issue_ends_at, valid_days, total_quantity, limit_per_user, status, benefit_type, benefit_value, min_order_amount, download_count, store_id) VALUES 
-(3, NOW(), NOW(), '지난 겨울 할인', '2025-12-01', '2025-12-31', 30, 100, 1, 'EXPIRED', 'PERCENTAGE_DISCOUNT', '10', 0, 0, 1);
+(3, NOW(), NOW(), '지난 겨울 할인', '2026-02-21', '2026-12-31', 30, 100, 1, 'EXPIRED', 'PERCENTAGE_DISCOUNT', '10', 0, 0, 1);
 
 -- Scheduled Coupon (Store 3)
 INSERT INTO coupon (coupon_id, created_at, modified_at, title, issue_starts_at, issue_ends_at, valid_days, total_quantity, limit_per_user, status, benefit_type, benefit_value, min_order_amount, download_count, store_id) VALUES 
-(4, NOW(), NOW(), '3월 개강 이벤트', '2026-03-02', '2026-03-31', 14, 200, 1, 'ACTIVE', 'FIXED_DISCOUNT', '500', 0, 0, 3);
+(4, NOW(), NOW(), '3월 개강 이벤트', '2026-02-21', '2026-03-31', 14, 200, 1, 'ACTIVE', 'FIXED_DISCOUNT', '500', 0, 0, 3);
 
 -- Active but Sold Out Coupon (Store 4 - no store owner user_id but coupon exists? Let's assign to Store 2 instead)
 -- Let's make Store 5 have a sold out coupon
 INSERT INTO coupon (coupon_id, created_at, modified_at, title, issue_starts_at, issue_ends_at, valid_days, total_quantity, limit_per_user, status, benefit_type, benefit_value, min_order_amount, download_count, store_id) VALUES 
-(5, NOW(), NOW(), '선착순 1명 무료', '2026-02-01', '2026-02-28', 1, 0, 1, 'ACTIVE', 'FIXED_DISCOUNT', '5000', 0, 0, 5);
+(5, NOW(), NOW(), '선착순 1명 무료', '2026-02-20', '2026-02-28', 1, 0, 1, 'ACTIVE', 'FIXED_DISCOUNT', '5000', 0, 0, 5);
 
 -- 5.5 Student Coupons
 INSERT INTO student_coupon (student_coupon_id, created_at, modified_at, verification_code, status, issued_at, activated_at, used_at, expires_at, user_id, coupon_id) VALUES
@@ -244,15 +244,15 @@ INSERT INTO student_coupon (student_coupon_id, created_at, modified_at, verifica
 -- 6. Events
 -- Upcoming
 INSERT INTO events (event_id, created_at, modified_at, title, description, latitude, longitude, start_date_time, end_date_time, status, university_id) VALUES 
-(1, NOW(), NOW(), '2026 전북대학교 대동제', '2026년 전북대 대동제에 여러분을 초대합니다!', 35.846833, 127.129360, '2026-05-20 10:00:00', '2026-05-22 23:00:00', 'UPCOMING', 1);
+(1, NOW(), NOW(), '2026 전북대학교 대동제', '2026년 전북대 대동제에 여러분을 초대합니다!', 35.846833, 127.129360, '2026-02-15 10:00:00', '2026-05-22 23:00:00', 'UPCOMING', 1);
 
 -- Live
 INSERT INTO events (event_id, created_at, modified_at, title, description, latitude, longitude, start_date_time, end_date_time, status, university_id) VALUES 
-(2, NOW(), NOW(), '소프트웨어공학과 신입생 오리엔테이션', '신입생 환영회', 35.846100, 127.129600, '2026-02-07 09:00:00', '2026-02-07 18:00:00', 'LIVE', 1);
+(2, NOW(), NOW(), '소프트웨어공학과 신입생 오리엔테이션', '신입생 환영회', 35.846100, 127.129600, '2026-02-13 09:00:00', '2026-02-28 18:00:00', 'LIVE', 1);
 
 -- Ended
 INSERT INTO events (event_id, created_at, modified_at, title, description, latitude, longitude, start_date_time, end_date_time, status, university_id) VALUES 
-(3, NOW(), NOW(), '2025 졸업작품 전시회', '고생하셨습니다', 35.846100, 127.129600, '2025-11-20 09:00:00', '2025-11-22 18:00:00', 'ENDED', 1);
+(3, NOW(), NOW(), '2025 졸업작품 전시회', '고생하셨습니다', 35.846100, 127.129600, '2026-02-16 09:00:00', '2025-02-28 18:00:00', 'ENDED', 1);
 
 
 INSERT INTO event_types (event_id, event_type) VALUES (1, 'SCHOOL_EVENT'), (1, 'PERFORMANCE'), (2, 'COMMUNITY'), (3, 'SCHOOL_EVENT');

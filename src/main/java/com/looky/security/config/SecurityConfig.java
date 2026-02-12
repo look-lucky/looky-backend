@@ -92,7 +92,9 @@ public class SecurityConfig {
                         .authorizeHttpRequests((auth) -> auth
                                 .requestMatchers("/api/auth/**", "/reissue", "/docs", "/swagger-ui/**", "/v3/api-docs/**", "/health")
                                 .permitAll()
-                                .requestMatchers(HttpMethod.GET, "/api/universities/**")
+                                .requestMatchers(HttpMethod.GET, "/api/universities/**", "/api/universities/**/**", "/api/organizations/**/**", "/api/store-claims/search")
+                                .permitAll()
+                                .requestMatchers(HttpMethod.POST, "/api/biz-reg-no/verify", "/api/store-claims/**")
                                 .permitAll()
                                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
                                 .anyRequest().authenticated());

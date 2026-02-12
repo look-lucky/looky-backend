@@ -6,6 +6,8 @@ import lombok.Getter;
 @Getter
 @Builder
 public class StudentInfoResponse {
+    private String username;
+    private String nickname;
     private Long universityId;
     private Long collegeId;
     private Long departmentId;
@@ -13,5 +15,4 @@ public class StudentInfoResponse {
     private String collegeName;
     private String departmentName;
     private Boolean isClubMember;
-    private String username;
 }

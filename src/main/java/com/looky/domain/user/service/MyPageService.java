@@ -117,6 +117,8 @@ public class MyPageService {
         }
 
         return StudentInfoResponse.builder()
+                .username(user.getUsername())
+                .nickname(profile.getNickname())
                 .universityId(profile.getUniversity() != null ? profile.getUniversity().getId() : null)
                 .collegeId(collegeId)
                 .departmentId(departmentId)
@@ -124,7 +126,6 @@ public class MyPageService {
                 .collegeName(collegeName)
                 .departmentName(departmentName)
                 .isClubMember(profile.getIsClubMember())
-                .username(user.getUsername())
                 .build();
     }
 

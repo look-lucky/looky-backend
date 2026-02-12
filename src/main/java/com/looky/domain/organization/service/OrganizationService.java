@@ -85,6 +85,11 @@ public class OrganizationService {
                                 .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "단과대학을 찾을 수 없습니다."));
                 }
 
+                // 같은 대학 내 이름 중복 확인
+                if (organizationRepository.existsByUniversityIdAndName(universityId, request.getName())) {
+                        throw new CustomException(ErrorCode.DUPLICATE_RESOURCE, "이미 존재하는 소속 이름입니다.");
+                }
+
                 Organization organization = request.toEntity(university, parent, user);
                 Organization savedOrganization = organizationRepository.save(organization);
                 return savedOrganization.getId();
@@ -118,6 +123,14 @@ public class OrganizationService {
                     }
                 }
 
+                // 이름 변경 시 중복 확인
+                if (request.getName().isPresent()) {
+                    String newName = request.getName().get();
+                    if (!organization.getName().equals(newName) && organizationRepository.existsByUniversityIdAndName(organization.getUniversity().getId(), newName)) {
+                        throw new CustomException(ErrorCode.DUPLICATE_RESOURCE, "이미 존재하는 소속 이름입니다.");
+                    }
+                }
+
                 organization.update(
                     request.getCategory().orElse(organization.getCategory()),
                     request.getName().orElse(organization.getName()),
@@ -134,6 +147,10 @@ public class OrganizationService {
                 // 학생회인 경우 본인 소유 확인
                 if (user.getRole() == Role.ROLE_COUNCIL && !Objects.equals(organization.getUser().getId(), user.getId())) {
                         throw new CustomException(ErrorCode.FORBIDDEN, "본인이 생성한 소속만 삭제할 수 있습니다.");
+                }
+
+                if (organizationRepository.existsByParentId(organizationId)) {
+                        throw new CustomException(ErrorCode.BAD_REQUEST, "하위 조직이 있어 삭제할 수 없습니다.");
                 }
 
                 organizationRepository.delete(organization);

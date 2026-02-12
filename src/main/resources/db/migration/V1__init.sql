@@ -6,7 +6,6 @@ create table university (
     university_id bigint auto_increment primary key,
     email_domain varchar(255) not null,
     name varchar(255) not null,
-    constraint UK_university_email unique (email_domain),
     constraint UK_university_name unique (name)
 );
 
@@ -94,7 +93,8 @@ create table organization (
     user_id bigint not null,
     foreign key (university_id) references university (university_id),
     foreign key (parent_id) references organization (organization_id),
-    foreign key (user_id) references user (user_id)
+    foreign key (user_id) references user (user_id),
+    constraint UK_organization_university_name unique (university_id, name)
 );
 
 create table user_organization (

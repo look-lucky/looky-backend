@@ -263,7 +263,8 @@ public class StoreService {
                     : null,
             
             request.getHolidayDates().orElse(store.getHolidayDates()),
-            request.getIsSuspended().orElse(store.getIsSuspended())
+            request.getIsSuspended().orElse(store.getIsSuspended()),
+            request.getRepresentativeName().orElse(store.getRepresentativeName())
         );
 
         // 1. 이미지 삭제 처리 (preserveImageIds 기준)

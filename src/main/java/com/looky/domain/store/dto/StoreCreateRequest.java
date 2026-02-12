@@ -37,6 +37,8 @@ public class StoreCreateRequest {
 
     private String storePhone;
 
+    private String representativeName; // 대표자명
+
     private String introduction;
 
     private String operatingHours;
@@ -58,6 +60,7 @@ public class StoreCreateRequest {
                 .latitude(latitude)
                 .longitude(longitude)
                 .storePhone(storePhone)
+                .representativeName(representativeName)
                 .introduction(introduction)
                 .operatingHours(operatingHours)
                 .storeCategories(new HashSet<>(storeCategories))

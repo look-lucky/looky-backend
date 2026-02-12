@@ -66,7 +66,7 @@ public class StoreClaimVerificationService {
         claim.updateStatus(StoreClaimStatus.APPROVED, null);
 
         // 연관 스토어 정보 업데이트
-        store.approveClaim(user, claim.getBizRegNo(), claim.getStorePhone());
+        store.approveClaim(user, claim.getBizRegNo(), claim.getStorePhone(), claim.getRepresentativeName());
         
         // 등급 재계산
         storeService.recalculateCloverGrade(store);

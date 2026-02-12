@@ -2,6 +2,12 @@ package com.looky.domain.user.service;
 
 import com.looky.common.exception.CustomException;
 import com.looky.common.exception.ErrorCode;
+import com.looky.common.service.S3Service;
+import com.looky.domain.coupon.entity.Coupon;
+import com.looky.domain.coupon.repository.CouponRepository;
+import com.looky.domain.item.entity.Item;
+import com.looky.domain.item.repository.ItemCategoryRepository;
+import com.looky.domain.item.repository.ItemRepository;
 import com.looky.domain.organization.entity.Organization;
 import com.looky.domain.organization.entity.OrganizationCategory;
 import com.looky.domain.organization.entity.University;
@@ -9,6 +15,11 @@ import com.looky.domain.organization.entity.UserOrganization;
 import com.looky.domain.organization.repository.OrganizationRepository;
 import com.looky.domain.organization.repository.UniversityRepository;
 import com.looky.domain.organization.repository.UserOrganizationRepository;
+import com.looky.domain.store.entity.StoreImage;
+import com.looky.domain.store.repository.StoreRepository;
+import com.looky.domain.storenews.entity.StoreNews;
+import com.looky.domain.storenews.entity.StoreNewsImage;
+import com.looky.domain.storenews.repository.StoreNewsRepository;
 import com.looky.domain.user.dto.ChangePasswordRequest;
 import com.looky.domain.user.dto.ChangeUsernameRequest;
 import com.looky.domain.user.dto.UpdateStudentProfileRequest;
@@ -40,6 +51,12 @@ public class MyPageService {
     private final OrganizationRepository organizationRepository;
     private final UserOrganizationRepository userOrganizationRepository;
     private final UniversityRepository universityRepository;
+    private final StoreRepository storeRepository;
+    private final CouponRepository couponRepository;
+    private final StoreNewsRepository storeNewsRepository;
+    private final ItemRepository itemRepository;
+    private final ItemCategoryRepository itemCategoryRepository;
+    private final S3Service s3Service;
 
     // 아이디 변경
     @Transactional
@@ -159,7 +176,7 @@ public class MyPageService {
         profile.update(request.getNickname(), request.getIsClubMember() != null ? request.getIsClubMember() : profile.getIsClubMember(), null);
     }
 
-    // 대학 수정
+    // 학생 대학 수정
     @Transactional
     public void updateUniversity(Long userId, UpdateUniversityRequest request) {
         User user = userRepository.findById(userId)
@@ -200,5 +217,60 @@ public class MyPageService {
                 .organization(organization)
                 .build();
         userOrganizationRepository.save(userOrg);
+    }
+
+    // 점주 탈퇴 시 데이터 정리
+    @Transactional
+    public void withdrawOwner(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        if (user.getRole() != Role.ROLE_OWNER) {
+            throw new CustomException(ErrorCode.FORBIDDEN, "점주 회원만 이용 가능합니다.");
+        }
+
+        // 1. 소유한 가게들 처리
+        List<com.looky.domain.store.entity.Store> stores = storeRepository.findAllByUser(user);
+        for (com.looky.domain.store.entity.Store store : stores) {
+            // 1-1. S3 이미지 삭제 (가게, 소식, 상품)
+            // 가게 이미지 삭제
+            for (StoreImage image : store.getImages()) {
+                s3Service.deleteFile(image.getImageUrl());
+            }
+
+            // 가게 소식 이미지 삭제
+            List<StoreNews> newsList = storeNewsRepository.findByStoreId(store.getId(), org.springframework.data.domain.Pageable.unpaged()).getContent();
+            for (StoreNews news : newsList) {
+                for (StoreNewsImage image : news.getImages()) {
+                    s3Service.deleteFile(image.getImageUrl());
+                }
+            }
+
+            // 상품 이미지 삭제
+            List<Item> items = itemRepository.findByStoreId(store.getId());
+            for (Item item : items) {
+                if (item.getImageUrl() != null) {
+                    s3Service.deleteFile(item.getImageUrl());
+                }
+            }
+
+            // 1-2. 가게 점유 해제 및 민감 정보 삭제 (이미지 리스트도 clear됨)
+            store.unclaim();
+
+            // 1-3. 진행 중인 쿠폰 만료 처리
+            List<Coupon> coupons = couponRepository.findByStoreId(store.getId());
+            for (Coupon coupon : coupons) {
+                if (coupon.getStatus() == com.looky.domain.coupon.entity.CouponStatus.ACTIVE) {
+                    coupon.expireByWithdrawal();
+                }
+            }
+
+            // 1-4. 가게 소식 삭제
+            storeNewsRepository.deleteByStore(store);
+
+            // 1-5. 상품(메뉴) 및 카테고리 삭제 (순서 중요: 상품 -> 카테고리)
+            itemRepository.deleteByStoreId(store.getId());
+            itemCategoryRepository.deleteByStoreId(store.getId());
+        }
     }
 }

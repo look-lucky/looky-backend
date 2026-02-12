@@ -91,7 +91,8 @@ public class AdminStoreService {
                             store.getStoreCategories(),
                             store.getStoreMoods(),
                             store.getHolidayDates(),
-                            store.getIsSuspended()
+                            store.getIsSuspended(),
+                            store.getRepresentativeName()
                     );
                 } else { // 가게가 존재하지 않는 경우 -> 생성
                     store = Store.builder()

@@ -7,6 +7,8 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import com.looky.domain.organization.entity.University;
+import org.hibernate.annotations.Formula;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -44,6 +46,9 @@ public class Store extends BaseEntity {
     private Double longitude; // 경도
 
     private String storePhone; // 가게 전화 번호
+
+    @Formula("(SELECT COALESCE(AVG(r.rating), 0) FROM review r WHERE r.store_id = store_id AND r.parent_review_id IS NULL)")
+    private Double averageRating; // 평균 별점 (Formula)
 
     private String representativeName; // 대표자명
 

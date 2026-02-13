@@ -16,6 +16,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -76,18 +77,17 @@ public class FavoriteController {
                 return ResponseEntity.ok(CommonResponse.success(count));
         }
 
-        @Operation(summary = "[학생] 내 단골 상점 목록 조회", description = "내가 등록한 단골 상점 목록을 페이징하여 조회합니다.")
+        @Operation(summary = "[학생] 내 단골 상점 목록 조회", description = "내가 등록한 단골 상점 목록을 페이징하여 조회합니다.<br>정렬 기능: 찜한최신순(sort=createdAt,desc), 별점높은순(sort=store.averageRating,desc)")
         @ApiResponses(value = {
                         @ApiResponse(responseCode = "200", description = "조회 성공")
         })
         @GetMapping("/favorites")
         public ResponseEntity<CommonResponse<PageResponse<FavoriteStoreResponse>>> getMyFavorites(
                 @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,
-                @Parameter(description = "페이징 정보") @PageableDefault(size = 10) Pageable pageable
+                @Parameter(description = "페이징 정보") @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
         )
         {
-                Page<FavoriteStoreResponse> favorites = favoriteService.getMyFavorites(principalDetails.getUser(),
-                                pageable);
+                Page<FavoriteStoreResponse> favorites = favoriteService.getMyFavorites(principalDetails.getUser(), pageable);
                 return ResponseEntity.ok(CommonResponse.success(PageResponse.from(favorites)));
         }
 }

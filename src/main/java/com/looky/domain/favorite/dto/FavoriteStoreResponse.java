@@ -1,5 +1,6 @@
 package com.looky.domain.favorite.dto;
 
+import com.looky.domain.favorite.entity.FavoriteStore;
 import com.looky.domain.store.entity.Store;
 import com.looky.domain.store.entity.StoreCategory;
 import lombok.AllArgsConstructor;
@@ -7,6 +8,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,14 +24,19 @@ public class FavoriteStoreResponse {
     private String jibunAddress;
     private List<StoreCategory> storeCategories;
     private String imageUrl; // 대표이미지
+    private Double averageRating; // 별점 평균
+    private LocalDateTime createdAt; // 찜한 시간
 
-    public static FavoriteStoreResponse from(Store store) {
+    public static FavoriteStoreResponse from(FavoriteStore favoriteStore) {
+        Store store = favoriteStore.getStore();
         return FavoriteStoreResponse.builder()
                 .storeId(store.getId())
                 .name(store.getName())
                 .roadAddress(store.getRoadAddress())
                 .jibunAddress(store.getJibunAddress())
                 .storeCategories(new ArrayList<>(store.getStoreCategories()))
+                .averageRating(store.getAverageRating())
+                .createdAt(favoriteStore.getCreatedAt())
                 .build();
     }
 }

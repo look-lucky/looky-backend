@@ -64,6 +64,6 @@ public class FavoriteService {
 
     public Page<FavoriteStoreResponse> getMyFavorites(User user, Pageable pageable) {
         return favoriteRepository.findByUser(user, pageable)
-                .map(favoriteStore -> FavoriteStoreResponse.from(favoriteStore.getStore()));
+                .map(FavoriteStoreResponse::from);
     }
 }

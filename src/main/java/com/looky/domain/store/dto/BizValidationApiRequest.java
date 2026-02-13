@@ -6,26 +6,24 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
 
 import java.util.List;
 
+// 서버 -> 공공데이터포털 API 요청 DTO
 @Getter
 @Builder
-@ToString
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-public class BizVerificationRequest {
+public class BizValidationApiRequest {
 
-    @JsonProperty("bizs")
-    private List<BizInfo> bizs;
+    @JsonProperty("businesses")
+    private List<BusinessInfo> businesses;
 
     @Getter
     @Builder
-    @ToString
     @NoArgsConstructor(access = AccessLevel.PROTECTED)
     @AllArgsConstructor
-    public static class BizInfo {
+    public static class BusinessInfo {
         @JsonProperty("b_no")
         private String bNo; // 사업자등록번호
 
@@ -34,6 +32,5 @@ public class BizVerificationRequest {
 
         @JsonProperty("p_nm")
         private String pNm; // 대표자 성명
-
     }
 }

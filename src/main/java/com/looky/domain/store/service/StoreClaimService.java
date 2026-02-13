@@ -30,6 +30,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import com.looky.domain.store.dto.BizValidationApiRequest;
 import java.io.IOException;
 import java.net.URI;
 import java.util.Collections;
@@ -57,6 +58,7 @@ public class StoreClaimService {
 
     // 사업자등록번호 유효성 검증
     public BizVerificationResponse verifyBizRegNo(BizVerificationRequest request) {
+        log.info("사업자등록정보 진위확인 요청: {}", request);
 
         RestTemplate restTemplate = new RestTemplate();
 
@@ -68,20 +70,24 @@ public class StoreClaimService {
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
 
-        // 데이터 정제 (하이픈 제거)
-        List<BizVerificationRequest.BizInfo> sanitizedBizs = request.getBizs().stream()
-                .map(biz -> BizVerificationRequest.BizInfo.builder()
+        // 데이터 정제 (하이픈 제거) 및 외부 API 요청 DTO 변환
+        if (request.getBizs() == null) {
+            throw new CustomException(ErrorCode.BAD_REQUEST, "사업자 정보 목록이 비어있습니다.");
+        }
+        
+        List<BizValidationApiRequest.BusinessInfo> businessInfos = request.getBizs().stream()
+                .map(biz -> BizValidationApiRequest.BusinessInfo.builder()
                         .bNo(biz.getBNo() != null ? biz.getBNo().replaceAll("-", "") : null)
                         .startDt(biz.getStartDt() != null ? biz.getStartDt().replaceAll("-", "") : null)
                         .pNm(biz.getPNm())
                         .build())
                 .collect(Collectors.toList());
 
-        BizVerificationRequest sanitizedRequest = BizVerificationRequest.builder()
-                .bizs(sanitizedBizs)
+        BizValidationApiRequest apiRequest = BizValidationApiRequest.builder()
+                .businesses(businessInfos)
                 .build();
 
-        HttpEntity<BizVerificationRequest> entity = new HttpEntity<>(sanitizedRequest, headers);
+        HttpEntity<BizValidationApiRequest> entity = new HttpEntity<>(apiRequest, headers);
 
         try {
             ResponseEntity<BizVerificationResponse> responseEntity = restTemplate.postForEntity(uri, entity,

@@ -172,7 +172,12 @@ public class OrganizationService {
 
                 // 이미 같은 카테고리(단과대학 or 학과)에 가입되어 있는지 확인
                 if (userOrganizationRepository.existsByUserAndOrganization_Category(currentUser, organization.getCategory())) {
-                        String categoryName = organization.getCategory() == OrganizationCategory.COLLEGE ? "단과대학" : "학과";
+                        String categoryName;
+                        if (organization.getCategory() == OrganizationCategory.COLLEGE) categoryName = "단과대학";
+                        else if (organization.getCategory() == OrganizationCategory.DEPARTMENT) categoryName = "학과";
+                        else if (organization.getCategory() == OrganizationCategory.UNIVERSITY_COUNCIL) categoryName = "총학생회";
+                        else categoryName = "총동아리연합회";
+                        
                         throw new CustomException(ErrorCode.DUPLICATE_RESOURCE, "이미 가입한 " + categoryName + "이 있습니다.");
                 }
 

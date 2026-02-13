@@ -3,6 +3,7 @@ package com.looky.domain.user.service;
 import com.looky.common.exception.CustomException;
 import com.looky.common.exception.ErrorCode;
 import com.looky.domain.organization.entity.Organization;
+import com.looky.domain.organization.entity.OrganizationCategory;
 import com.looky.domain.organization.entity.University;
 import com.looky.domain.organization.entity.UserOrganization;
 import com.looky.domain.organization.repository.OrganizationRepository;
@@ -352,6 +353,16 @@ public class AuthService {
             }
 
             userOrganizationRepository.save(new UserOrganization(user, department));
+        }
+
+        // 총학생회 자동 가입
+        organizationRepository.findByUniversityIdAndCategory(university.getId(), OrganizationCategory.UNIVERSITY_COUNCIL)
+                .ifPresent(council -> userOrganizationRepository.save(new UserOrganization(user, council)));
+
+        // 총동아리연합회 자동 가입 (동아리 가입 여부가 true인 경우)
+        if (isClubMember) {
+            organizationRepository.findByUniversityIdAndCategory(university.getId(), OrganizationCategory.CLUB_ASSOCIATION)
+                .ifPresent(association -> userOrganizationRepository.save(new UserOrganization(user, association)));
         }
 
         StudentProfile profile = StudentProfile.builder()

@@ -51,40 +51,6 @@ public class AuthService {
     private final WithdrawalFeedbackRepository withdrawalFeedbackRepository;
     private final EmailVerificationService emailVerificationService;
 
-
-
-    // 계정 찾기용 인증번호 발송 (가입된 이메일인지 확인)
-    @Transactional
-    public void sendVerificationCodeForAccountRecovery(String email) {
-        
-        // 이메일 존재 여부 확인 (User 테이블)
-        if (!userRepository.existsByEmail(email)) {
-             throw new CustomException(ErrorCode.USER_NOT_FOUND, "가입되지 않은 이메일입니다.");
-        }
-        
-        // 인증번호 발송 (도메인 체크 X)
-        emailVerificationService.sendCode(email);
-    }
-
-    // 계정 찾기용 인증번호 검증 (검증 완료 처리)
-    @Transactional
-    public void verifyCodeForAccountRecovery(String email, String code) {
-        emailVerificationService.verifyCode(email, code);
-    }
-
-    @Transactional(readOnly = true)
-    public boolean isVerified(String email) {
-        return emailVerificationService.isVerified(email);
-    }
-
-    @Transactional
-    public void clearVerification(String email) {
-        emailVerificationService.clearVerification(email);
-    }
-
-
-
-
     // 아이디 찾기 - 인증 후 아이디 반환
     @Transactional
     public String findUsernameByEmail(String email, String code) {
@@ -154,6 +120,10 @@ public class AuthService {
             throw new CustomException(ErrorCode.DUPLICATE_RESOURCE, "이미 존재하는 아이디입니다.");
         }
 
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new CustomException(ErrorCode.DUPLICATE_RESOURCE, "이미 존재하는 이메일입니다.");
+        }
+
         User user = User.builder()
                 .username(request.getUsername())
                 .password(passwordEncoder.encode(request.getPassword()))
@@ -176,6 +146,10 @@ public class AuthService {
     public AuthTokens signupOwner(OwnerSignupRequest request) {
         if (userRepository.existsByUsername(request.getUsername())) {
             throw new CustomException(ErrorCode.DUPLICATE_RESOURCE, "이미 존재하는 아이디입니다.");
+        }
+
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new CustomException(ErrorCode.DUPLICATE_RESOURCE, "이미 존재하는 이메일입니다.");
         }
 
         User user = User.builder()
@@ -404,5 +378,24 @@ public class AuthService {
         refreshTokenService.save(user.getId(), refreshToken);
 
         return new AuthTokens(accessToken, refreshToken, jwtTokenProvider.getAccessTokenExpiresIn());
+    }
+
+    // 계정 찾기용 인증번호 발송 (가입된 이메일인지 확인)
+    @Transactional
+    public void sendVerificationCodeForAccountRecovery(String email) {
+
+        // 이메일 존재 여부 확인 (User 테이블)
+        if (!userRepository.existsByEmail(email)) {
+            throw new CustomException(ErrorCode.USER_NOT_FOUND, "가입되지 않은 이메일입니다.");
+        }
+
+        // 인증번호 발송 (도메인 체크 X)
+        emailVerificationService.sendCode(email);
+    }
+
+    // 계정 찾기용 인증번호 검증 (검증 완료 처리)
+    @Transactional
+    public void verifyCodeForAccountRecovery(String email, String code) {
+        emailVerificationService.verifyCode(email, code);
     }
 }

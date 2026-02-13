@@ -8,5 +8,6 @@ import lombok.RequiredArgsConstructor;
 public enum OrganizationCategory {
     COLLEGE, // 단과대학
     DEPARTMENT, // 학과
-    STUDENT_COUNCIL, // 학생회
+    UNIVERSITY_COUNCIL, // 총학생회
+    CLUB_ASSOCIATION, // 총동아리연합회
 }

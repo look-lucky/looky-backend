@@ -74,7 +74,8 @@ INSERT INTO user (user_id, created_at, modified_at, username, password, role, de
 INSERT INTO council_profile (user_id, university_id) VALUES (50, 1);
 
 INSERT INTO organization (organization_id, created_at, modified_at, university_id, user_id, category, name, parent_id) VALUES 
-(1, NOW(), NOW(), 1, 50, 'STUDENT_COUNCIL', '전북대학교 총학생회', NULL);
+(1, NOW(), NOW(), 1, 50, 'UNIVERSITY_COUNCIL', '전북대학교 총학생회', NULL),
+(2, NOW(), NOW(), 1, 50, 'CLUB_ASSOCIATION', '전북대학교 총동아리연합회', NULL);
 
 INSERT INTO organization (organization_id, created_at, modified_at, university_id, user_id, category, name, parent_id) VALUES 
 (10, NOW(), NOW(), 1, 50, 'COLLEGE', '공과대학', 1),

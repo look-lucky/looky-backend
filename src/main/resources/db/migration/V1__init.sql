@@ -85,7 +85,7 @@ create table organization (
     modified_at datetime(6) not null,
     created_by varchar(255),
     last_modified_by varchar(255),
-    category enum ('COLLEGE','DEPARTMENT','STUDENT_COUNCIL') not null,
+    category enum ('COLLEGE','DEPARTMENT','UNIVERSITY_COUNCIL','CLUB_ASSOCIATION') not null,
     name varchar(255) not null,
     expires_at datetime(6),
     university_id bigint not null,

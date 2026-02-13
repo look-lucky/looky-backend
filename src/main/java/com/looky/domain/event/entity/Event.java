@@ -30,6 +30,8 @@ public class Event extends BaseEntity {
     @Column(columnDefinition = "TEXT")
     private String description;
 
+    private String subtitle; // 이벤트 부제목
+
     @ElementCollection(targetClass = EventType.class)
     @CollectionTable(name = "event_types", joinColumns = @JoinColumn(name = "event_id"))
     @Enumerated(EnumType.STRING)
@@ -61,9 +63,10 @@ public class Event extends BaseEntity {
     private List<EventImage> images = new ArrayList<>();
 
     @Builder
-    public Event(String title, String description, Set<EventType> eventTypes, Double latitude, Double longitude, String place, LocalDateTime startDateTime, LocalDateTime endDateTime, EventStatus status, University university) {
+    public Event(String title, String description, String subtitle, Set<EventType> eventTypes, Double latitude, Double longitude, String place, LocalDateTime startDateTime, LocalDateTime endDateTime, EventStatus status, University university) {
         this.title = title;
         this.description = description;
+        this.subtitle = subtitle;
         this.eventTypes = eventTypes != null ? eventTypes : new HashSet<>();
         this.latitude = latitude;
         this.longitude = longitude;
@@ -74,9 +77,10 @@ public class Event extends BaseEntity {
         this.university = university;
     }
 
-    public void update(String title, String description, Set<EventType> eventTypes, Double latitude, Double longitude, String place, LocalDateTime startDateTime, LocalDateTime endDateTime, EventStatus status) {
+    public void update(String title, String description, String subtitle, Set<EventType> eventTypes, Double latitude, Double longitude, String place, LocalDateTime startDateTime, LocalDateTime endDateTime, EventStatus status) {
         this.title = title;
         this.description = description;
+        this.subtitle = subtitle;
         
         if (eventTypes != null) {
             this.eventTypes.clear(); // JPA 영속성 컨텍스트 유지를 위해 컬렉션 전체 교체 대신 내용물 교체

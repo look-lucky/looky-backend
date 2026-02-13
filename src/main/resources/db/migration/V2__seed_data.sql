@@ -244,16 +244,16 @@ INSERT INTO student_coupon (student_coupon_id, created_at, modified_at, verifica
 
 -- 6. Events
 -- Upcoming
-INSERT INTO events (event_id, created_at, modified_at, title, description, latitude, longitude, place, start_date_time, end_date_time, status, university_id) VALUES 
-(1, NOW(), NOW(), '2026 전북대학교 대동제', '2026년 전북대 대동제에 여러분을 초대합니다!', 35.846833, 127.129360, '대운동장', '2026-02-15 10:00:00', '2026-05-22 23:00:00', 'UPCOMING', 1);
+INSERT INTO events (event_id, created_at, modified_at, title, subtitle, description, latitude, longitude, place, start_date_time, end_date_time, status, university_id) VALUES 
+(1, NOW(), NOW(), '2026 전북대학교 대동제', '모두가 하나되는 축제', '2026년 전북대 대동제에 여러분을 초대합니다!', 35.846833, 127.129360, '대운동장', '2026-02-15 10:00:00', '2026-05-22 23:00:00', 'UPCOMING', 1);
 
 -- Live
-INSERT INTO events (event_id, created_at, modified_at, title, description, latitude, longitude, place, start_date_time, end_date_time, status, university_id) VALUES 
-(2, NOW(), NOW(), '소프트웨어공학과 신입생 오리엔테이션', '신입생 환영회', 35.846100, 127.129600, '소프트웨어공학관', '2026-02-13 09:00:00', '2026-02-28 18:00:00', 'LIVE', 1);
+INSERT INTO events (event_id, created_at, modified_at, title, subtitle, description, latitude, longitude, place, start_date_time, end_date_time, status, university_id) VALUES 
+(2, NOW(), NOW(), '소프트웨어공학과 신입생 오리엔테이션', '새로운 시작을 응원해', '신입생 환영회', 35.846100, 127.129600, '소프트웨어공학관', '2026-02-13 09:00:00', '2026-02-28 18:00:00', 'LIVE', 1);
 
 -- Ended
-INSERT INTO events (event_id, created_at, modified_at, title, description, latitude, longitude, place, start_date_time, end_date_time, status, university_id) VALUES 
-(3, NOW(), NOW(), '2025 졸업작품 전시회', '고생하셨습니다', 35.846100, 127.129600, '진수당', '2026-02-16 09:00:00', '2025-02-28 18:00:00', 'ENDED', 1);
+INSERT INTO events (event_id, created_at, modified_at, title, subtitle, description, latitude, longitude, place, start_date_time, end_date_time, status, university_id) VALUES 
+(3, NOW(), NOW(), '2025 졸업작품 전시회', '4년의 결실', '고생하셨습니다', 35.846100, 127.129600, '진수당', '2026-02-16 09:00:00', '2025-02-28 18:00:00', 'ENDED', 1);
 
 
 INSERT INTO event_types (event_id, event_type) VALUES (1, 'SCHOOL_EVENT'), (1, 'PERFORMANCE'), (2, 'COMMUNITY'), (3, 'SCHOOL_EVENT');
@@ -265,16 +265,16 @@ INSERT INTO event_image (created_at, modified_at, event_id, image_url, order_ind
 
 -- New Events (Feb 7-14)
 -- 4. Fleamarket (Feb 8 11:00 - Feb 9 18:00)
-INSERT INTO events (event_id, created_at, modified_at, title, description, latitude, longitude, place, start_date_time, end_date_time, status, university_id) VALUES 
-(4, NOW(), NOW(), '전북대 벼룩시장', '안쓰는 물건 싸게 득템하세요!', 35.846833, 127.129360, '구정문 알림의 거리', '2026-02-08 11:00:00', '2026-02-09 18:00:00', 'UPCOMING', 1);
+INSERT INTO events (event_id, created_at, modified_at, title, subtitle, description, latitude, longitude, place, start_date_time, end_date_time, status, university_id) VALUES 
+(4, NOW(), NOW(), '전북대 벼룩시장', '득템 찬스!', '안쓰는 물건 싸게 득템하세요!', 35.846833, 127.129360, '구정문 알림의 거리', '2026-02-08 11:00:00', '2026-02-09 18:00:00', 'UPCOMING', 1);
 
 -- 5. SE Opening Party (Feb 10 18:00 - 22:00)
-INSERT INTO events (event_id, created_at, modified_at, title, description, latitude, longitude, place, start_date_time, end_date_time, status, university_id) VALUES 
-(5, NOW(), NOW(), '소프트웨어공학과 개강총회', '2026학년도 1학기 개강총회입니다.', 35.846500, 127.129000, '진수당', '2026-02-10 18:00:00', '2026-02-10 22:00:00', 'UPCOMING', 1);
+INSERT INTO events (event_id, created_at, modified_at, title, subtitle, description, latitude, longitude, place, start_date_time, end_date_time, status, university_id) VALUES 
+(5, NOW(), NOW(), '소프트웨어공학과 개강총회', '다함께 모여라', '2026학년도 1학기 개강총회입니다.', 35.846500, 127.129000, '진수당', '2026-02-10 18:00:00', '2026-02-10 22:00:00', 'UPCOMING', 1);
 
 -- 6. Valentine Giveaway (Feb 13 10:00 - Feb 14 18:00)
-INSERT INTO events (event_id, created_at, modified_at, title, description, latitude, longitude, place, start_date_time, end_date_time, status, university_id) VALUES 
-(6, NOW(), NOW(), '발렌타인 데이 초콜릿 나눔', '달콤한 초콜릿 받아가세요~', 35.847000, 127.129500, '학생회관 앞', '2026-02-13 10:00:00', '2026-02-14 18:00:00', 'UPCOMING', 1);
+INSERT INTO events (event_id, created_at, modified_at, title, subtitle, description, latitude, longitude, place, start_date_time, end_date_time, status, university_id) VALUES 
+(6, NOW(), NOW(), '발렌타인 데이 초콜릿 나눔', '달콤함을 전해요', '달콤한 초콜릿 받아가세요~', 35.847000, 127.129500, '학생회관 앞', '2026-02-13 10:00:00', '2026-02-14 18:00:00', 'UPCOMING', 1);
 
 INSERT INTO event_types (event_id, event_type) VALUES (4, 'COMMUNITY'), (5, 'SCHOOL_EVENT'), (6, 'COMMUNITY');
 INSERT INTO event_image (created_at, modified_at, event_id, image_url, order_index) VALUES 
@@ -424,9 +424,9 @@ INSERT INTO partnership (created_at, modified_at, benefit, starts_at, ends_at, s
 (NOW(), NOW(), '안주 1개 서비스', '2026-03-01', '2026-12-31', 32, 1); -- Yukjun, Student Council
 
 -- New Events
-INSERT INTO events (event_id, created_at, modified_at, title, description, latitude, longitude, place, start_date_time, end_date_time, status, university_id) VALUES
-(10, NOW(), NOW(), '중간고사 간식 나눔', '시험기간 힘내세요! 햄버거 증정', 35.841000, 127.129500, '중앙도서관', '2026-04-20 18:00:00', '2026-04-20 20:00:00', 'UPCOMING', 1),
-(11, NOW(), NOW(), '1학기 종강 파티', '한 학기 마무리 파티', 35.841500, 127.129000, '구정문 광장', '2026-06-20 19:00:00', '2026-06-21 02:00:00', 'UPCOMING', 1);
+INSERT INTO events (event_id, created_at, modified_at, title, subtitle, description, latitude, longitude, place, start_date_time, end_date_time, status, university_id) VALUES
+(10, NOW(), NOW(), '중간고사 간식 나눔', '시험기간 응원', '시험기간 힘내세요! 햄버거 증정', 35.841000, 127.129500, '중앙도서관', '2026-04-20 18:00:00', '2026-04-20 20:00:00', 'UPCOMING', 1),
+(11, NOW(), NOW(), '1학기 종강 파티', '한 학기의 마무리', '한 학기 마무리 파티', 35.841500, 127.129000, '구정문 광장', '2026-06-20 19:00:00', '2026-06-21 02:00:00', 'UPCOMING', 1);
 
 INSERT INTO event_types (event_id, event_type) VALUES (10, 'SCHOOL_EVENT'), (11, 'COMMUNITY');
 

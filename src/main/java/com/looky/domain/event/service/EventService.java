@@ -46,6 +46,7 @@ public class EventService {
         Event event = Event.builder()
                 .title(request.getTitle())
                 .description(request.getDescription())
+                .subtitle(request.getSubtitle())
                 .eventTypes(new HashSet<>(request.getEventTypes()))
                 .latitude(request.getLatitude())
                 .longitude(request.getLongitude())
@@ -88,6 +89,7 @@ public class EventService {
         event.update(
                 request.getTitle().orElse(event.getTitle()),
                 request.getDescription().orElse(event.getDescription()),
+                request.getSubtitle().orElse(event.getSubtitle()),
                 request.getEventTypes().isPresent() ? (request.getEventTypes().get() != null ? new HashSet<>(request.getEventTypes().get()) : new HashSet<>()) : null,
                 request.getLatitude().orElse(event.getLatitude()),
                 request.getLongitude().orElse(event.getLongitude()),

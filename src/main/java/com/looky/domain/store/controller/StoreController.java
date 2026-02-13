@@ -235,10 +235,11 @@ public class StoreController {
         })
         @GetMapping("/map")
         public ResponseEntity<CommonResponse<List<StoreMapResponse>>> getStoreMap(
+                @Parameter(description = "대학(상권) ID 필터") @RequestParam(required = false) Long universityId,
                 @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails
         ) {
                 User user = principalDetails != null ? principalDetails.getUser() : null;
-                List<StoreMapResponse> response = storeService.getStoreMap(user);
+                List<StoreMapResponse> response = storeService.getStoreMap(universityId, user);
                 return ResponseEntity.ok(CommonResponse.success(response));
         }
 

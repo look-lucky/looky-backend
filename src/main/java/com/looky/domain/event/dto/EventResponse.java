@@ -17,6 +17,7 @@ public class EventResponse {
     private Long id;
     private String title;
     private String description;
+    private String subtitle;
     private Set<EventType> eventTypes;
     private Double latitude;
     private Double longitude;
@@ -31,6 +32,7 @@ public class EventResponse {
         this.id = event.getId();
         this.title = event.getTitle();
         this.description = event.getDescription();
+        this.subtitle = event.getSubtitle();
         this.eventTypes = event.getEventTypes();
         this.latitude = event.getLatitude();
         this.longitude = event.getLongitude();

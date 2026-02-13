@@ -568,9 +568,15 @@ public class StoreService {
         }
     }
 
-    public List<StoreMapResponse> getStoreMap(User user) {
-        // 모든 상점 조회 (추후 성능 이슈 발생 시 범위 기반 조회 등으로 변경 고려)
-        List<Store> stores = storeRepository.findAll();
+    public List<StoreMapResponse> getStoreMap(Long universityId, User user) {
+        // 대학 ID 필터링 적용 (StoreSpecification 활용)
+        Specification<Store> spec = Specification.where(StoreSpecification.isNotSuspended());
+
+        if (universityId != null) {
+            spec = spec.and(StoreSpecification.hasUniversityId(universityId));
+        }
+
+        List<Store> stores = storeRepository.findAll(spec);
 
         Long userUniversityId = null;
         if (user != null && user.getRole() == Role.ROLE_STUDENT) {
@@ -609,7 +615,6 @@ public class StoreService {
             boolean isPartnership = finalPartnershipStoreIds.contains(store.getId());
             boolean hasCoupon = finalCouponStoreIds.contains(store.getId());
 
-            return StoreMapResponse.of(store, averageRating, reviewCount != null ? reviewCount.intValue() : 0, isPartnership, hasCoupon, favoriteCount);
-        }).toList();
+            return StoreMapResponse.of(store, averageRating, reviewCount != null ? reviewCount.intValue() : 0, isPartnership, hasCoupon, favoriteCount);}).toList();
     }
 }

@@ -23,6 +23,9 @@ public class CreateEventRequest {
     @Schema(description = "이벤트 설명", example = "다양한 수공예품과 먹거리를 만나보세요!")
     private String description;
 
+    @Schema(description = "이벤트 부제목", example = "봄맞이 대축제")
+    private String subtitle;
+
     @NotEmpty(message = "이벤트 타입은 최소 1개 이상 선택해야 합니다.")
     @Schema(description = "이벤트 타입 목록", example = "[\"FLEA_MARKET\", \"FOOD_EVENT\"]")
     private List<EventType> eventTypes;

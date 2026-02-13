@@ -21,6 +21,9 @@ public class UpdateEventRequest {
     @Schema(description = "이벤트 설명")
     private JsonNullable<String> description = JsonNullable.undefined();
 
+    @Schema(description = "이벤트 부제목")
+    private JsonNullable<String> subtitle = JsonNullable.undefined();
+
     @Schema(description = "이벤트 타입 목록")
     private JsonNullable<List<EventType>> eventTypes = JsonNullable.undefined();
 

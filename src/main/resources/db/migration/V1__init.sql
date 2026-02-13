@@ -286,6 +286,7 @@ create table events (
     created_by varchar(255),
     last_modified_by varchar(255),
     title varchar(255) not null,
+    subtitle varchar(255),
     description text,
     latitude double,
     longitude double,

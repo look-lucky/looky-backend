@@ -22,6 +22,7 @@ public class EventResponse {
     private Double longitude;
     private LocalDateTime startDateTime;
     private LocalDateTime endDateTime;
+    private String place;
     private EventStatus status;
     private List<String> imageUrls;
     private LocalDateTime createdAt;
@@ -35,6 +36,7 @@ public class EventResponse {
         this.longitude = event.getLongitude();
         this.startDateTime = event.getStartDateTime();
         this.endDateTime = event.getEndDateTime();
+        this.place = event.getPlace();
         this.status = event.getStatus();
         this.imageUrls = event.getImages().stream()
                 .map(EventImage::getImageUrl)

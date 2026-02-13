@@ -49,6 +49,7 @@ public class EventService {
                 .eventTypes(new HashSet<>(request.getEventTypes()))
                 .latitude(request.getLatitude())
                 .longitude(request.getLongitude())
+                .place(request.getPlace())
                 .startDateTime(request.getStartDateTime())
                 .endDateTime(request.getEndDateTime())
                 .status(EventStatus.UPCOMING)
@@ -90,6 +91,7 @@ public class EventService {
                 request.getEventTypes().isPresent() ? (request.getEventTypes().get() != null ? new HashSet<>(request.getEventTypes().get()) : new HashSet<>()) : null,
                 request.getLatitude().orElse(event.getLatitude()),
                 request.getLongitude().orElse(event.getLongitude()),
+                request.getPlace().orElse(event.getPlace()),
                 request.getStartDateTime().orElse(event.getStartDateTime()),
                 request.getEndDateTime().orElse(event.getEndDateTime()),
                 request.getStatus().orElse(event.getStatus())

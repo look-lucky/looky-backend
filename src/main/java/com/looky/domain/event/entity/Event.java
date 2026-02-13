@@ -54,23 +54,27 @@ public class Event extends BaseEntity {
     @Column(nullable = false)
     private EventStatus status;
 
+    @Column(nullable = false)
+    private String place;
+
     @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<EventImage> images = new ArrayList<>();
 
     @Builder
-    public Event(String title, String description, Set<EventType> eventTypes, Double latitude, Double longitude, LocalDateTime startDateTime, LocalDateTime endDateTime, EventStatus status, University university) {
+    public Event(String title, String description, Set<EventType> eventTypes, Double latitude, Double longitude, String place, LocalDateTime startDateTime, LocalDateTime endDateTime, EventStatus status, University university) {
         this.title = title;
         this.description = description;
         this.eventTypes = eventTypes != null ? eventTypes : new HashSet<>();
         this.latitude = latitude;
         this.longitude = longitude;
+        this.place = place;
         this.startDateTime = startDateTime;
         this.endDateTime = endDateTime;
         this.status = status != null ? status : EventStatus.UPCOMING;
         this.university = university;
     }
 
-    public void update(String title, String description, Set<EventType> eventTypes, Double latitude, Double longitude, LocalDateTime startDateTime, LocalDateTime endDateTime, EventStatus status) {
+    public void update(String title, String description, Set<EventType> eventTypes, Double latitude, Double longitude, String place, LocalDateTime startDateTime, LocalDateTime endDateTime, EventStatus status) {
         this.title = title;
         this.description = description;
         
@@ -81,6 +85,7 @@ public class Event extends BaseEntity {
 
         this.latitude = latitude;
         this.longitude = longitude;
+        this.place = place;
         this.startDateTime = startDateTime;
         this.endDateTime = endDateTime;
         this.status = status;

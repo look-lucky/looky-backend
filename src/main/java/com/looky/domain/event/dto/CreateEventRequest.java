@@ -37,9 +37,12 @@ public class CreateEventRequest {
     @Schema(description = "이벤트 시작일시", example = "2024-03-01T10:00:00")
     private LocalDateTime startDateTime;
 
-    @NotNull(message = "종료일시는 필수입니다.")
     @Schema(description = "이벤트 종료일시", example = "2024-03-01T18:00:00")
     private LocalDateTime endDateTime;
+
+    @NotBlank(message = "장소는 필수입니다.")
+    @Schema(description = "장소", example = "학생회관 1층")
+    private String place;
 
     @NotNull(message = "대학교 ID는 필수입니다.")
     @Schema(description = "대학교 ID", example = "1")

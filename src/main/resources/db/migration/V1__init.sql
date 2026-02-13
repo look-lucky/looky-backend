@@ -289,6 +289,7 @@ create table events (
     description text,
     latitude double,
     longitude double,
+    place varchar(255) not null,
     start_date_time datetime(6) not null,
     end_date_time datetime(6) not null,
     status enum ('ENDED','LIVE','UPCOMING') not null,

@@ -24,6 +24,9 @@ public class UpdateEventRequest {
     @Schema(description = "이벤트 타입 목록")
     private JsonNullable<List<EventType>> eventTypes = JsonNullable.undefined();
 
+    @Schema(description = "장소")
+    private JsonNullable<String> place = JsonNullable.undefined();
+
     @Schema(description = "위도")
     private JsonNullable<Double> latitude = JsonNullable.undefined();
 

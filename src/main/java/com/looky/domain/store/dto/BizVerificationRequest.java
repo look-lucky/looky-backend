@@ -15,6 +15,7 @@ import java.util.List;
 @AllArgsConstructor
 public class BizVerificationRequest {
 
+    @JsonProperty("businesses")
     private List<BizInfo> bizs;
 
     @Getter
@@ -30,5 +31,13 @@ public class BizVerificationRequest {
 
         @JsonProperty("p_nm")
         private String pNm; // 대표자 성명
+
+        public String getBNo() {
+            return bNo != null ? bNo.replaceAll("-", "") : null;
+        }
+
+        public String getStartDt() {
+            return startDt != null ? startDt.replaceAll("-", "") : null;
+        }
     }
 }

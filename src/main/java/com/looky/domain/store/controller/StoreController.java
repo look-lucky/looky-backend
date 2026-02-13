@@ -229,4 +229,17 @@ public class StoreController {
                 return ResponseEntity.ok(CommonResponse.success(response));
         }
 
+        @Operation(summary = "[학생] 지도용 상점 전체 조회", description = "지도를 위한 상점 전체 목록을 조회합니다.")
+        @ApiResponses(value = {
+                @ApiResponse(responseCode = "200", description = "조회 성공")
+        })
+        @GetMapping("/map")
+        public ResponseEntity<CommonResponse<List<StoreMapResponse>>> getStoreMap(
+                @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails
+        ) {
+                User user = principalDetails != null ? principalDetails.getUser() : null;
+                List<StoreMapResponse> response = storeService.getStoreMap(user);
+                return ResponseEntity.ok(CommonResponse.success(response));
+        }
+
 }

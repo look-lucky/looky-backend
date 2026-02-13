@@ -567,4 +567,49 @@ public class StoreService {
             store.updateCloverGrade(CloverGrade.SPROUT);
         }
     }
+
+    public List<StoreMapResponse> getStoreMap(User user) {
+        // 모든 상점 조회 (추후 성능 이슈 발생 시 범위 기반 조회 등으로 변경 고려)
+        List<Store> stores = storeRepository.findAll();
+
+        Long userUniversityId = null;
+        if (user != null && user.getRole() == Role.ROLE_STUDENT) {
+            StudentProfile studentProfile = studentProfileRepository.findById(user.getId()).orElse(null);
+            if (studentProfile != null && studentProfile.getUniversity() != null) {
+                userUniversityId = studentProfile.getUniversity().getId();
+            }
+        }
+
+        LocalDate today = LocalDate.now(ZoneId.of("Asia/Seoul"));
+        LocalDateTime now = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
+
+        List<Long> storeIds = stores.stream().map(Store::getId).toList();
+
+        Set<Long> batchedPartnershipStoreIds = new HashSet<>();
+        if (userUniversityId != null && !storeIds.isEmpty()) {
+            batchedPartnershipStoreIds = partnershipRepository.findActivePartnershipsByStoreIdsAndUniversityId(storeIds, userUniversityId, today)
+                    .stream().map(p -> p.getStore().getId()).collect(Collectors.toSet());
+        }
+
+        Set<Long> batchedCouponStoreIds = new HashSet<>();
+
+        if (userUniversityId != null && !storeIds.isEmpty()) {
+            batchedCouponStoreIds = couponRepository.findActiveCouponsByStoreIds(storeIds, now)
+                    .stream().map(c -> c.getStore().getId()).collect(Collectors.toSet());
+        }
+
+        final Set<Long> finalPartnershipStoreIds = batchedPartnershipStoreIds;
+        final Set<Long> finalCouponStoreIds = batchedCouponStoreIds;
+
+        return stores.stream().map(store -> {
+            Double averageRating = reviewRepository.findAverageRatingByStoreId(store.getId());
+            Long reviewCount = reviewRepository.countByStoreIdAndParentReviewIsNull(store.getId());
+            Long favoriteCount = favoriteRepository.countByStore(store);
+
+            boolean isPartnership = finalPartnershipStoreIds.contains(store.getId());
+            boolean hasCoupon = finalCouponStoreIds.contains(store.getId());
+
+            return StoreMapResponse.of(store, averageRating, reviewCount != null ? reviewCount.intValue() : 0, isPartnership, hasCoupon, favoriteCount);
+        }).toList();
+    }
 }

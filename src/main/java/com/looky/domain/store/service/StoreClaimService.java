@@ -18,6 +18,8 @@ import com.looky.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -34,6 +36,7 @@ import java.util.Collections;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class StoreClaimService {
 
     private final S3Service s3Service;
@@ -93,6 +96,7 @@ public class StoreClaimService {
 
             return response;
         } catch (Exception e) {
+            log.warn("사업자등록정보 진위 확인 중 오류 발생", e);
             throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR, "사업자등록정보 진위확인 중 오류가 발생했습니다.");
         }
     }

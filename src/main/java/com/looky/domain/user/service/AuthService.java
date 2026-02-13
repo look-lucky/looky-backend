@@ -149,7 +149,7 @@ public class AuthService {
 
     // 학생 회원 가입
     @Transactional
-    public Long signupStudent(StudentSignupRequest request) {
+    public AuthTokens signupStudent(StudentSignupRequest request) {
         if (userRepository.existsByUsername(request.getUsername())) {
             throw new CustomException(ErrorCode.DUPLICATE_RESOURCE, "이미 존재하는 아이디입니다.");
         }
@@ -168,12 +168,12 @@ public class AuthService {
 
         createStudentProfile(user, request.getNickname(), request.getUniversityId(), request.getCollegeId(), request.getDepartmentId(), request.getIsClubMember());
 
-        return user.getId();
+        return generateTokenResponse(user);
     }
 
     // 점주 회원 가입
     @Transactional
-    public Long signupOwner(OwnerSignupRequest request) {
+    public AuthTokens signupOwner(OwnerSignupRequest request) {
         if (userRepository.existsByUsername(request.getUsername())) {
             throw new CustomException(ErrorCode.DUPLICATE_RESOURCE, "이미 존재하는 아이디입니다.");
         }
@@ -192,11 +192,11 @@ public class AuthService {
 
         createOwnerProfile(user, request.getName());
 
-        return user.getId();
+        return generateTokenResponse(user);
     }
 
     @Transactional
-    public Long signupCouncil(CouncilSignupRequest request) {
+    public AuthTokens signupCouncil(CouncilSignupRequest request) {
         if (userRepository.existsByUsername(request.getUsername())) {
             throw new CustomException(ErrorCode.DUPLICATE_RESOURCE, "이미 존재하는 아이디입니다.");
         }
@@ -212,7 +212,7 @@ public class AuthService {
 
         createCouncilProfile(user, request.getUniversityId());
 
-        return user.getId();
+        return generateTokenResponse(user);
     }
 
     @Transactional

@@ -37,23 +37,35 @@ public class AuthController {
 
         @Operation(summary = "[학생] 학생 회원가입", description = "학생 회원을 등록합니다.")
         @PostMapping("/signup/student")
-        public ResponseEntity<CommonResponse<Long>> signupStudent(@RequestBody StudentSignupRequest request) {
-            Long id = authService.signupStudent(request);
-            return ResponseEntity.status(HttpStatus.CREATED).body(CommonResponse.success(id));
+        public ResponseEntity<CommonResponse<LoginResponse>> signupStudent(@RequestBody StudentSignupRequest request) {
+            AuthTokens authTokens = authService.signupStudent(request);
+            ResponseCookie refreshCookie = cookieUtil.createRefreshTokenCookie(authTokens.getRefreshToken());
+
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
+                    .body(CommonResponse.success(LoginResponse.of(authTokens.getAccessToken(), authTokens.getExpiresIn())));
         }
 
         @Operation(summary = "[점주] 점주 회원가입", description = "점주 회원을 등록합니다.")
         @PostMapping("/signup/owner")
-        public ResponseEntity<CommonResponse<Long>> signupOwner(@RequestBody OwnerSignupRequest request) {
-            Long id = authService.signupOwner(request);
-            return ResponseEntity.ok(CommonResponse.success(id));
+        public ResponseEntity<CommonResponse<LoginResponse>> signupOwner(@RequestBody OwnerSignupRequest request) {
+            AuthTokens authTokens = authService.signupOwner(request);
+            ResponseCookie refreshCookie = cookieUtil.createRefreshTokenCookie(authTokens.getRefreshToken());
+
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
+                    .body(CommonResponse.success(LoginResponse.of(authTokens.getAccessToken(), authTokens.getExpiresIn())));
         }
         
         @Operation(summary = "[학생회] 학생회 회원가입", description = "학생회 회원을 등록합니다.")
         @PostMapping("/signup/council")
-        public ResponseEntity<CommonResponse<Long>> signupcouncil(@RequestBody CouncilSignupRequest request) {
-                Long id = authService.signupCouncil(request);
-                return ResponseEntity.ok(CommonResponse.success(id));
+        public ResponseEntity<CommonResponse<LoginResponse>> signupcouncil(@RequestBody CouncilSignupRequest request) {
+                AuthTokens authTokens = authService.signupCouncil(request);
+                ResponseCookie refreshCookie = cookieUtil.createRefreshTokenCookie(authTokens.getRefreshToken());
+
+                return ResponseEntity.ok()
+                        .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
+                        .body(CommonResponse.success(LoginResponse.of(authTokens.getAccessToken(), authTokens.getExpiresIn())));
         }
 
         @Operation(summary = "[공통] 로그인", description = "아이디와 비밀번호로 로그인합니다.")

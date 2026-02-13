@@ -68,7 +68,20 @@ public class StoreClaimService {
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
 
-        HttpEntity<BizVerificationRequest> entity = new HttpEntity<>(request, headers);
+        // 데이터 정제 (하이픈 제거)
+        List<BizVerificationRequest.BizInfo> sanitizedBizs = request.getBizs().stream()
+                .map(biz -> BizVerificationRequest.BizInfo.builder()
+                        .bNo(biz.getBNo() != null ? biz.getBNo().replaceAll("-", "") : null)
+                        .startDt(biz.getStartDt() != null ? biz.getStartDt().replaceAll("-", "") : null)
+                        .pNm(biz.getPNm())
+                        .build())
+                .collect(Collectors.toList());
+
+        BizVerificationRequest sanitizedRequest = BizVerificationRequest.builder()
+                .bizs(sanitizedBizs)
+                .build();
+
+        HttpEntity<BizVerificationRequest> entity = new HttpEntity<>(sanitizedRequest, headers);
 
         try {
             ResponseEntity<BizVerificationResponse> responseEntity = restTemplate.postForEntity(uri, entity,

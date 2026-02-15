@@ -34,7 +34,7 @@ import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
 @RequestMapping("/api")
 public class ReviewController {
 
-        private final ReviewService reviewService;
+    private final ReviewService reviewService;
 
     @Operation(summary = "[공통] 리뷰 및 답글 작성", description = "상점에 대한 리뷰(학생) 또는 답글(점주, 학생)을 작성합니다.")
     @ApiResponses(value = {

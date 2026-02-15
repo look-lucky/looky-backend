@@ -5,7 +5,6 @@ import com.looky.domain.store.entity.StoreCategory;
 import com.looky.domain.store.entity.StoreMood;
 import com.looky.domain.user.entity.User;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -43,7 +42,6 @@ public class StoreCreateRequest {
 
     private String operatingHours;
 
-    @NotNull(message = "카테고리는 필수입니다.")
     private List<StoreCategory> storeCategories;
 
     private List<StoreMood> storeMoods;

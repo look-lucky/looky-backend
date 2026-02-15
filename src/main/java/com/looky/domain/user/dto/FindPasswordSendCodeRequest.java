@@ -12,6 +12,6 @@ public class FindPasswordSendCodeRequest {
     private String username;
 
     @NotBlank
-    @Email
+    @Email(message = "이메일 형식이 아닙니다.")
     private String email;
 }

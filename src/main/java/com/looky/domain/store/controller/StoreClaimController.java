@@ -15,6 +15,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,6 +27,7 @@ import java.io.IOException;
 @RestController
 @RequestMapping("/api")
 @RequiredArgsConstructor
+@Slf4j
 public class StoreClaimController {
 
     private final StoreClaimService storeClaimService;
@@ -35,7 +37,9 @@ public class StoreClaimController {
     public ResponseEntity<CommonResponse<List<StoreResponse>>> searchUnclaimedStores(
             @RequestParam String keyword
     ) {
+        log.debug("[StoreClaimController] searchUnclaimedStores 요청 - keyword: {}", keyword);
         List<StoreResponse> response = storeClaimService.searchUnclaimedStores(keyword);
+        log.debug("[StoreClaimController] searchUnclaimedStores 응답 - 결과 수: {}, 데이터: {}", response.size(), response);
         return ResponseEntity.ok(CommonResponse.success(response));
     }
 

@@ -49,9 +49,14 @@ public class StoreClaimService {
     private String serviceKey;
     private static final String API_URL = "https://api.odcloud.kr/api/nts-businessman/v1/validate"; // 사업자등록정보 진위확인 API
 
-    // 미등록된 상점 조회 
+    // 미등록된 상점 조회
     public List<StoreResponse> searchUnclaimedStores(String keyword) {
-        return storeRepository.findUnclaimedByNameOrAddress(keyword).stream()
+        log.debug("[StoreClaimService] searchUnclaimedStores 호출 - keyword: '{}'", keyword);
+        List<com.looky.domain.store.entity.Store> stores = storeRepository.findUnclaimedByNameOrAddress(keyword);
+        log.debug("[StoreClaimService] DB 조회 결과 - 총 {}건", stores.size());
+        stores.forEach(store -> log.debug("[StoreClaimService] 상점 - id: {}, name: {}, roadAddress: {}, storeStatus: {}",
+                store.getId(), store.getName(), store.getRoadAddress(), store.getStoreStatus()));
+        return stores.stream()
                 .map(StoreResponse::from)
                 .collect(Collectors.toList());
     }

@@ -10,8 +10,17 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validator;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.validation.BeanPropertyBindingResult;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.ObjectError;
+
+import java.util.Set;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -32,19 +41,24 @@ import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
 public class StoreNewsController {
 
     private final StoreNewsService storeNewsService;
+    private final ObjectMapper objectMapper;
+    private final Validator validator;
 
     @Operation(summary = "[점주] 소식 등록", description = "가게에 새로운 소식을 등록합니다.")
-    @PostMapping(value = "/stores/{storeId}/news", consumes = MULTIPART_FORM_DATA_VALUE)
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "소식 등록 성공"),
             @ApiResponse(responseCode = "403", description = "권한 없음 (본인 가게 아님)"),
             @ApiResponse(responseCode = "404", description = "가게 찾을 수 없음")
     })
+    @PostMapping(value = "/stores/{storeId}/news", consumes = MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<CommonResponse<Long>> createStoreNews(
             @Parameter(description = "가게 ID") @PathVariable Long storeId,
             @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,
             @Parameter(description = "소식 이미지 목록") @RequestPart(required = false) List<MultipartFile> images,
-            @RequestPart @Valid CreateStoreNewsRequest request) throws IOException {
+            @RequestPart("request") String requestJson) throws IOException, MethodArgumentNotValidException {
+        CreateStoreNewsRequest request = objectMapper.readValue(requestJson, CreateStoreNewsRequest.class);
+        validateRequest(request);
+
         Long newsId = storeNewsService.createStoreNews(principalDetails.getUser(), request, storeId, images);
         return ResponseEntity.status(HttpStatus.CREATED).body(CommonResponse.success(newsId));
     }
@@ -76,7 +90,10 @@ public class StoreNewsController {
             @Parameter(description = "소식 ID") @PathVariable Long newsId,
             @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,
             @Parameter(description = "변경할 소식 이미지 목록") @RequestPart(required = false) List<MultipartFile> images,
-            @RequestPart @Valid UpdateStoreNewsRequest request) throws IOException {
+            @RequestPart("request") String requestJson) throws IOException, MethodArgumentNotValidException {
+        UpdateStoreNewsRequest request = objectMapper.readValue(requestJson, UpdateStoreNewsRequest.class);
+        validateRequest(request);
+
         storeNewsService.updateStoreNews(newsId, principalDetails.getUser(), request, images);
         return ResponseEntity.ok(CommonResponse.success(null));
     }
@@ -128,5 +145,16 @@ public class StoreNewsController {
             @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails) {
         storeNewsService.deleteComment(commentId, principalDetails.getUser());
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body(CommonResponse.success(null));
+    }
+
+    private <T> void validateRequest(T request) throws MethodArgumentNotValidException {
+        Set<ConstraintViolation<T>> violations = validator.validate(request);
+        if (!violations.isEmpty()) {
+            BindingResult bindingResult = new BeanPropertyBindingResult(request, request.getClass().getName());
+            for (ConstraintViolation<T> violation : violations) {
+                bindingResult.addError(new ObjectError(request.getClass().getName(), violation.getMessage()));
+            }
+            throw new MethodArgumentNotValidException(null, bindingResult);
+        }
     }
 }

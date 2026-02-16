@@ -8,13 +8,22 @@ import com.looky.domain.store.dto.StoreClaimRequest;
 import com.looky.domain.store.dto.MyStoreClaimResponse;
 import com.looky.domain.store.service.StoreClaimService;
 import com.looky.security.details.PrincipalDetails;
+import jakarta.validation.Valid;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import java.util.List;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.validation.BeanPropertyBindingResult;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.ObjectError;
+
+import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -31,6 +40,8 @@ import java.io.IOException;
 public class StoreClaimController {
 
     private final StoreClaimService storeClaimService;
+    private final ObjectMapper objectMapper;
+    private final Validator validator;
 
     @Operation(summary = "[점주] 미등록 상점 검색", description = "시스템에 등록된 미등록 상점을 이름 또는 주소로 검색합니다.")
     @GetMapping("/store-claims/search")
@@ -55,9 +66,12 @@ public class StoreClaimController {
     @PostMapping("/store-claims")
     public ResponseEntity<CommonResponse<Long>> createStoreClaims(
             @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,
-            @RequestPart @Valid StoreClaimRequest request,
+            @RequestPart("request") String requestJson,
             @Parameter(description = "사업자등록증 이미지") @RequestPart MultipartFile image
-    ) throws IOException {
+    ) throws IOException, MethodArgumentNotValidException {
+        StoreClaimRequest request = objectMapper.readValue(requestJson, StoreClaimRequest.class);
+        validateRequest(request);
+
         Long storeClaimId = storeClaimService.createStoreClaims(principalDetails.getUser(), request, image);
         return ResponseEntity.status(HttpStatus.CREATED).body(CommonResponse.success(storeClaimId));
     }
@@ -69,6 +83,17 @@ public class StoreClaimController {
     ) {
         List<MyStoreClaimResponse> response = storeClaimService.getMyStoreClaims(principalDetails.getUser());
         return ResponseEntity.ok(CommonResponse.success(response));
+    }
+
+    private <T> void validateRequest(T request) throws MethodArgumentNotValidException {
+        Set<ConstraintViolation<T>> violations = validator.validate(request);
+        if (!violations.isEmpty()) {
+            BindingResult bindingResult = new BeanPropertyBindingResult(request, request.getClass().getName());
+            for (ConstraintViolation<T> violation : violations) {
+                bindingResult.addError(new ObjectError(request.getClass().getName(), violation.getMessage()));
+            }
+            throw new MethodArgumentNotValidException(null, bindingResult);
+        }
     }
 
 }

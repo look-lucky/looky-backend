@@ -13,8 +13,16 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.validation.BeanPropertyBindingResult;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.ObjectError;
+
+import java.util.Set;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -36,6 +44,8 @@ import java.util.List;
 public class InquiryController {
 
     private final InquiryService inquiryService;
+    private final ObjectMapper objectMapper;
+    private final Validator validator;
 
     @Operation(summary = "문의하기", description = "고객센터에 문의를 등록합니다.")
     @ApiResponses(value = {
@@ -45,9 +55,12 @@ public class InquiryController {
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<CommonResponse<Long>> createInquiry(
             @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,
-            @Valid @RequestPart("request") CreateInquiryRequest request,
+            @RequestPart("request") String requestJson,
             @RequestPart(value = "images", required = false) List<MultipartFile> images
-    ) throws IOException {
+    ) throws IOException, MethodArgumentNotValidException {
+        CreateInquiryRequest request = objectMapper.readValue(requestJson, CreateInquiryRequest.class);
+        validateRequest(request);
+
         Long inquiryId = inquiryService.createInquiry(principalDetails.getUser(), request, images);
         return ResponseEntity.ok(CommonResponse.success(inquiryId));
     }
@@ -75,5 +88,16 @@ public class InquiryController {
     ) {
         InquiryResponse response = inquiryService.getInquiry(principalDetails.getUser(), inquiryId);
         return ResponseEntity.ok(CommonResponse.success(response));
+    }
+
+    private <T> void validateRequest(T request) throws MethodArgumentNotValidException {
+        Set<ConstraintViolation<T>> violations = validator.validate(request);
+        if (!violations.isEmpty()) {
+            BindingResult bindingResult = new BeanPropertyBindingResult(request, request.getClass().getName());
+            for (ConstraintViolation<T> violation : violations) {
+                bindingResult.addError(new ObjectError(request.getClass().getName(), violation.getMessage()));
+            }
+            throw new MethodArgumentNotValidException(null, bindingResult);
+        }
     }
 }

@@ -14,8 +14,18 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
+
 import lombok.RequiredArgsConstructor;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validator;
+
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.validation.BeanPropertyBindingResult;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.ObjectError;
+
+import java.util.Set;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -34,6 +44,8 @@ import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
 public class ItemController {
 
         private final ItemService itemService;
+        private final ObjectMapper objectMapper;
+        private final Validator validator;
 
         @Operation(summary = "[점주] 상품 등록", description = "상점에 새로운 상품을 등록합니다. (본인 상점만 가능)")
         @ApiResponses(value = {
@@ -47,8 +59,14 @@ public class ItemController {
                 @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,
                 @Parameter(description = "상품 ID") @PathVariable Long storeId,
                 @Parameter(description = "상품 이미지") @RequestPart(required = false) MultipartFile image,
-                @RequestPart(required = false) @Valid CreateItemRequest request
-        ) throws IOException {
+                @RequestPart(value = "request", required = false) String requestJson
+        ) throws IOException, MethodArgumentNotValidException {
+                CreateItemRequest request = null;
+                if (requestJson != null) {
+                    request = objectMapper.readValue(requestJson, CreateItemRequest.class);
+                    validateRequest(request);
+                }
+
                 Long itemId = itemService.createItem(storeId, principalDetails.getUser(), request, image);
                 return ResponseEntity.status(HttpStatus.CREATED).body(CommonResponse.success(itemId));
         }
@@ -91,9 +109,14 @@ public class ItemController {
         public ResponseEntity<CommonResponse<Void>> updateItem(
                 @Parameter(description = "상품 ID") @PathVariable Long itemId,
                 @Parameter(description = "변경할 상품 이미지") @RequestPart(required = false) MultipartFile image,
-                @RequestPart(required = false) @Valid UpdateItemRequest request,
+                @RequestPart(value = "request", required = false) String requestJson,
                 @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails
-        ) throws IOException {
+        ) throws IOException, MethodArgumentNotValidException {
+                UpdateItemRequest request = null;
+                if (requestJson != null) {
+                    request = objectMapper.readValue(requestJson, UpdateItemRequest.class);
+                    validateRequest(request);
+                }
 
                 itemService.updateItem(itemId, principalDetails.getUser(), request, image);
 
@@ -114,5 +137,16 @@ public class ItemController {
         {
                 itemService.deleteItem(itemId, principalDetails.getUser());
                 return ResponseEntity.status(HttpStatus.NO_CONTENT).body(CommonResponse.success(null));
+        }
+
+        private <T> void validateRequest(T request) throws MethodArgumentNotValidException {
+                Set<ConstraintViolation<T>> violations = validator.validate(request);
+                if (!violations.isEmpty()) {
+                        BindingResult bindingResult = new BeanPropertyBindingResult(request, request.getClass().getName());
+                        for (ConstraintViolation<T> violation : violations) {
+                                bindingResult.addError(new ObjectError(request.getClass().getName(), violation.getMessage()));
+                        }
+                        throw new MethodArgumentNotValidException(null, bindingResult);
+                }
         }
 }

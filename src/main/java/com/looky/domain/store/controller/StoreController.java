@@ -17,8 +17,18 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.validation.BeanPropertyBindingResult;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.ObjectError;
+
+import java.util.Set;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -41,6 +51,8 @@ import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
 public class StoreController {
 
         private final StoreService storeService;
+        private final ObjectMapper objectMapper;
+        private final Validator validator;
 
         @Operation(summary = "[점주] 상점 등록", description = "새로운 상점을 등록합니다.")
         @ApiResponses(value = {
@@ -53,8 +65,11 @@ public class StoreController {
         public ResponseEntity<CommonResponse<Long>> createStore(
                 @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,
                 @Parameter(description = "상품 이미지 목록") @RequestPart(required = false) List<MultipartFile> images,
-                @RequestPart @Valid StoreCreateRequest request
-        ) throws IOException {
+                @RequestPart("request") String requestJson
+        ) throws IOException, MethodArgumentNotValidException {
+                StoreCreateRequest request = objectMapper.readValue(requestJson, StoreCreateRequest.class);
+                validateRequest(request);
+
                 Long storeId = storeService.createStore(principalDetails.getUser(), request, images);
                 return ResponseEntity.status(HttpStatus.CREATED).body(CommonResponse.success(storeId));
         }
@@ -70,9 +85,12 @@ public class StoreController {
         public ResponseEntity<CommonResponse<Void>> updateStore(
                 @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,
                 @Parameter(description = "상점 ID") @PathVariable Long storeId,
-                @RequestPart @Valid StoreUpdateRequest request,
+                @RequestPart("request") String requestJson,
                 @RequestPart(required = false) List<MultipartFile> images
-        ) throws IOException {
+        ) throws IOException, MethodArgumentNotValidException {
+                StoreUpdateRequest request = objectMapper.readValue(requestJson, StoreUpdateRequest.class);
+                validateRequest(request);
+
                 if (images != null) {
                     log.info("Update Store Request: storeId={}, images count={}", storeId, images.size());
                     for (MultipartFile img : images) {
@@ -241,6 +259,17 @@ public class StoreController {
                 User user = principalDetails != null ? principalDetails.getUser() : null;
                 List<StoreMapResponse> response = storeService.getStoreMap(universityId, user);
                 return ResponseEntity.ok(CommonResponse.success(response));
+        }
+
+        private <T> void validateRequest(T request) throws MethodArgumentNotValidException {
+                Set<ConstraintViolation<T>> violations = validator.validate(request);
+                if (!violations.isEmpty()) {
+                        BindingResult bindingResult = new BeanPropertyBindingResult(request, request.getClass().getName());
+                        for (ConstraintViolation<T> violation : violations) {
+                                bindingResult.addError(new ObjectError(request.getClass().getName(), violation.getMessage()));
+                        }
+                        throw new MethodArgumentNotValidException(null, bindingResult);
+                }
         }
 
 }

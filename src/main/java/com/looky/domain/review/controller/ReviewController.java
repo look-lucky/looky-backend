@@ -14,7 +14,17 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.validation.BeanPropertyBindingResult;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.ObjectError;
+
+import java.util.Set;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -35,6 +45,8 @@ import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
 public class ReviewController {
 
     private final ReviewService reviewService;
+    private final ObjectMapper objectMapper;
+    private final Validator validator;
 
     @Operation(summary = "[공통] 리뷰 및 답글 작성", description = "상점에 대한 리뷰(학생) 또는 답글(점주, 학생)을 작성합니다.")
     @ApiResponses(value = {
@@ -48,9 +60,12 @@ public class ReviewController {
     public ResponseEntity<CommonResponse<Long>> createReview(
             @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,
             @Parameter(description = "상점 ID") @PathVariable Long storeId,
-            @RequestPart @Valid CreateReviewRequest request,
+            @RequestPart("request") String requestJson,
             @Parameter(description = "리뷰 이미지 목록") @RequestPart(required = false) List<MultipartFile> images
-    ) throws IOException {
+    ) throws IOException, MethodArgumentNotValidException {
+            CreateReviewRequest request = objectMapper.readValue(requestJson, CreateReviewRequest.class);
+            validateRequest(request);
+
             Long reviewId = reviewService.createReview(principalDetails.getUser(), storeId, request, images);
             return ResponseEntity.status(HttpStatus.CREATED).body(CommonResponse.success(reviewId));
     }
@@ -65,9 +80,12 @@ public class ReviewController {
     public ResponseEntity<CommonResponse<Void>> updateReview(
             @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,
             @Parameter(description = "리뷰 ID") @PathVariable Long reviewId,
-            @RequestPart @Valid UpdateReviewRequest request,
+            @RequestPart("request") String requestJson,
             @Parameter(description = "리뷰 이미지 목록") @RequestPart(required = false) List<MultipartFile> images
-    ) throws IOException {
+    ) throws IOException, MethodArgumentNotValidException {
+            UpdateReviewRequest request = objectMapper.readValue(requestJson, UpdateReviewRequest.class);
+            validateRequest(request);
+
             reviewService.updateReview(reviewId, principalDetails.getUser(), request, images);
             return ResponseEntity.ok(CommonResponse.success(null));
     }
@@ -174,4 +192,15 @@ public class ReviewController {
                 reviewService.removeLike(principalDetails.getUser(), reviewId);
                 return ResponseEntity.ok(CommonResponse.success(null));
         }
+
+    private <T> void validateRequest(T request) throws MethodArgumentNotValidException {
+        Set<ConstraintViolation<T>> violations = validator.validate(request);
+        if (!violations.isEmpty()) {
+            BindingResult bindingResult = new BeanPropertyBindingResult(request, request.getClass().getName());
+            for (ConstraintViolation<T> violation : violations) {
+                bindingResult.addError(new ObjectError(request.getClass().getName(), violation.getMessage()));
+            }
+            throw new MethodArgumentNotValidException(null, bindingResult);
+        }
+    }
 }

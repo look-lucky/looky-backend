@@ -25,10 +25,11 @@ public class ReviewResponse {
     private LocalDateTime createdAt;
     private int likeCount;
     private boolean isOwnerReply;
+    private boolean isLiked;
     private List<String> imageUrls;
     private List<ReviewResponse> children;
 
-    public static ReviewResponse from(Review review) {
+    public static ReviewResponse from(Review review, boolean isLiked) {
         return ReviewResponse.builder()
                 .reviewId(review.getId())
                 .storeId(review.getStore().getId())
@@ -42,6 +43,7 @@ public class ReviewResponse {
                 .likeCount(review.getLikeCount())
                 .isOwnerReply(review.getParentReview() == null &&
                         review.getReplies().stream().anyMatch(r -> r.getUser().getRole() == Role.ROLE_OWNER))
+                .isLiked(isLiked)
                 .build();
     }
 }

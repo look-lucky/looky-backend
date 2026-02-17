@@ -10,7 +10,8 @@ import com.looky.domain.coupon.entity.CouponUsageStatus;
 import com.looky.domain.coupon.repository.StudentCouponRepository;
 import com.looky.domain.review.dto.*;
 
-import java.util.Collections;
+import java.util.*;
+
 import com.looky.domain.review.entity.Review;
 import com.looky.domain.review.entity.ReviewImage;
 import com.looky.domain.review.entity.ReviewLike;
@@ -29,8 +30,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-import java.util.List;
+
 import java.io.IOException;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -208,7 +210,7 @@ public class ReviewService {
     }
 
     // 특정 상점 리뷰 목록 조회
-    public Page<ReviewResponse> getReviews(Long storeId, Pageable pageable) {
+    public Page<ReviewResponse> getReviews(Long storeId, Pageable pageable, User user) {
         Store store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "해당 상점을 찾을 수 없습니다."));
 
@@ -218,22 +220,38 @@ public class ReviewService {
         // 2. 조회된 부모 리뷰들의 ID 수집
         List<Review> parents = parentReviews.getContent();
         if (parents.isEmpty()) {
-            return parentReviews.map(ReviewResponse::from);
+            return parentReviews.map(review -> ReviewResponse.from(review, false));
         }
 
         // 3. 부모 리뷰들에 대한 답글 일괄 조회
         List<Review> replies = reviewRepository.findByParentReviewIn(parents);
 
         // 4. 답글을 부모 리뷰 ID로 그룹화
-        java.util.Map<Long, List<Review>> repliesByParentId = replies.stream()
-                .collect(java.util.stream.Collectors.groupingBy(reply -> reply.getParentReview().getId()));
+        Map<Long, List<Review>> repliesByParentId = replies.stream()
+                .collect(Collectors.groupingBy(reply -> reply.getParentReview().getId()));
 
-        // 5. ReviewResponse로 변환 및 답글 매핑
+        // 5. 로그인 한 경우, 좋아요 여부 확인 (부모 + 자식 모두)
+        Set<Long> likedReviewIds = new HashSet<>();
+        if (user != null) {
+            List<Review> allReviews = new ArrayList<>(parents);
+            allReviews.addAll(replies);
+
+            if (!allReviews.isEmpty()) {
+                likedReviewIds = reviewLikeRepository.findByUserAndReviewIn(user, allReviews).stream()
+                        .map(like -> like.getReview().getId())
+                        .collect(Collectors.toSet());
+            }
+        }
+
+        final Set<Long> finalLikedReviewIds = likedReviewIds;
+
+        // 6. ReviewResponse로 변환 및 답글 매핑
         return parentReviews.map(review -> {
-            ReviewResponse response = ReviewResponse.from(review);
+            boolean isLiked = finalLikedReviewIds.contains(review.getId());
+            ReviewResponse response = ReviewResponse.from(review, isLiked);
             List<Review> childReviews = repliesByParentId.getOrDefault(review.getId(), java.util.Collections.emptyList());
             response.setChildren(childReviews.stream()
-                    .map(ReviewResponse::from)
+                    .map(r -> ReviewResponse.from(r, finalLikedReviewIds.contains(r.getId())))
                     .toList());
             return response;
         });
@@ -241,8 +259,9 @@ public class ReviewService {
 
     // 내가 작성한 리뷰 목록 조회
     public Page<ReviewResponse> getMyReviews(User user, Pageable pageable) {
+        // 내 리뷰에는 좋아요를 누를 수 없으므로 isLiked는 항상 false
         return reviewRepository.findByUserAndParentReviewIsNull(user, pageable)
-                .map(ReviewResponse::from);
+                .map(review -> ReviewResponse.from(review, false));
     }
 
     // 특정 상점 리뷰 통계 조회

@@ -97,101 +97,102 @@ public class ReviewController {
             @ApiResponse(responseCode = "404", description = "리뷰 없음", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class)))
     })
     @DeleteMapping("/reviews/{reviewId}")
-        public ResponseEntity<CommonResponse<Void>> deleteReview(
-                @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,
-                @Parameter(description = "리뷰 ID") @PathVariable Long reviewId
-        )
-        {
-                reviewService.deleteReview(reviewId, principalDetails.getUser());
-                return ResponseEntity.status(HttpStatus.NO_CONTENT).body(CommonResponse.success(null));
-        }
+    public ResponseEntity<CommonResponse<Void>> deleteReview(
+            @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,
+            @Parameter(description = "리뷰 ID") @PathVariable Long reviewId
+    )
+    {
+            reviewService.deleteReview(reviewId, principalDetails.getUser());
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).body(CommonResponse.success(null));
+    }
 
-        @Operation(summary = "[공통] 상점 리뷰 목록 조회", description = "특정 상점의 리뷰 목록을 페이징하여 조회합니다.")
-        @ApiResponses(value = {
-                        @ApiResponse(responseCode = "200", description = "성공"),
-                        @ApiResponse(responseCode = "404", description = "상점 없음", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class)))
-        })
-        @GetMapping("/stores/{storeId}/reviews")
-        public ResponseEntity<CommonResponse<PageResponse<ReviewResponse>>> getReviews(
-                        @Parameter(description = "상점 ID") @PathVariable Long storeId,
-                        @Parameter(description = "페이징 정보") @PageableDefault(size = 10) Pageable pageable)
-        {
-                Page<ReviewResponse> reviews = reviewService.getReviews(storeId, pageable);
-                return ResponseEntity.ok(CommonResponse.success(PageResponse.from(reviews)));
-        }
+    @Operation(summary = "[공통] 상점 리뷰 목록 조회", description = "특정 상점의 리뷰 목록을 페이징하여 조회합니다.")
+    @ApiResponses(value = {
+                    @ApiResponse(responseCode = "200", description = "성공"),
+                    @ApiResponse(responseCode = "404", description = "상점 없음", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class)))
+    })
+    @GetMapping("/stores/{storeId}/reviews")
+    public ResponseEntity<CommonResponse<PageResponse<ReviewResponse>>> getReviews(
+                    @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,
+                    @Parameter(description = "상점 ID") @PathVariable Long storeId,
+                    @Parameter(description = "페이징 정보") @PageableDefault(size = 10) Pageable pageable)
+    {
+            Page<ReviewResponse> reviews = reviewService.getReviews(storeId, pageable, principalDetails.getUser());
+            return ResponseEntity.ok(CommonResponse.success(PageResponse.from(reviews)));
+    }
 
-        @Operation(summary = "[공통] 내 리뷰 목록 조회", description = "내가 작성한 리뷰 목록을 조회합니다.")
-        @ApiResponses(value = {
-                        @ApiResponse(responseCode = "200", description = "성공"),
-        })
-        @GetMapping("/reviews/my")
-        public ResponseEntity<CommonResponse<PageResponse<ReviewResponse>>> getMyReviews(
-                        @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,
-                        @Parameter(description = "페이징 정보") @PageableDefault(size = 10) Pageable pageable)
-        {
-                Page<ReviewResponse> reviews = reviewService.getMyReviews(principalDetails.getUser(), pageable);
-                return ResponseEntity.ok(CommonResponse.success(PageResponse.from(reviews)));
-        }
+    @Operation(summary = "[공통] 내 리뷰 목록 조회", description = "내가 작성한 리뷰 목록을 조회합니다.")
+    @ApiResponses(value = {
+                    @ApiResponse(responseCode = "200", description = "성공"),
+    })
+    @GetMapping("/reviews/my")
+    public ResponseEntity<CommonResponse<PageResponse<ReviewResponse>>> getMyReviews(
+                    @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,
+                    @Parameter(description = "페이징 정보") @PageableDefault(size = 10) Pageable pageable)
+    {
+            Page<ReviewResponse> reviews = reviewService.getMyReviews(principalDetails.getUser(), pageable);
+            return ResponseEntity.ok(CommonResponse.success(PageResponse.from(reviews)));
+    }
 
-        @Operation(summary = "[공통] 상점 리뷰 통계", description = "상점의 평점 평균, 총 리뷰 수, 별점별 개수 분포를 조회합니다.")
-        @ApiResponses(value = {
-                        @ApiResponse(responseCode = "200", description = "통계 조회 성공"),
-                        @ApiResponse(responseCode = "404", description = "상점 없음", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class)))
-        })
-        @GetMapping("/stores/{storeId}/reviews/stats")
-        public ResponseEntity<CommonResponse<ReviewStatsResponse>> getReviewStats(
-                        @Parameter(description = "상점 ID") @PathVariable Long storeId
-        )
-        {
-                ReviewStatsResponse response = reviewService.getReviewStats(storeId);
-                return ResponseEntity.ok(CommonResponse.success(response));
-        }
+    @Operation(summary = "[공통] 상점 리뷰 통계", description = "상점의 평점 평균, 총 리뷰 수, 별점별 개수 분포를 조회합니다.")
+    @ApiResponses(value = {
+                    @ApiResponse(responseCode = "200", description = "통계 조회 성공"),
+                    @ApiResponse(responseCode = "404", description = "상점 없음", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class)))
+    })
+    @GetMapping("/stores/{storeId}/reviews/stats")
+    public ResponseEntity<CommonResponse<ReviewStatsResponse>> getReviewStats(
+                    @Parameter(description = "상점 ID") @PathVariable Long storeId
+    )
+    {
+            ReviewStatsResponse response = reviewService.getReviewStats(storeId);
+            return ResponseEntity.ok(CommonResponse.success(response));
+    }
 
-        @Operation(summary = "[공통] 리뷰 신고 ", description = "특정 리뷰를 신고합니다.")
-        @ApiResponses(value = {
-                        @ApiResponse(responseCode = "200", description = "리뷰 신고 성공"),
-                        @ApiResponse(responseCode = "404", description = "리뷰 없음", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class)))
-        })
-        @PostMapping("/reviews/{reviewId}/reports")
-        public ResponseEntity<CommonResponse<Void>> reportReview(
-                        @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,
-                        @Parameter(description = "리뷰 ID") @PathVariable Long reviewId,
-                        @RequestBody @Valid ReportRequest request
-        )
-        {
-                reviewService.reportReview(reviewId, principalDetails.getUser().getId(), request);
-                return ResponseEntity.ok(CommonResponse.success(null));
-        }
+    @Operation(summary = "[공통] 리뷰 신고 ", description = "특정 리뷰를 신고합니다.")
+    @ApiResponses(value = {
+                    @ApiResponse(responseCode = "200", description = "리뷰 신고 성공"),
+                    @ApiResponse(responseCode = "404", description = "리뷰 없음", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class)))
+    })
+    @PostMapping("/reviews/{reviewId}/reports")
+    public ResponseEntity<CommonResponse<Void>> reportReview(
+                    @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,
+                    @Parameter(description = "리뷰 ID") @PathVariable Long reviewId,
+                    @RequestBody @Valid ReportRequest request
+    )
+    {
+            reviewService.reportReview(reviewId, principalDetails.getUser().getId(), request);
+            return ResponseEntity.ok(CommonResponse.success(null));
+    }
 
-        @Operation(summary = "[공통] 리뷰 좋아요", description = "리뷰에 좋아요를 누릅니다.")
-        @ApiResponses(value = {
-                        @ApiResponse(responseCode = "200", description = "리뷰 좋아요 성공"),
-                        @ApiResponse(responseCode = "400", description = "자신의 리뷰에 좋아요 시도", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class))),
-                        @ApiResponse(responseCode = "404", description = "리뷰 없음", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class))),
-                        @ApiResponse(responseCode = "409", description = "이미 좋아요 누름", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class)))
-        })
-        @PostMapping("/reviews/{reviewId}/likes")
-        public ResponseEntity<CommonResponse<Void>> addLike(
-                        @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,
-                        @Parameter(description = "리뷰 ID") @PathVariable Long reviewId)
-        {
-                reviewService.addLike(principalDetails.getUser(), reviewId);
-                return ResponseEntity.ok(CommonResponse.success(null));
-        }
+    @Operation(summary = "[공통] 리뷰 좋아요", description = "리뷰에 좋아요를 누릅니다.")
+    @ApiResponses(value = {
+                    @ApiResponse(responseCode = "200", description = "리뷰 좋아요 성공"),
+                    @ApiResponse(responseCode = "400", description = "자신의 리뷰에 좋아요 시도", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class))),
+                    @ApiResponse(responseCode = "404", description = "리뷰 없음", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class))),
+                    @ApiResponse(responseCode = "409", description = "이미 좋아요 누름", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class)))
+    })
+    @PostMapping("/reviews/{reviewId}/likes")
+    public ResponseEntity<CommonResponse<Void>> addLike(
+                    @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,
+                    @Parameter(description = "리뷰 ID") @PathVariable Long reviewId)
+    {
+            reviewService.addLike(principalDetails.getUser(), reviewId);
+            return ResponseEntity.ok(CommonResponse.success(null));
+    }
 
-        @Operation(summary = "[공통] 리뷰 좋아요 취소", description = "리뷰 좋아요를 취소합니다.")
-        @ApiResponses(value = {
-                        @ApiResponse(responseCode = "200", description = "리뷰 좋아요 취소 성공"),
-                        @ApiResponse(responseCode = "404", description = "좋아요를 누르지 않은 리뷰", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class)))
-        })
-        @DeleteMapping("/reviews/{reviewId}/likes")
-        public ResponseEntity<CommonResponse<Void>> removeLike(
-                        @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,
-                        @Parameter(description = "리뷰 ID") @PathVariable Long reviewId)
-        {
-                reviewService.removeLike(principalDetails.getUser(), reviewId);
-                return ResponseEntity.ok(CommonResponse.success(null));
-        }
+    @Operation(summary = "[공통] 리뷰 좋아요 취소", description = "리뷰 좋아요를 취소합니다.")
+    @ApiResponses(value = {
+                    @ApiResponse(responseCode = "200", description = "리뷰 좋아요 취소 성공"),
+                    @ApiResponse(responseCode = "404", description = "좋아요를 누르지 않은 리뷰", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class)))
+    })
+    @DeleteMapping("/reviews/{reviewId}/likes")
+    public ResponseEntity<CommonResponse<Void>> removeLike(
+                    @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,
+                    @Parameter(description = "리뷰 ID") @PathVariable Long reviewId)
+    {
+            reviewService.removeLike(principalDetails.getUser(), reviewId);
+            return ResponseEntity.ok(CommonResponse.success(null));
+    }
 
     private <T> void validateRequest(T request) throws MethodArgumentNotValidException {
         Set<ConstraintViolation<T>> violations = validator.validate(request);

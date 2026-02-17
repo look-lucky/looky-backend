@@ -14,4 +14,5 @@ public class StoreStatsResponse {
     private Long totalIssuedCoupons; // 총 발급 쿠폰
     private Long totalUsedCoupons; // 총 사용 쿠폰
     private Long totalReviews; // 총 리뷰 수
+    private Long favoriteIncreaseCount; // 이번 주 찜 증가 수 (지난 주 대비)
 }

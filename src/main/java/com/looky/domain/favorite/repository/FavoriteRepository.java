@@ -20,6 +20,8 @@ public interface FavoriteRepository extends JpaRepository<FavoriteStore, Long> {
 
     long countByStore(Store store);
 
+    long countByStoreAndCreatedAtAfter(Store store, LocalDateTime createdAt);
+
     Page<FavoriteStore> findByUser(User user, Pageable pageable);
 
     @Query("SELECT f.store, COUNT(f) " +

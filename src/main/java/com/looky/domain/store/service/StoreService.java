@@ -215,12 +215,14 @@ public class StoreService {
         long totalReviews = reviewRepository.countByStoreIdAndParentReviewIsNull(storeId);
         long totalIssuedCoupons = couponRepository.countByStoreId(storeId);
         long totalUsedCoupons = studentCouponRepository.countByCoupon_StoreIdAndStatus(storeId, CouponUsageStatus.USED);
+        long favoriteIncreaseCount = favoriteRepository.countByStoreAndCreatedAtAfter(store, LocalDateTime.now(ZoneId.of("Asia/Seoul")).with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)).withHour(0).withMinute(0).withSecond(0).withNano(0));
 
         return StoreStatsResponse.builder()
                 .totalRegulars(totalRegulars)
                 .totalIssuedCoupons(totalIssuedCoupons)
                 .totalUsedCoupons(totalUsedCoupons)
                 .totalReviews(totalReviews)
+                .favoriteIncreaseCount(favoriteIncreaseCount)
                 .build();
     }
     

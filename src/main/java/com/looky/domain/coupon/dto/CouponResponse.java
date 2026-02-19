@@ -15,9 +15,10 @@ public class CouponResponse {
     private Long id;
     private Long storeId;
     private String title;
-    private String description;
+
     private LocalDateTime issueStartsAt;
     private LocalDateTime issueEndsAt;
+    private Integer validDays; // 유효 기간
     private Integer totalQuantity;
     private Integer limitPerUser;
     private CouponStatus status;
@@ -33,9 +34,10 @@ public class CouponResponse {
                 .id(coupon.getId())
                 .storeId(coupon.getStore().getId())
                 .title(coupon.getTitle())
-                .description(coupon.getDescription())
+
                 .issueStartsAt(coupon.getIssueStartsAt())
                 .issueEndsAt(coupon.getIssueEndsAt())
+                .validDays(coupon.getValidDays())
                 .totalQuantity(coupon.getTotalQuantity())
                 .limitPerUser(coupon.getLimitPerUser())
                 .status(coupon.getStatus())

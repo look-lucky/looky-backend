@@ -5,12 +5,21 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
+
 
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import jakarta.persistence.LockModeType;
+import org.springframework.data.jpa.repository.Lock;
+
 public interface CouponRepository extends JpaRepository<Coupon, Long> {
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT c FROM Coupon c WHERE c.id = :id")
+    Optional<Coupon> findByIdWithLock(@Param("id") Long id);
     
     // 특정 상점이 발행한 모든 쿠폰 목록 조회
     List<Coupon> findByStoreId(Long storeId);
@@ -54,11 +63,9 @@ public interface CouponRepository extends JpaRepository<Coupon, Long> {
             @Param("now") LocalDateTime now
     );
 
-    // 쿠폰 다운로드 시 다운로드 수 증가 (선착순 마감 처리, 동시성 제어)
-    // @Modifying: UPDATE/DELETE 쿼리임을 명시
-    // clearAutomatically = true: 쿼리 실행 후 영속성 컨텍스트(1차 캐시)를 비워서 DB와 동기화 (조회 시 최신 데이터 보장)
-    @Modifying(clearAutomatically = true)
-    @Query("UPDATE Coupon c SET c.downloadCount = c.downloadCount + 1 " +
-           "WHERE c.id = :id AND c.downloadCount < c.totalQuantity")
-    int incrementDownloadCount(@Param("id") Long id);
+    // ACTIVE 쿠폰 중 발급 가능 기간 지난 쿠폰 EXPIRED로 설정
+    @Modifying
+    @Query("UPDATE Coupon c SET c.status = 'EXPIRED' WHERE c.status = 'ACTIVE' AND c.issueEndsAt < :now")
+    void expireByIssueEndsAt(@Param("now") LocalDateTime now);
+
 }

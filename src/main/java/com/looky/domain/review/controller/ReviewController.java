@@ -26,6 +26,8 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.List;
 
+import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
+
 @Tag(name = "Review", description = "리뷰 관련 API")
 @RestController
 @RequiredArgsConstructor
@@ -42,7 +44,7 @@ public class ReviewController {
             @ApiResponse(responseCode = "404", description = "상점 또는 원본 리뷰 없음", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class))),
             @ApiResponse(responseCode = "409", description = "이미 작성된 리뷰 존재", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class)))
     })
-    @PostMapping("/stores/{storeId}/reviews")
+    @PostMapping(value = "/stores/{storeId}/reviews", consumes = MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<CommonResponse<Long>> createReview(
             @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,
             @Parameter(description = "상점 ID") @PathVariable Long storeId,
@@ -59,7 +61,7 @@ public class ReviewController {
             @ApiResponse(responseCode = "403", description = "권한 없음 (본인 리뷰 아님)", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class))),
             @ApiResponse(responseCode = "404", description = "리뷰 없음", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class)))
     })
-    @PatchMapping("/reviews/{reviewId}")
+    @PatchMapping(value = "/reviews/{reviewId}", consumes = MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<CommonResponse<Void>> updateReview(
             @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,
             @Parameter(description = "리뷰 ID") @PathVariable Long reviewId,

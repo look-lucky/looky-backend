@@ -31,6 +31,8 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.List;
 
+import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
+
 @Tag(name = "Store", description = "상점 관련 API")
 @RestController
 @RequestMapping("/api/stores")
@@ -47,7 +49,7 @@ public class StoreController {
                 @ApiResponse(responseCode = "403", description = "권한 없음", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class))),
                 @ApiResponse(responseCode = "409", description = "이미 존재하는 상점 이름", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class)))
         })
-        @PostMapping
+        @PostMapping(consumes = MULTIPART_FORM_DATA_VALUE)
         public ResponseEntity<CommonResponse<Long>> createStore(
                 @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,
                 @Parameter(description = "상품 이미지 목록") @RequestPart(required = false) List<MultipartFile> images,
@@ -64,14 +66,22 @@ public class StoreController {
                 @ApiResponse(responseCode = "404", description = "상점 없음", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class))),
                 @ApiResponse(responseCode = "409", description = "이미 존재하는 상점 이름", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class)))
         })
-        @PatchMapping("/{storeId}")
+        @PatchMapping(value = "/{storeId}", consumes = MULTIPART_FORM_DATA_VALUE)
         public ResponseEntity<CommonResponse<Void>> updateStore(
                 @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,
                 @Parameter(description = "상점 ID") @PathVariable Long storeId,
                 @RequestPart @Valid StoreUpdateRequest request,
                 @RequestPart(required = false) List<MultipartFile> images
         ) throws IOException {
-                log.info("Update Store Request: storeId={}, images={}", storeId, images != null ? images.size() : "null");
+                if (images != null) {
+                    log.info("Update Store Request: storeId={}, images count={}", storeId, images.size());
+                    for (MultipartFile img : images) {
+                        log.info("Received Image: name={}, originalFilename={}, size={}, contentType={}", 
+                                img.getName(), img.getOriginalFilename(), img.getSize(), img.getContentType());
+                    }
+                } else {
+                    log.info("Update Store Request: storeId={}, images=null", storeId);
+                }
                 storeService.updateStore(storeId, principalDetails.getUser(), request, images);
                 return ResponseEntity.ok(CommonResponse.success(null));
         }

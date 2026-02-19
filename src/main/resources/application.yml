@@ -8,8 +8,8 @@ spring:
   # 업로드 제한
   servlet:
     multipart:
-      max-file-size: 50MB    # 개별 파일 용량
-      max-request-size: 50MB # 요청 전체 용량
+      max-file-size: 20MB    # 개별 파일 용량 (Spring 차원 제한 - 넉넉하게 설정 후 로직에서 10MB 체크)
+      max-request-size: 100MB # 요청 전체 용량 (여러 이미지 업로드 고려하여 증설)
 
   #  문서화 (Swagger)
   springdoc:
@@ -49,13 +49,14 @@ app:
     from: ${SPRING_MAIL_USERNAME}
     verification:
       ttl-minutes: 5
+
   redirect-uris: # 소셜 로그인 리다이렉트 URI (백엔드 -> 앱)
     app: "rnapp://auth/callback"                # 앱에서 요청 시
 
 # JWT 정책
 jwt:
   secret: ${JWT_SECRET}
-  access-expiration: 3600000
+  access-expiration: 3000000 # 5분
   refresh-expiration: 1209600000
 
 # open api 설정
@@ -67,4 +68,3 @@ naver:
   maps:
     client-id: ${NAVER_MAP_CLIENT_ID}
     client-secret: ${NAVER_MAP_CLIENT_SECRET}
-

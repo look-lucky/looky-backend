@@ -74,7 +74,8 @@ INSERT INTO user (user_id, created_at, modified_at, username, password, role, de
 INSERT INTO council_profile (user_id, university_id) VALUES (50, 1);
 
 INSERT INTO organization (organization_id, created_at, modified_at, university_id, user_id, category, name, parent_id) VALUES 
-(1, NOW(), NOW(), 1, 50, 'STUDENT_COUNCIL', '전북대학교 총학생회', NULL);
+(1, NOW(), NOW(), 1, 50, 'UNIVERSITY_COUNCIL', '전북대학교 총학생회', NULL),
+(2, NOW(), NOW(), 1, 50, 'CLUB_ASSOCIATION', '전북대학교 총동아리연합회', NULL);
 
 INSERT INTO organization (organization_id, created_at, modified_at, university_id, user_id, category, name, parent_id) VALUES 
 (10, NOW(), NOW(), 1, 50, 'COLLEGE', '공과대학', 1),
@@ -217,22 +218,22 @@ INSERT INTO partnership (created_at, modified_at, benefit, starts_at, ends_at, s
 
 -- 5.4 Coupons
 -- Active Coupon (Store 1, Store 2)
-INSERT INTO coupon (coupon_id, created_at, modified_at, title, description, issue_starts_at, issue_ends_at, total_quantity, limit_per_user, status, benefit_type, benefit_value, min_order_amount, download_count, store_id) VALUES 
-(1, NOW(), NOW(), '신학기 1000원 할인 쿠폰', '모든 메뉴에 적용 가능합니다.', '2026-02-01', '2026-03-31', 100, 1, 'ACTIVE', 'FIXED_DISCOUNT', '1000', 10000, 2, 1),
-(2, NOW(), NOW(), '감자튀김 무료 증정', '세트 메뉴 주문 시 사용 가능', '2026-01-01', '2026-12-31', 50, 1, 'ACTIVE', 'SERVICE_GIFT', '감자튀김', 15000, 1, 2);
+INSERT INTO coupon (coupon_id, created_at, modified_at, title, issue_starts_at, issue_ends_at, valid_days, total_quantity, limit_per_user, status, benefit_type, benefit_value, min_order_amount, download_count, store_id) VALUES 
+(1, NOW(), NOW(), '신학기 1000원 할인 쿠폰', '2026-02-01', '2026-03-31', 30, 100, 1, 'ACTIVE', 'FIXED_DISCOUNT', '1000', 10000, 2, 1),
+(2, NOW(), NOW(), '감자튀김 무료 증정', '2026-01-01', '2026-12-31', 7, 50, 1, 'ACTIVE', 'SERVICE_GIFT', '감자튀김', 15000, 1, 2);
 
 -- Expired Coupon (Store 1)
-INSERT INTO coupon (coupon_id, created_at, modified_at, title, description, issue_starts_at, issue_ends_at, total_quantity, limit_per_user, status, benefit_type, benefit_value, min_order_amount, download_count, store_id) VALUES 
-(3, NOW(), NOW(), '지난 겨울 할인', '지난 시즌 할인', '2025-12-01', '2025-12-31', 100, 1, 'EXPIRED', 'PERCENTAGE_DISCOUNT', '10', 0, 0, 1);
+INSERT INTO coupon (coupon_id, created_at, modified_at, title, issue_starts_at, issue_ends_at, valid_days, total_quantity, limit_per_user, status, benefit_type, benefit_value, min_order_amount, download_count, store_id) VALUES 
+(3, NOW(), NOW(), '지난 겨울 할인', '2025-02-21', '2025-12-31', 30, 100, 1, 'EXPIRED', 'PERCENTAGE_DISCOUNT', '10', 0, 0, 1);
 
 -- Scheduled Coupon (Store 3)
-INSERT INTO coupon (coupon_id, created_at, modified_at, title, description, issue_starts_at, issue_ends_at, total_quantity, limit_per_user, status, benefit_type, benefit_value, min_order_amount, download_count, store_id) VALUES 
-(4, NOW(), NOW(), '3월 개강 이벤트', '개강 기념 할인', '2026-03-02', '2026-03-31', 200, 1, 'SCHEDULED', 'FIXED_DISCOUNT', '500', 0, 0, 3);
+INSERT INTO coupon (coupon_id, created_at, modified_at, title, issue_starts_at, issue_ends_at, valid_days, total_quantity, limit_per_user, status, benefit_type, benefit_value, min_order_amount, download_count, store_id) VALUES 
+(4, NOW(), NOW(), '3월 개강 이벤트', '2026-02-21', '2026-03-31', 14, 200, 1, 'ACTIVE', 'FIXED_DISCOUNT', '500', 0, 0, 3);
 
 -- Active but Sold Out Coupon (Store 4 - no store owner user_id but coupon exists? Let's assign to Store 2 instead)
 -- Let's make Store 5 have a sold out coupon
-INSERT INTO coupon (coupon_id, created_at, modified_at, title, description, issue_starts_at, issue_ends_at, total_quantity, limit_per_user, status, benefit_type, benefit_value, min_order_amount, download_count, store_id) VALUES 
-(5, NOW(), NOW(), '선착순 1명 무료', '빨리 오세요', '2026-02-01', '2026-02-28', 0, 1, 'ACTIVE', 'FIXED_DISCOUNT', '5000', 0, 0, 5);
+INSERT INTO coupon (coupon_id, created_at, modified_at, title, issue_starts_at, issue_ends_at, valid_days, total_quantity, limit_per_user, status, benefit_type, benefit_value, min_order_amount, download_count, store_id) VALUES 
+(5, NOW(), NOW(), '선착순 1명 무료', '2026-02-20', '2026-02-28', 1, 0, 1, 'ACTIVE', 'FIXED_DISCOUNT', '5000', 0, 0, 5);
 
 -- 5.5 Student Coupons
 INSERT INTO student_coupon (student_coupon_id, created_at, modified_at, verification_code, status, issued_at, activated_at, used_at, expires_at, user_id, coupon_id) VALUES
@@ -244,15 +245,15 @@ INSERT INTO student_coupon (student_coupon_id, created_at, modified_at, verifica
 -- 6. Events
 -- Upcoming
 INSERT INTO events (event_id, created_at, modified_at, title, description, latitude, longitude, start_date_time, end_date_time, status, university_id) VALUES 
-(1, NOW(), NOW(), '2026 전북대학교 대동제', '2026년 전북대 대동제에 여러분을 초대합니다!', 35.846833, 127.129360, '2026-05-20 10:00:00', '2026-05-22 23:00:00', 'UPCOMING', 1);
+(1, NOW(), NOW(), '2026 전북대학교 대동제', '2026년 전북대 대동제에 여러분을 초대합니다!', 35.846833, 127.129360, '2026-02-15 10:00:00', '2026-05-22 23:00:00', 'UPCOMING', 1);
 
 -- Live
 INSERT INTO events (event_id, created_at, modified_at, title, description, latitude, longitude, start_date_time, end_date_time, status, university_id) VALUES 
-(2, NOW(), NOW(), '소프트웨어공학과 신입생 오리엔테이션', '신입생 환영회', 35.846100, 127.129600, '2026-02-07 09:00:00', '2026-02-07 18:00:00', 'LIVE', 1);
+(2, NOW(), NOW(), '소프트웨어공학과 신입생 오리엔테이션', '신입생 환영회', 35.846100, 127.129600, '2026-02-13 09:00:00', '2026-02-28 18:00:00', 'LIVE', 1);
 
 -- Ended
 INSERT INTO events (event_id, created_at, modified_at, title, description, latitude, longitude, start_date_time, end_date_time, status, university_id) VALUES 
-(3, NOW(), NOW(), '2025 졸업작품 전시회', '고생하셨습니다', 35.846100, 127.129600, '2025-11-20 09:00:00', '2025-11-22 18:00:00', 'ENDED', 1);
+(3, NOW(), NOW(), '2025 졸업작품 전시회', '고생하셨습니다', 35.846100, 127.129600, '2026-02-16 09:00:00', '2025-02-28 18:00:00', 'ENDED', 1);
 
 
 INSERT INTO event_types (event_id, event_type) VALUES (1, 'SCHOOL_EVENT'), (1, 'PERFORMANCE'), (2, 'COMMUNITY'), (3, 'SCHOOL_EVENT');
@@ -324,6 +325,11 @@ INSERT INTO store_news_comment (id, created_at, modified_at, store_news_id, user
 (2, NOW(), NOW(), 1, 102, '무슨 메뉴인가요?'),
 (3, NOW(), NOW(), 2, 104, '헉 헛걸음할뻔');
 
+INSERT INTO store_news_image (id, created_at, modified_at, store_news_id, image_url, order_index) VALUES
+(1, NOW(), NOW(), 1, 'https://example.com/news1_1.jpg', 0),
+(2, NOW(), NOW(), 1, 'https://example.com/news1_2.jpg', 1),
+(3, NOW(), NOW(), 2, 'https://example.com/news2_1.jpg', 0);
+
 -- 10. Store Claims
 INSERT INTO store_claim (store_claim_request_id, created_at, modified_at, store_id, user_id, biz_reg_no, representative_name, store_name, store_phone, license_image_url, status, reject_reason, admin_memo) VALUES
 (1, NOW(), NOW(), 4, 15, '123-45-78901', '박사장', '컴포즈커피 전북대구정문점', '010-0000-0000', 'https://example.com/license1.jpg', 'PENDING', NULL, '검토 중'),
@@ -372,5 +378,67 @@ INSERT INTO store_categories (store_id, category) VALUES (22, 'ETC');
 INSERT INTO store_university (store_id, university_id) VALUES (22, 1);
 INSERT INTO store_claim (created_at, modified_at, store_id, user_id, biz_reg_no, representative_name, store_name, store_phone, license_image_url, status) VALUES
 (NOW(), NOW(), 22, 10, '345-67-89012', '김사장', '탕후루 왕가', '063-444-4444', 'https://example.com/license22.jpg', 'PENDING');
+
+-- 14. Enriched Data (Additional Stores & Content)
+-- Store 30: 서브웨이 (Active, Partnership)
+INSERT INTO store (store_id, created_at, modified_at, name, branch, biz_reg_no, road_address, jibun_address, latitude, longitude, store_phone, store_status, user_id, introduction, operating_hours, is_suspended, clover_grade) VALUES
+(30, NOW(), NOW(), '서브웨이', '전북대점', '888-77-66666', '전북 전주시 덕진구 명륜4길 30', '덕진동1가 666-6', 35.847200, 127.129200, '063-555-5555', 'ACTIVE', 11, '신선한 샌드위치', '{"0": [["08:00", "22:00"], null], "1": [["08:00", "22:00"], null], "2": [["08:00", "22:00"], null], "3": [["08:00", "22:00"], null], "4": [["08:00", "22:00"], null], "5": [["08:00", "22:00"], null], "6": [["08:00", "22:00"], null]}', 0, 'SPROUT');
+INSERT INTO store_categories (store_id, category) VALUES (30, 'RESTAURANT');
+INSERT INTO store_university (store_id, university_id) VALUES (30, 1);
+INSERT INTO store_image (store_id, image_url, order_index) VALUES (30, 'https://example.com/subway1.jpg', 0);
+
+-- Store 31: 배스킨라빈스 (Active)
+INSERT INTO store (store_id, created_at, modified_at, name, branch, biz_reg_no, road_address, jibun_address, latitude, longitude, store_phone, store_status, user_id, introduction, operating_hours, is_suspended, clover_grade) VALUES
+(31, NOW(), NOW(), '배스킨라빈스', '전북대점', '777-66-55555', '전북 전주시 덕진구 명륜4길 35', '덕진동1가 777-7', 35.847400, 127.129400, '063-666-6666', 'ACTIVE', 12, '골라먹는 재미', '{"0": [["10:00", "23:00"], null], "1": [["10:00", "23:00"], null], "2": [["10:00", "23:00"], null], "3": [["10:00", "23:00"], null], "4": [["10:00", "23:00"], null], "5": [["10:00", "23:00"], null], "6": [["10:00", "23:00"], null]}', 0, 'THREE_LEAF');
+INSERT INTO store_categories (store_id, category) VALUES (31, 'CAFE');
+INSERT INTO store_university (store_id, university_id) VALUES (31, 1);
+INSERT INTO store_image (store_id, image_url, order_index) VALUES (31, 'https://example.com/baskin1.jpg', 0);
+
+-- Store 32: 역전할머니맥주 (Active, Hot Place)
+INSERT INTO store (store_id, created_at, modified_at, name, branch, biz_reg_no, road_address, jibun_address, latitude, longitude, store_phone, store_status, user_id, introduction, operating_hours, is_suspended, clover_grade) VALUES
+(32, NOW(), NOW(), '역전할머니맥주', '전북대점', '666-55-44444', '전북 전주시 덕진구 명륜4길 40', '덕진동1가 888-8', 35.846800, 127.129800, '063-777-7777', 'ACTIVE', 13, '시원한 살얼음 맥주', '{"0": [["17:00", "04:00"], null], "1": [["17:00", "04:00"], null], "2": [["17:00", "04:00"], null], "3": [["17:00", "04:00"], null], "4": [["17:00", "04:00"], null], "5": [["17:00", "04:00"], null], "6": [["17:00", "04:00"], null]}', 0, 'THREE_LEAF');
+INSERT INTO store_categories (store_id, category) VALUES (32, 'BAR');
+INSERT INTO store_moods (store_id, mood) VALUES (32, 'GROUP_GATHERING'), (32, 'LATE_NIGHT');
+INSERT INTO store_university (store_id, university_id) VALUES (32, 1);
+INSERT INTO store_image (store_id, image_url, order_index) VALUES (32, 'https://example.com/yukjun1.jpg', 0);
+
+-- Items for New Stores
+INSERT INTO item_category (item_category_id, created_at, modified_at, name, store_id) VALUES 
+(20, NOW(), NOW(), '샌드위치', 30),
+(21, NOW(), NOW(), '아이스크림', 31),
+(22, NOW(), NOW(), '맥주/안주', 32);
+
+INSERT INTO item (item_id, created_at, modified_at, name, price, description, is_sold_out, is_representative, is_hidden, badge, store_id, item_category_id) VALUES
+(30, NOW(), NOW(), '이탈리안 비엠티', 6700, '페퍼로니, 살라미, 햄의 조화', 0, 1, 0, 'BEST', 30, 20),
+(31, NOW(), NOW(), '에그마요', 5500, '부드러운 달걀 샐러드', 0, 0, 0, NULL, 30, 20),
+(32, NOW(), NOW(), '쿠키', 1300, '달콤한 디저트', 0, 0, 0, NULL, 30, 20),
+(33, NOW(), NOW(), '파인트', 9800, '3가지 맛 선택', 0, 1, 0, 'BEST', 31, 21),
+(34, NOW(), NOW(), '싱글레귤러', 3900, '1가지 맛', 0, 0, 0, NULL, 31, 21),
+(35, NOW(), NOW(), '살얼음맥주 500cc', 4500, '속까지 시원한 맥주', 0, 1, 0, 'BEST', 32, 22),
+(36, NOW(), NOW(), '오징어입', 8000, '맥주 도둑 안주', 0, 0, 0, 'HOT', 32, 22),
+(37, NOW(), NOW(), '치즈라볶이', 9000, '뚝배기에 나오는 라볶이', 0, 0, 0, NULL, 32, 22);
+
+-- New Partnerships
+INSERT INTO partnership (created_at, modified_at, benefit, starts_at, ends_at, store_id, organization_id) VALUES
+(NOW(), NOW(), '단품 구매 시 세트 업그레이드', '2026-03-01', '2026-12-31', 30, 10), -- Subway, College of Engineering
+(NOW(), NOW(), '안주 1개 서비스', '2026-03-01', '2026-12-31', 32, 1); -- Yukjun, Student Council
+
+-- New Events
+INSERT INTO events (event_id, created_at, modified_at, title, description, latitude, longitude, start_date_time, end_date_time, status, university_id) VALUES
+(10, NOW(), NOW(), '중간고사 간식 나눔', '시험기간 힘내세요! 햄버거 증정', 35.841000, 127.129500, '2026-04-20 18:00:00', '2026-04-20 20:00:00', 'UPCOMING', 1),
+(11, NOW(), NOW(), '1학기 종강 파티', '한 학기 마무리 파티', 35.841500, 127.129000, '2026-06-20 19:00:00', '2026-06-21 02:00:00', 'UPCOMING', 1);
+
+INSERT INTO event_types (event_id, event_type) VALUES (10, 'SCHOOL_EVENT'), (11, 'COMMUNITY');
+
+-- New Reviews
+INSERT INTO review (review_id, created_at, modified_at, user_id, store_id, is_verified, rating, content, status, report_count, like_count, is_private) VALUES
+(10, NOW(), NOW(), 101, 30, 1, 5, '서브웨이 생겨서 너무 좋아요 ㅠㅠ', 'PUBLISHED', 0, 3, 0),
+(11, NOW(), NOW(), 102, 30, 1, 4, '점심시간에 사람 많아요', 'PUBLISHED', 0, 1, 0),
+(12, NOW(), NOW(), 103, 32, 1, 5, '맥주가 진짜 시원해요', 'PUBLISHED', 0, 5, 0),
+(13, NOW(), NOW(), 104, 32, 0, 3, '시끄러워서 대화하기 힘들어요', 'PUBLISHED', 0, 0, 0);
+
+INSERT INTO review_image (review_id, image_url, order_index) VALUES
+(10, 'https://example.com/subway_review.jpg', 0),
+(12, 'https://example.com/beer_review.jpg', 0);
 
 SET FOREIGN_KEY_CHECKS = 1;

@@ -23,6 +23,7 @@ public class CompleteSocialSignupRequest {
     private Long universityId;
     private Long collegeId;
     private Long departmentId;
+    private Boolean isClubMember;
 
     // 점주
     private String name;

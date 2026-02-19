@@ -17,9 +17,10 @@ public class IssueCouponResponse {
     private LocalDateTime issuedAt;
     private LocalDateTime expiresAt;
     private String title;
-    private String description;
+
     private CouponBenefitType benefitType;
     private String benefitValue;
+    private Integer minOrderAmount;
     private String storeName;
 
     public static IssueCouponResponse from(StudentCoupon studentCoupon) {
@@ -35,9 +36,10 @@ public class IssueCouponResponse {
                 .issuedAt(studentCoupon.getIssuedAt())
                 .expiresAt(studentCoupon.getExpiresAt())
                 .title(coupon.getTitle())
-                .description(coupon.getDescription())
+
                 .benefitType(coupon.getBenefitType())
                 .benefitValue(coupon.getBenefitValue())
+                .minOrderAmount(coupon.getMinOrderAmount())
                 .storeName(storeName)
                 .build();
     }

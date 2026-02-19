@@ -73,7 +73,7 @@ public class OrganizationService {
                 // 학생회가 등록할 때
                 if (user.getRole() == Role.ROLE_COUNCIL) {
                         CouncilProfile councilProfile = councilProfileRepository.findById(user.getId())
-                                        .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "학생회를 찾을 수 없습니다."));
+                                .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "학생회를 찾을 수 없습니다."));
                         if (!Objects.equals(councilProfile.getUniversity().getId(), universityId)) {
                                 throw new CustomException(ErrorCode.FORBIDDEN, "자신의 대학에만 소속을 등록할 수 있습니다.");
                         }
@@ -82,7 +82,12 @@ public class OrganizationService {
                 // 학과일 때
                 if (request.getParentId() != null) {
                         parent = organizationRepository.findById(request.getParentId())
-                                        .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "단과대학을 찾을 수 없습니다."));
+                                .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "단과대학을 찾을 수 없습니다."));
+                }
+
+                // 같은 대학 내 이름 중복 확인
+                if (organizationRepository.existsByUniversityIdAndName(universityId, request.getName())) {
+                        throw new CustomException(ErrorCode.DUPLICATE_RESOURCE, "이미 존재하는 소속 이름입니다.");
                 }
 
                 Organization organization = request.toEntity(university, parent, user);
@@ -96,7 +101,7 @@ public class OrganizationService {
                                 .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "소속을 찾을 수 없습니다."));
 
                 // 학생회인 경우 본인 소유 확인
-                if (user.getRole() == Role.ROLE_ADMIN || !Objects.equals(organization.getUser().getId(), user.getId())) {
+                if (user.getRole() == Role.ROLE_COUNCIL && !Objects.equals(organization.getUser().getId(), user.getId())) {
                         throw new CustomException(ErrorCode.FORBIDDEN, "본인이 생성한 소속만 수정할 수 있습니다.");
                 }
 
@@ -118,6 +123,14 @@ public class OrganizationService {
                     }
                 }
 
+                // 이름 변경 시 중복 확인
+                if (request.getName().isPresent()) {
+                    String newName = request.getName().get();
+                    if (!organization.getName().equals(newName) && organizationRepository.existsByUniversityIdAndName(organization.getUniversity().getId(), newName)) {
+                        throw new CustomException(ErrorCode.DUPLICATE_RESOURCE, "이미 존재하는 소속 이름입니다.");
+                    }
+                }
+
                 organization.update(
                     request.getCategory().orElse(organization.getCategory()),
                     request.getName().orElse(organization.getName()),
@@ -132,8 +145,12 @@ public class OrganizationService {
                                 .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "소속을 찾을 수 없습니다."));
 
                 // 학생회인 경우 본인 소유 확인
-                if (user.getRole() == Role.ROLE_ADMIN || !Objects.equals(organization.getUser().getId(), user.getId())) {
+                if (user.getRole() == Role.ROLE_COUNCIL && !Objects.equals(organization.getUser().getId(), user.getId())) {
                         throw new CustomException(ErrorCode.FORBIDDEN, "본인이 생성한 소속만 삭제할 수 있습니다.");
+                }
+
+                if (organizationRepository.existsByParentId(organizationId)) {
+                        throw new CustomException(ErrorCode.BAD_REQUEST, "하위 조직이 있어 삭제할 수 없습니다.");
                 }
 
                 organizationRepository.delete(organization);
@@ -155,7 +172,12 @@ public class OrganizationService {
 
                 // 이미 같은 카테고리(단과대학 or 학과)에 가입되어 있는지 확인
                 if (userOrganizationRepository.existsByUserAndOrganization_Category(currentUser, organization.getCategory())) {
-                        String categoryName = organization.getCategory() == OrganizationCategory.COLLEGE ? "단과대학" : "학과";
+                        String categoryName;
+                        if (organization.getCategory() == OrganizationCategory.COLLEGE) categoryName = "단과대학";
+                        else if (organization.getCategory() == OrganizationCategory.DEPARTMENT) categoryName = "학과";
+                        else if (organization.getCategory() == OrganizationCategory.UNIVERSITY_COUNCIL) categoryName = "총학생회";
+                        else categoryName = "총동아리연합회";
+                        
                         throw new CustomException(ErrorCode.DUPLICATE_RESOURCE, "이미 가입한 " + categoryName + "이 있습니다.");
                 }
 

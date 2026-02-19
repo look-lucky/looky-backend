@@ -25,14 +25,14 @@ public class Coupon extends BaseEntity {
     @Column(nullable = false)
     private String title;
 
-    @Lob
-    private String description;
 
-    private LocalDateTime issueStartsAt; // 예약 발행 시 사용
+    private LocalDateTime issueStartsAt; // 쿠폰 노출/발급 시작일
     private LocalDateTime issueEndsAt; // 쿠폰 노출/발급 종료일
 
     @Column(nullable = false)
-    private Integer totalQuantity; // 총 발행 한도
+    private Integer validDays; // 발급 후 유효 기간 (일 단위. 0이면 발급 종료일과 동일)
+
+    private Integer totalQuantity; // 총 발행 한도 (null이면 무한대)
 
     @Column(nullable = false)
     private Integer limitPerUser;
@@ -52,12 +52,12 @@ public class Coupon extends BaseEntity {
     private Integer downloadCount = 0; // 현재 발급된 수량 (다운로드 수)
 
     @Builder
-    public Coupon(Store store, String title, String description, LocalDateTime issueStartsAt, LocalDateTime issueEndsAt, Integer totalQuantity, Integer limitPerUser, CouponStatus status, CouponBenefitType benefitType, String benefitValue, Integer minOrderAmount) {
+    public Coupon(Store store, String title, LocalDateTime issueStartsAt, LocalDateTime issueEndsAt, Integer validDays, Integer totalQuantity, Integer limitPerUser, CouponStatus status, CouponBenefitType benefitType, String benefitValue, Integer minOrderAmount) {
         this.store = store;
         this.title = title;
-        this.description = description;
         this.issueStartsAt = issueStartsAt;
         this.issueEndsAt = issueEndsAt;
+        this.validDays = validDays;
         this.totalQuantity = totalQuantity;
         this.limitPerUser = limitPerUser;
         this.status = status;
@@ -66,16 +66,28 @@ public class Coupon extends BaseEntity {
         this.minOrderAmount = minOrderAmount;
     }
 
-    public void updateCoupon(String title, String description, LocalDateTime issueStartsAt, LocalDateTime issueEndsAt, Integer totalQuantity, Integer limitPerUser, CouponStatus status, CouponBenefitType benefitType, String benefitValue, Integer minOrderAmount) {
+    public void updateCoupon(String title, LocalDateTime issueStartsAt, LocalDateTime issueEndsAt, Integer validDays, Integer totalQuantity, Integer limitPerUser, CouponStatus status, CouponBenefitType benefitType, String benefitValue, Integer minOrderAmount) {
         this.title = title;
-        this.description = description;
         this.issueStartsAt = issueStartsAt;
         this.issueEndsAt = issueEndsAt;
+        this.validDays = validDays;
         this.totalQuantity = totalQuantity;
         this.limitPerUser = limitPerUser;
         this.status = status;
         this.benefitType = benefitType;
         this.benefitValue = benefitValue;
         this.minOrderAmount = minOrderAmount;
+    }
+
+    public void increaseDownloadCount() {
+        this.downloadCount++;
+    }
+
+    public void expire() {
+        this.status = CouponStatus.EXPIRED;
+    }
+
+    public void expireByWithdrawal() {
+        this.status = CouponStatus.WITHDRAWN_BY_OWNER;
     }
 }

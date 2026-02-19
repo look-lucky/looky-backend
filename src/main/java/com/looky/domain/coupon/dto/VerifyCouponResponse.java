@@ -14,7 +14,7 @@ public class VerifyCouponResponse {
     private Long studentCouponId;
     private String studentNickname;
     private String couponTitle;
-    private String description;
+
     private CouponBenefitType benefitType;
     private String benefitValue;
     private LocalDateTime issuedAt;
@@ -27,7 +27,7 @@ public class VerifyCouponResponse {
                 .studentCouponId(studentCoupon.getId())
                 .studentNickname(studentNickname)
                 .couponTitle(coupon.getTitle())
-                .description(coupon.getDescription())
+
                 .benefitType(coupon.getBenefitType())
                 .benefitValue(coupon.getBenefitValue())
                 .issuedAt(studentCoupon.getIssuedAt())

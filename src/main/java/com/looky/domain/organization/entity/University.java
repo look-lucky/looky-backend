@@ -19,17 +19,17 @@ public class University {
     @Column(unique = true, nullable = false)
     private String name;
 
-    @Column(unique = true, nullable = false)
-    private String emailDomain;
+    @Column(name = "email_domain", nullable = false)
+    private String emailDomains; // 콤마로 구분된 도메인 목록
 
     @Builder
-    public University(String name, String emailDomain) {
+    public University(String name, String emailDomains) {
         this.name = name;
-        this.emailDomain = emailDomain;
+        this.emailDomains = emailDomains;
     }
 
-    public void update(String name, String emailDomain) {
+    public void update(String name, String emailDomains) {
         this.name = name;
-        this.emailDomain = emailDomain;
+        this.emailDomains = emailDomains;
     }
 }

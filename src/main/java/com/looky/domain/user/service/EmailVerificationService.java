@@ -115,16 +115,26 @@ public class EmailVerificationService {
         University university = universityRepository.findById(universityId)
                 .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "해당 대학을 찾을 수 없습니다."));
         
-        String domain = university.getEmailDomain();
-        if (domain == null || domain.isEmpty()) {
+        String domainsStr = university.getEmailDomains();
+        if (domainsStr == null || domainsStr.isEmpty()) {
             throw new CustomException(ErrorCode.BAD_REQUEST, "해당 대학에 이메일 도메인이 존재하지 않습니다.");
         }
 
         String normalizedEmail = email.toLowerCase(Locale.ROOT);
-        String normalizedDomain = domain.toLowerCase(Locale.ROOT);
+        String[] domains = domainsStr.split(",");
+        boolean matched = false;
 
-        if (!normalizedEmail.endsWith("@" + normalizedDomain)) {
-            throw new CustomException(ErrorCode.BAD_REQUEST, university.getName() + " 이메일 계정만 인증 가능합니다.");
+        // 여러 개 도메인 중 일치하는 거 있는지 확인
+        for (String domain : domains) {
+            String normalizedDomain = domain.trim().toLowerCase(Locale.ROOT);
+            if (normalizedEmail.endsWith("@" + normalizedDomain)) {
+                matched = true;
+                break;
+            }
+        }
+
+        if (!matched) {
+            throw new CustomException(ErrorCode.BAD_REQUEST, university.getName() + " 이메일 계정만 인증 가능합니다. (" + domainsStr + ")");
         }
     }
 

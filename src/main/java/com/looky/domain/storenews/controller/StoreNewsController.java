@@ -23,6 +23,8 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.List;
 
+import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
+
 @Tag(name = "StoreNews", description = "가게 소식 관련 API")
 @RestController
 @RequestMapping("/api")
@@ -32,7 +34,7 @@ public class StoreNewsController {
     private final StoreNewsService storeNewsService;
 
     @Operation(summary = "[점주] 소식 등록", description = "가게에 새로운 소식을 등록합니다.")
-    @PostMapping("/stores/{storeId}/news")
+    @PostMapping(value = "/stores/{storeId}/news", consumes = MULTIPART_FORM_DATA_VALUE)
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "소식 등록 성공"),
             @ApiResponse(responseCode = "403", description = "권한 없음 (본인 가게 아님)"),
@@ -69,7 +71,7 @@ public class StoreNewsController {
     }
 
     @Operation(summary = "[점주] 소식 수정", description = "소식을 수정합니다.")
-    @PatchMapping("/store-news/{newsId}")
+    @PatchMapping(value = "/store-news/{newsId}", consumes = MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<CommonResponse<Void>> updateStoreNews(
             @Parameter(description = "소식 ID") @PathVariable Long newsId,
             @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,

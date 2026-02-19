@@ -6,7 +6,6 @@ create table university (
     university_id bigint auto_increment primary key,
     email_domain varchar(255) not null,
     name varchar(255) not null,
-    constraint UK_university_email unique (email_domain),
     constraint UK_university_name unique (name)
 );
 
@@ -86,7 +85,7 @@ create table organization (
     modified_at datetime(6) not null,
     created_by varchar(255),
     last_modified_by varchar(255),
-    category enum ('COLLEGE','DEPARTMENT','STUDENT_COUNCIL') not null,
+    category enum ('COLLEGE','DEPARTMENT','UNIVERSITY_COUNCIL','CLUB_ASSOCIATION') not null,
     name varchar(255) not null,
     expires_at datetime(6),
     university_id bigint not null,
@@ -94,7 +93,8 @@ create table organization (
     user_id bigint not null,
     foreign key (university_id) references university (university_id),
     foreign key (parent_id) references organization (organization_id),
-    foreign key (user_id) references user (user_id)
+    foreign key (user_id) references user (user_id),
+    constraint UK_organization_university_name unique (university_id, name)
 );
 
 create table user_organization (
@@ -120,6 +120,7 @@ create table store (
     latitude double,
     longitude double,
     store_phone varchar(255),
+    representative_name varchar(255),
     need_to_check bit,
     check_reason varchar(255),
     introduction longtext,
@@ -243,12 +244,12 @@ create table coupon (
     created_by varchar(255),
     last_modified_by varchar(255),
     title varchar(255) not null,
-    description longtext,
     issue_starts_at datetime(6),
     issue_ends_at datetime(6),
-    total_quantity int not null,
+    valid_days int not null,
+    total_quantity int,
     limit_per_user int not null,
-    status enum ('ACTIVE','DRAFT','EXPIRED','SCHEDULED','STOPPED') not null,
+    status enum ('ACTIVE','EXPIRED','WITHDRAWN_BY_OWNER') not null,
     benefit_type enum ('FIXED_DISCOUNT','PERCENTAGE_DISCOUNT','SERVICE_GIFT') not null,
     benefit_value varchar(255),
     min_order_amount int,
@@ -434,6 +435,7 @@ create table store_news_image (
     last_modified_by varchar(255),
     store_news_id bigint not null,
     image_url varchar(255) not null,
+    order_index int not null,
     foreign key (store_news_id) references store_news (id)
 );
 

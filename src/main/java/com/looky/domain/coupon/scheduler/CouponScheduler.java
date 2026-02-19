@@ -22,4 +22,11 @@ public class CouponScheduler {
             log.info("[Scheduler] 만료된 쿠폰 {}개 초기화 완료", count);
         }
     }
+
+    // 10분마다 만료 체크 실행
+    @Scheduled(fixedDelay = 600000)
+    public void scheduleCouponExpirationCheck() {
+        couponService.expireOutdatedCoupons();
+        log.info("[Scheduler] 쿠폰 만료 체크 실행 완료");
+    }
 }

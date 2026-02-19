@@ -25,6 +25,8 @@ public class StoreResponse {
     private Double latitude;
     private Double longitude;
     private String phone;
+    private String representativeName;
+
     private String introduction;
     private String operatingHours;
     private Boolean needToCheck;
@@ -50,6 +52,8 @@ public class StoreResponse {
                 .latitude(store.getLatitude())
                 .longitude(store.getLongitude())
                 .phone(store.getStorePhone())
+                .representativeName(store.getRepresentativeName())
+
                 .introduction(store.getIntroduction())
                 .operatingHours(store.getOperatingHours())
                 .needToCheck(store.getNeedToCheck())

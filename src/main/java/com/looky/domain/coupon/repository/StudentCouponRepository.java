@@ -43,6 +43,9 @@ public interface StudentCouponRepository extends JpaRepository<StudentCoupon, Lo
     // 해당 유저가 특정 상점에서 쿠폰을 사용한 적이 있는가? (리뷰 검증용)
     boolean existsByUserAndCoupon_StoreAndStatus(User user, Store store, CouponUsageStatus status);
 
+    // 상점 내 활성화된 쿠폰 중 해당 코드 존재 여부 확인 (중복 방지)
+    boolean existsByCoupon_Store_IdAndVerificationCodeAndStatus(Long storeId, String verificationCode, CouponUsageStatus status);
+
     List<StudentCoupon> findByUserAndCouponIn(User user, List<Coupon> coupons);
 
     // 쿠폰 사용 횟수 조회 (점주용)

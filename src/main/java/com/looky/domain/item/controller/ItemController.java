@@ -25,6 +25,8 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.List;
 
+import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
+
 @Tag(name = "Item", description = "상품 관련 API")
 @RestController
 @RequestMapping("/api")
@@ -40,11 +42,11 @@ public class ItemController {
                 @ApiResponse(responseCode = "403", description = "권한 없음 (본인 소유 상점 아님)", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class))),
                 @ApiResponse(responseCode = "404", description = "상점 없음", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class)))
         })
-        @PostMapping("/stores/{storeId}/items")
+        @PostMapping(value = "/stores/{storeId}/items", consumes = MULTIPART_FORM_DATA_VALUE)
         public ResponseEntity<CommonResponse<Long>> createItem(
                 @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,
                 @Parameter(description = "상품 ID") @PathVariable Long storeId,
-                @Parameter(description = "상품 이미지") @RequestPart MultipartFile image,
+                @Parameter(description = "상품 이미지") @RequestPart(required = false) MultipartFile image,
                 @RequestPart(required = false) @Valid CreateItemRequest request
         ) throws IOException {
                 Long itemId = itemService.createItem(storeId, principalDetails.getUser(), request, image);
@@ -81,11 +83,11 @@ public class ItemController {
 
         @Operation(summary = "[점주] 상품 수정", description = "상품 정보를 수정합니다. (본인 상점만 가능)")
         @ApiResponses(value = {
-                        @ApiResponse(responseCode = "200", description = "상품 수정 성공"),
-                        @ApiResponse(responseCode = "403", description = "권한 없음 (본인 소유 상점 아님)", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class))),
-                        @ApiResponse(responseCode = "404", description = "상품 없음", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class)))
+                @ApiResponse(responseCode = "200", description = "상품 수정 성공"),
+                @ApiResponse(responseCode = "403", description = "권한 없음 (본인 소유 상점 아님)", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class))),
+                @ApiResponse(responseCode = "404", description = "상품 없음", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class)))
         })
-        @PatchMapping("/items/{itemId}")
+        @PatchMapping(value = "/items/{itemId}", consumes = MULTIPART_FORM_DATA_VALUE)
         public ResponseEntity<CommonResponse<Void>> updateItem(
                 @Parameter(description = "상품 ID") @PathVariable Long itemId,
                 @Parameter(description = "변경할 상품 이미지") @RequestPart(required = false) MultipartFile image,

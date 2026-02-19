@@ -19,12 +19,12 @@ public class CreateCouponRequest {
     @NotBlank(message = "쿠폰명은 필수입니다.")
     private String title;
 
-    private String description;
-
     private LocalDateTime issueStartsAt;
     private LocalDateTime issueEndsAt;
 
-    @NotNull(message = "총 발행 수량은 필수입니다.")
+    @NotNull(message = "유효 기간(일)은 필수입니다.")
+    private Integer validDays;
+
     private Integer totalQuantity;
 
     @NotNull(message = "인당 발행 한도는 필수입니다.")

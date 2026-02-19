@@ -9,6 +9,8 @@ import com.looky.common.exception.ErrorCode;
 import com.looky.domain.coupon.entity.CouponUsageStatus;
 import com.looky.domain.coupon.repository.StudentCouponRepository;
 import com.looky.domain.review.dto.*;
+
+import java.util.Collections;
 import com.looky.domain.review.entity.Review;
 import com.looky.domain.review.entity.ReviewImage;
 import com.looky.domain.review.entity.ReviewLike;
@@ -153,21 +155,38 @@ public class ReviewService {
         );
 
         // 새 이미지가 존재하면 기존 것 모두 삭제 후 새로 등록
-        if (images != null && !images.isEmpty()) {
+        // 1. 이미지 삭제 처리 (preserveImageIds 기준)
+        if (request.getPreserveImageIds().isPresent()) {
+            List<Long> preserveIds = request.getPreserveImageIds().get();
+            List<Long> finalPreserveIds = preserveIds != null ? preserveIds : Collections.emptyList();
 
-            // S3 파일 삭제
-            for (ReviewImage oldImage : review.getImages()) {
-                s3Service.deleteFile(oldImage.getImageUrl());
+            List<ReviewImage> imagesToDelete = review.getImages().stream()
+                    .filter(img -> !finalPreserveIds.contains(img.getId()))
+                    .toList();
+
+            for (ReviewImage img : imagesToDelete) {
+                s3Service.deleteFile(img.getImageUrl());
+                review.removeImage(img);
             }
+        }
 
-            // DB 삭제 (orphanRemoval = true로 인해 리스트에서 제거하면 삭제됨)
-            review.getImages().clear();
+        // 2. 새 이미지 추가 및 전체 개수 검증
+        int currentImageCount = review.getImages().size(); 
+        int newImageCount = (images != null) ? images.size() : 0;
 
-            // 이미지 유효성 검사 (최대 3장, 10MB)
+        if (currentImageCount + newImageCount > 3) {
+            throw new CustomException(ErrorCode.BAD_REQUEST, "이미지는 최대 3장까지 등록할 수 있습니다.");
+        }
+
+        // 새 이미지 업로드 및 저장
+        if (newImageCount > 0) {
             FileValidator.validateImageFiles(images, 3, 10 * 1024 * 1024);
-
-            // 새 이미지 업로드
             uploadAndSaveImages(review, images);
+        }
+
+        // 3. 인덱스 재정렬
+        for (int i = 0; i < review.getImages().size(); i++) {
+             review.getImages().get(i).updateOrderIndex(i);
         }
     }
 

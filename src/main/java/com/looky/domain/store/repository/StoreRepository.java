@@ -22,6 +22,8 @@ public interface StoreRepository extends JpaRepository<Store, Long>, JpaSpecific
 
     Optional<Store> findByNameAndRoadAddress(String name, String roadAddress);
 
+    boolean existsByNameAndRoadAddress(String name, String roadAddress);
+
     @Query(value =
         "SELECT *, " +
         "(6371 * acos(cos(radians(:latitude)) * cos(radians(latitude)) * cos(radians(longitude) - radians(:longitude)) + sin(radians(:latitude)) * sin(radians(latitude)))) AS distance " +

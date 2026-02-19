@@ -218,6 +218,21 @@ public class StoreController {
                 return ResponseEntity.ok(CommonResponse.success(response));
         }
 
+        @Operation(summary = "[학생] 특정 위치 상점 목록 조회", description = "위도, 경도가 일치하는 상점 목록을 조회합니다. (같은 건물/위치)")
+        @ApiResponses(value = {
+                @ApiResponse(responseCode = "200", description = "상점 목록 조회 성공")
+        })
+        @GetMapping("/location")
+        public ResponseEntity<CommonResponse<List<StoreResponse>>> getStoresByLocation(
+                @Parameter(description = "위도") @RequestParam Double latitude,
+                @Parameter(description = "경도") @RequestParam Double longitude,
+                @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails
+        ) {
+                User user = principalDetails != null ? principalDetails.getUser() : null;
+                List<StoreResponse> response = storeService.getStoresByLocation(latitude, longitude, user);
+                return ResponseEntity.ok(CommonResponse.success(response));
+        }
+
         @Operation(summary = "[학생] 상점 신고", description = "특정 상점을 신고합니다.")
         @ApiResponses(value = {
                 @ApiResponse(responseCode = "200", description = "상점 신고 성공"),

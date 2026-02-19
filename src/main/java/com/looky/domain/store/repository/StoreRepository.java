@@ -24,6 +24,8 @@ public interface StoreRepository extends JpaRepository<Store, Long>, JpaSpecific
 
     boolean existsByNameAndRoadAddress(String name, String roadAddress);
 
+    List<Store> findByLatitudeAndLongitude(Double latitude, Double longitude);
+
     @Query(value =
         "SELECT *, " +
         "(6371 * acos(cos(radians(:latitude)) * cos(radians(latitude)) * cos(radians(longitude) - radians(:longitude)) + sin(radians(:latitude)) * sin(radians(latitude)))) AS distance " +

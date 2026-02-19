@@ -82,8 +82,8 @@ public class StoreService {
         }
 
 
-        if (storeRepository.existsByName(request.getName())) {
-            throw new CustomException(ErrorCode.DUPLICATE_RESOURCE, "이미 등록된 상점 이름입니다.");
+        if (storeRepository.existsByNameAndRoadAddress(request.getName(), request.getRoadAddress())) {
+            throw new CustomException(ErrorCode.DUPLICATE_RESOURCE, "이미 등록된 상점입니다.");
         }
 
         if (storeRepository.existsByBizRegNo(request.getBizRegNo())) {

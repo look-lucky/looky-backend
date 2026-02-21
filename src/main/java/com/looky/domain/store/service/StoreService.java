@@ -43,6 +43,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.temporal.TemporalAdjusters;
 import com.looky.domain.partnership.repository.PartnershipRepository;
+import com.looky.domain.partnership.service.PartnershipService;
 import com.looky.domain.coupon.repository.CouponRepository;
 import com.looky.domain.partnership.entity.Partnership;
 import com.looky.domain.coupon.entity.Coupon;
@@ -67,6 +68,7 @@ public class StoreService {
     private final FavoriteRepository favoriteRepository;
     private final StudentProfileRepository studentProfileRepository;
     private final PartnershipRepository partnershipRepository;
+    private final PartnershipService partnershipService;
     private final CouponRepository couponRepository;
     private final StudentCouponRepository studentCouponRepository;
     private final UniversityRepository universityRepository;
@@ -121,25 +123,25 @@ public class StoreService {
         Double averageRating = reviewRepository.findAverageRatingByStoreId(storeId);
         Long reviewCount = reviewRepository.countByStoreIdAndParentReviewIsNull(storeId);
 
-        boolean isPartnership = false;
+        List<String> myPartnerships = null;
         boolean hasCoupon = false;
 
         if (user != null && user.getRole() == Role.ROLE_STUDENT) {
             StudentProfile studentProfile = studentProfileRepository.findById(user.getId()).orElse(null);
             // 학생이고 소속 대학이 있는 경우
             if (studentProfile != null && studentProfile.getUniversity() != null) {
-                Long universityId = studentProfile.getUniversity().getId();
-                LocalDate today = LocalDate.now(ZoneId.of("Asia/Seoul"));
                 LocalDateTime now = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
-
-                // 해당 상점과 제휴 여부 확인
-                isPartnership = partnershipRepository.existsActivePartnership(storeId, universityId, today);
+                
+                // 내 혜택 조회
+                Map<Long, List<String>> partnershipsMap = partnershipService.getMyPartnershipOrganizations(List.of(storeId), user);
+                myPartnerships = partnershipsMap.get(storeId);
+                
                 // 해당 상점의 쿠폰 보유 여부 확인
                 hasCoupon = couponRepository.existsActiveCoupon(storeId, now);
             }
         }
 
-        return StoreResponse.of(store, averageRating, reviewCount != null ? reviewCount.intValue() : 0, isPartnership, hasCoupon, store.getCloverGrade());
+        return StoreResponse.of(store, averageRating, reviewCount != null ? reviewCount.intValue() : 0, myPartnerships, hasCoupon, store.getCloverGrade());
     }
 
     public PageResponse<StoreResponse> getStores(String keyword, List<StoreCategory> categories, List<StoreMood> moods, Long universityId, Pageable pageable, User user) {
@@ -152,39 +154,25 @@ public class StoreService {
         Page<Store> storePage = storeRepository.findAll(spec, pageable);
 
         // 배치 최적화를 위한 정보 준비
-        Long userUniversityId = null;
-        if (user != null && user.getRole() == Role.ROLE_STUDENT) {
-            StudentProfile studentProfile = studentProfileRepository.findById(user.getId()).orElse(null);
-            // 학생이고 소속 대학이 있는 경우 대학 ID 추출
-            if (studentProfile != null && studentProfile.getUniversity() != null) {
-                userUniversityId = studentProfile.getUniversity().getId();
-            }
-        }
-
-        final Long finalUserUniversityId = userUniversityId;
         LocalDate today = LocalDate.now(ZoneId.of("Asia/Seoul"));
         LocalDateTime now = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
         
         List<Long> storeIds = storePage.getContent().stream().map(Store::getId).toList();
         
-        
-        // 정확한 배치를 위해 findActivePartnershipsByStoreIdsAndUniversityId(제휴 정보 리스트 반환)를 사용한 후 상점 ID 추출
-        Set<Long> batchedPartnershipStoreIds = new HashSet<>();
-        // 학생 회원의 경우, 조회된 상점 목록에 대해 일괄적으로 제휴 여부를 확인 (N+1 방지)
-        if (finalUserUniversityId != null && !storeIds.isEmpty()) {
-            batchedPartnershipStoreIds = partnershipRepository.findActivePartnershipsByStoreIdsAndUniversityId(storeIds, finalUserUniversityId, today)
-                    .stream().map(p -> p.getStore().getId()).collect(Collectors.toSet());
-        }
+        // 상점 제휴-내 소속 매칭 조직 이름 목록 생성
+        Map<Long, List<String>> partnershipMap = partnershipService.getMyPartnershipOrganizations(storeIds, user);
 
         Set<Long> batchedCouponStoreIds = new HashSet<>();
         // 학생 회원의 경우, 조회된 상점 목록에 대해 일괄적으로 쿠폰 보유 여부를 확인 (N+1 방지)
-        if (finalUserUniversityId != null && !storeIds.isEmpty()) {
-             batchedCouponStoreIds = couponRepository.findActiveCouponsByStoreIds(storeIds, now)
-                     .stream().map(c -> c.getStore().getId()).collect(Collectors.toSet());
+        if (user != null && user.getRole() == Role.ROLE_STUDENT) {
+            StudentProfile studentProfile = studentProfileRepository.findById(user.getId()).orElse(null);
+            if (studentProfile != null && studentProfile.getUniversity() != null) {
+                 batchedCouponStoreIds = couponRepository.findActiveCouponsByStoreIds(storeIds, now)
+                         .stream().map(c -> c.getStore().getId()).collect(Collectors.toSet());
+            }
         }
 
         // 람다 표현식에서 사용하기 위해 effectively final 변수로 선언
-        final Set<Long> finalPartnershipStoreIds = batchedPartnershipStoreIds;
         final Set<Long> finalCouponStoreIds = batchedCouponStoreIds;
 
         Page<StoreResponse> responsePage = storePage.map(store -> {
@@ -192,10 +180,10 @@ public class StoreService {
             Long reviewCount = reviewRepository.countByStoreIdAndParentReviewIsNull(store.getId());
             
             // 제휴 여부 및 쿠폰 보유 여부 설정
-            boolean isPartnership = finalPartnershipStoreIds.contains(store.getId());
+            List<String> myPartnerships = partnershipMap.get(store.getId());
             boolean hasCoupon = finalCouponStoreIds.contains(store.getId());
 
-            return StoreResponse.of(store, averageRating, reviewCount != null ? reviewCount.intValue() : 0, isPartnership, hasCoupon, store.getCloverGrade());
+            return StoreResponse.of(store, averageRating, reviewCount != null ? reviewCount.intValue() : 0, myPartnerships, hasCoupon, store.getCloverGrade());
         });
         return PageResponse.from(responsePage);
     }
@@ -312,42 +300,31 @@ public class StoreService {
     public List<StoreResponse> getNearbyStores(Double latitude, Double longitude, Double radius, User user) {
         List<Store> stores = storeRepository.findByLocationWithin(latitude, longitude, radius);
         
-        Long userUniversityId = null;
-        if (user != null && user.getRole() == Role.ROLE_STUDENT) {
-            StudentProfile studentProfile = studentProfileRepository.findById(user.getId()).orElse(null);
-            if (studentProfile != null && studentProfile.getUniversity() != null) {
-                userUniversityId = studentProfile.getUniversity().getId();
-            }
-        }
-        
-        LocalDate today = LocalDate.now(ZoneId.of("Asia/Seoul"));
         LocalDateTime now = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
         
         List<Long> storeIds = stores.stream().map(Store::getId).toList();
         
-        Set<Long> batchedPartnershipStoreIds = new HashSet<>();
-        if (userUniversityId != null && !storeIds.isEmpty()) {
-            batchedPartnershipStoreIds = partnershipRepository.findActivePartnershipsByStoreIdsAndUniversityId(storeIds, userUniversityId, today)
-                    .stream().map(p -> p.getStore().getId()).collect(Collectors.toSet());
-        }
+        Map<Long, List<String>> partnershipMap = partnershipService.getMyPartnershipOrganizations(storeIds, user);
 
         Set<Long> batchedCouponStoreIds = new HashSet<>();
-        if (userUniversityId != null && !storeIds.isEmpty()) {
-             batchedCouponStoreIds = couponRepository.findActiveCouponsByStoreIds(storeIds, now)
-                     .stream().map(c -> c.getStore().getId()).collect(Collectors.toSet());
+        if (user != null && user.getRole() == Role.ROLE_STUDENT) {
+            StudentProfile studentProfile = studentProfileRepository.findById(user.getId()).orElse(null);
+            if (studentProfile != null && studentProfile.getUniversity() != null && !storeIds.isEmpty()) {
+                 batchedCouponStoreIds = couponRepository.findActiveCouponsByStoreIds(storeIds, now)
+                         .stream().map(c -> c.getStore().getId()).collect(Collectors.toSet());
+            }
         }
 
-        final Set<Long> finalPartnershipStoreIds = batchedPartnershipStoreIds;
         final Set<Long> finalCouponStoreIds = batchedCouponStoreIds;
         
         return stores.stream().map(store -> {
             Double averageRating = reviewRepository.findAverageRatingByStoreId(store.getId());
             Long reviewCount = reviewRepository.countByStoreIdAndParentReviewIsNull(store.getId());
             
-            boolean isPartnership = finalPartnershipStoreIds.contains(store.getId());
+            List<String> myPartnerships = partnershipMap.get(store.getId());
             boolean hasCoupon = finalCouponStoreIds.contains(store.getId());
             
-            return StoreResponse.of(store, averageRating, reviewCount != null ? reviewCount.intValue() : 0, isPartnership, hasCoupon, store.getCloverGrade());
+            return StoreResponse.of(store, averageRating, reviewCount != null ? reviewCount.intValue() : 0, myPartnerships, hasCoupon, store.getCloverGrade());
         }).toList();
     }
 
@@ -355,42 +332,31 @@ public class StoreService {
     public List<StoreResponse> getStoresByLocation(Double latitude, Double longitude, User user) {
         List<Store> stores = storeRepository.findByLatitudeAndLongitude(latitude, longitude);
 
-        Long userUniversityId = null;
-        if (user != null && user.getRole() == Role.ROLE_STUDENT) {
-            StudentProfile studentProfile = studentProfileRepository.findById(user.getId()).orElse(null);
-            if (studentProfile != null && studentProfile.getUniversity() != null) {
-                userUniversityId = studentProfile.getUniversity().getId();
-            }
-        }
-
-        LocalDate today = LocalDate.now(ZoneId.of("Asia/Seoul"));
         LocalDateTime now = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
 
         List<Long> storeIds = stores.stream().map(Store::getId).toList();
 
-        Set<Long> batchedPartnershipStoreIds = new HashSet<>();
-        if (userUniversityId != null && !storeIds.isEmpty()) {
-            batchedPartnershipStoreIds = partnershipRepository.findActivePartnershipsByStoreIdsAndUniversityId(storeIds, userUniversityId, today)
-                    .stream().map(p -> p.getStore().getId()).collect(Collectors.toSet());
-        }
+        Map<Long, List<String>> partnershipMap = partnershipService.getMyPartnershipOrganizations(storeIds, user);
 
         Set<Long> batchedCouponStoreIds = new HashSet<>();
-        if (userUniversityId != null && !storeIds.isEmpty()) {
-            batchedCouponStoreIds = couponRepository.findActiveCouponsByStoreIds(storeIds, now)
-                    .stream().map(c -> c.getStore().getId()).collect(Collectors.toSet());
+        if (user != null && user.getRole() == Role.ROLE_STUDENT) {
+            StudentProfile studentProfile = studentProfileRepository.findById(user.getId()).orElse(null);
+            if (studentProfile != null && studentProfile.getUniversity() != null && !storeIds.isEmpty()) {
+                batchedCouponStoreIds = couponRepository.findActiveCouponsByStoreIds(storeIds, now)
+                        .stream().map(c -> c.getStore().getId()).collect(Collectors.toSet());
+            }
         }
 
-        final Set<Long> finalPartnershipStoreIds = batchedPartnershipStoreIds;
         final Set<Long> finalCouponStoreIds = batchedCouponStoreIds;
 
         return stores.stream().map(store -> {
             Double averageRating = reviewRepository.findAverageRatingByStoreId(store.getId());
             Long reviewCount = reviewRepository.countByStoreIdAndParentReviewIsNull(store.getId());
 
-            boolean isPartnership = finalPartnershipStoreIds.contains(store.getId());
+            List<String> myPartnerships = partnershipMap.get(store.getId());
             boolean hasCoupon = finalCouponStoreIds.contains(store.getId());
 
-            return StoreResponse.of(store, averageRating, reviewCount != null ? reviewCount.intValue() : 0, isPartnership, hasCoupon, store.getCloverGrade());
+            return StoreResponse.of(store, averageRating, reviewCount != null ? reviewCount.intValue() : 0, myPartnerships, hasCoupon, store.getCloverGrade());
         }).toList();
     }
     
@@ -447,7 +413,7 @@ public class StoreService {
             Double averageRating = reviewRepository.findAverageRatingByStoreId(store.getId());
             Long reviewCount = reviewRepository.countByStoreIdAndParentReviewIsNull(store.getId());
 
-            return StoreResponse.of(store, averageRating, reviewCount != null ? reviewCount.intValue() : 0, false, false, store.getCloverGrade());
+            return StoreResponse.of(store, averageRating, reviewCount != null ? reviewCount.intValue() : 0, null, false, store.getCloverGrade());
         }).toList();
     }
 
@@ -613,6 +579,7 @@ public class StoreService {
         }
     }
 
+    // 지도에 필요한 상점 목록 조회 (대학 기반)
     public List<StoreMapResponse> getStoreMap(Long universityId, User user) {
         // 대학 ID 필터링 적용 (StoreSpecification 활용)
         Specification<Store> spec = Specification.where(StoreSpecification.isNotSuspended());
@@ -622,34 +589,22 @@ public class StoreService {
         }
 
         List<Store> stores = storeRepository.findAll(spec);
-
-        Long userUniversityId = null;
-        if (user != null && user.getRole() == Role.ROLE_STUDENT) {
-            StudentProfile studentProfile = studentProfileRepository.findById(user.getId()).orElse(null);
-            if (studentProfile != null && studentProfile.getUniversity() != null) {
-                userUniversityId = studentProfile.getUniversity().getId();
-            }
-        }
-
-        LocalDate today = LocalDate.now(ZoneId.of("Asia/Seoul"));
+        List<Long> storeIds = stores.stream().map(Store::getId).toList();
         LocalDateTime now = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
 
-        List<Long> storeIds = stores.stream().map(Store::getId).toList();
-
-        Set<Long> batchedPartnershipStoreIds = new HashSet<>();
-        if (userUniversityId != null && !storeIds.isEmpty()) {
-            batchedPartnershipStoreIds = partnershipRepository.findActivePartnershipsByStoreIdsAndUniversityId(storeIds, userUniversityId, today)
-                    .stream().map(p -> p.getStore().getId()).collect(Collectors.toSet());
-        }
+        // 2. 활성화된 제휴 정보 일괄 조회 (N+1 방지)
+        Map<Long, List<String>> partnershipMap = partnershipService.getMyPartnershipOrganizations(storeIds, user);
 
         Set<Long> batchedCouponStoreIds = new HashSet<>();
 
-        if (userUniversityId != null && !storeIds.isEmpty()) {
-            batchedCouponStoreIds = couponRepository.findActiveCouponsByStoreIds(storeIds, now)
-                    .stream().map(c -> c.getStore().getId()).collect(Collectors.toSet());
+        if (user != null && user.getRole() == Role.ROLE_STUDENT) {
+            StudentProfile studentProfile = studentProfileRepository.findById(user.getId()).orElse(null);
+            if (studentProfile != null && studentProfile.getUniversity() != null && !storeIds.isEmpty()) {
+                batchedCouponStoreIds = couponRepository.findActiveCouponsByStoreIds(storeIds, now)
+                        .stream().map(c -> c.getStore().getId()).collect(Collectors.toSet());
+            }
         }
 
-        final Set<Long> finalPartnershipStoreIds = batchedPartnershipStoreIds;
         final Set<Long> finalCouponStoreIds = batchedCouponStoreIds;
 
         return stores.stream().map(store -> {
@@ -657,9 +612,9 @@ public class StoreService {
             Long reviewCount = reviewRepository.countByStoreIdAndParentReviewIsNull(store.getId());
             Long favoriteCount = favoriteRepository.countByStore(store);
 
-            boolean isPartnership = finalPartnershipStoreIds.contains(store.getId());
+            List<String> myPartnerships = partnershipMap.get(store.getId());
             boolean hasCoupon = finalCouponStoreIds.contains(store.getId());
 
-            return StoreMapResponse.of(store, averageRating, reviewCount != null ? reviewCount.intValue() : 0, isPartnership, hasCoupon, favoriteCount);}).toList();
+            return StoreMapResponse.of(store, averageRating, reviewCount != null ? reviewCount.intValue() : 0, myPartnerships, hasCoupon, favoriteCount);}).toList();
     }
 }

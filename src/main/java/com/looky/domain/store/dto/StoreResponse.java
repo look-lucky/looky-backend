@@ -37,11 +37,11 @@ public class StoreResponse {
     private Integer reviewCount;
     private List<LocalDate> holidayDates;
     private Boolean isSuspended;
-    private Boolean isPartnership; // 제휴 여부
+    private List<String> myPartnerships; // 내가 속한 조직 중 제휴 맺은 조직 이름 목록
     private Boolean hasCoupon; // 쿠폰 보유 여부
     private CloverGrade cloverGrade; // 클로버 등급
 
-    public static StoreResponse of(Store store, Double averageRating, Integer reviewCount, Boolean isPartnership, Boolean hasCoupon, CloverGrade cloverGrade) {
+    public static StoreResponse of(Store store, Double averageRating, Integer reviewCount, List<String> myPartnerships, Boolean hasCoupon, CloverGrade cloverGrade) {
         return StoreResponse.builder()
                 .id(store.getId())
                 .userId(store.getUser() != null ? store.getUser().getId() : null)
@@ -64,13 +64,13 @@ public class StoreResponse {
                 .reviewCount(reviewCount != null ? reviewCount : 0)
                 .holidayDates(store.getHolidayDates())
                 .isSuspended(store.getIsSuspended())
-                .isPartnership(isPartnership)
+                .myPartnerships(myPartnerships)
                 .hasCoupon(hasCoupon)
                 .cloverGrade(cloverGrade)
                 .build();
     }
 
     public static StoreResponse from(Store store) {
-        return of(store, 0.0, 0, false, false, store.getCloverGrade());
+        return of(store, 0.0, 0, null, false, store.getCloverGrade());
     }
 }

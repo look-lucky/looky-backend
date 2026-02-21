@@ -22,11 +22,11 @@ public class StoreMapResponse {
     private Integer reviewCount;
     private List<StoreCategory> storeCategories;
     private String operatingHours;
-    private Boolean isPartnership;
+    private List<String> myPartnerships;
     private Boolean hasCoupon;
     private Long favoriteCount;
 
-    public static StoreMapResponse of(Store store, Double averageRating, Integer reviewCount, Boolean isPartnership, Boolean hasCoupon, Long favoriteCount) {
+    public static StoreMapResponse of(Store store, Double averageRating, Integer reviewCount, List<String> myPartnerships, Boolean hasCoupon, Long favoriteCount) {
         // 이미지 중 첫 번째 이미지를 썸네일로 사용
         String thumbnailUrl = store.getImages().stream()
                 .sorted(Comparator.comparingInt(StoreImage::getOrderIndex))
@@ -44,7 +44,7 @@ public class StoreMapResponse {
                 .reviewCount(reviewCount != null ? reviewCount : 0)
                 .storeCategories(new ArrayList<>(store.getStoreCategories()))
                 .operatingHours(store.getOperatingHours())
-                .isPartnership(isPartnership)
+                .myPartnerships(myPartnerships)
                 .hasCoupon(hasCoupon)
                 .favoriteCount(favoriteCount != null ? favoriteCount : 0L)
                 .build();

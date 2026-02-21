@@ -58,4 +58,26 @@ public interface PartnershipRepository extends JpaRepository<Partnership, Long> 
             @Param("universityId") Long universityId,
             @Param("today") LocalDate today
     );
+
+    // 상점 상세 페이지 조회용
+    @Query("SELECT p FROM Partnership p " +
+           "JOIN FETCH p.organization o " +
+           "WHERE p.store.id = :storeId " +
+           "AND p.startsAt <= :today AND p.endsAt >= :today")
+    List<Partnership> findAllActiveByStoreId(
+            @Param("storeId") Long storeId,
+            @Param("today") LocalDate today
+    );
+
+    // 내 소속 조직과 매칭되는 활성 제휴 목록 조회용
+    @Query("SELECT p FROM Partnership p " +
+           "JOIN FETCH p.organization o " +
+           "WHERE p.store.id IN :storeIds " +
+           "AND o.id IN :organizationIds " +
+           "AND p.startsAt <= :today AND p.endsAt >= :today")
+    List<Partnership> findActivePartnershipsByStoreIdsAndOrganizationIds(
+            @Param("storeIds") List<Long> storeIds,
+            @Param("organizationIds") List<Long> organizationIds,
+            @Param("today") LocalDate today
+    );
 }

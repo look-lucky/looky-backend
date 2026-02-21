@@ -25,9 +25,10 @@ public class FavoriteStoreResponse {
     private List<StoreCategory> storeCategories;
     private String imageUrl; // 대표이미지
     private Double averageRating; // 별점 평균
+    private Integer reviewCount; // 리뷰 수
     private LocalDateTime createdAt; // 찜한 시간
 
-    public static FavoriteStoreResponse from(FavoriteStore favoriteStore) {
+    public static FavoriteStoreResponse from(FavoriteStore favoriteStore, Integer reviewCount) {
         Store store = favoriteStore.getStore();
         return FavoriteStoreResponse.builder()
                 .storeId(store.getId())
@@ -36,6 +37,7 @@ public class FavoriteStoreResponse {
                 .jibunAddress(store.getJibunAddress())
                 .storeCategories(new ArrayList<>(store.getStoreCategories()))
                 .averageRating(store.getAverageRating())
+                .reviewCount(reviewCount)
                 .createdAt(favoriteStore.getCreatedAt())
                 .build();
     }

@@ -13,6 +13,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.looky.domain.review.repository.ReviewRepository;
 
 @Service
 @RequiredArgsConstructor
@@ -21,6 +22,7 @@ public class FavoriteService {
 
     private final FavoriteRepository favoriteRepository;
     private final StoreRepository storeRepository;
+    private final ReviewRepository reviewRepository;
 
     @Transactional
     public void addFavorite(User user, Long storeId) {
@@ -64,6 +66,11 @@ public class FavoriteService {
 
     public Page<FavoriteStoreResponse> getMyFavorites(User user, Pageable pageable) {
         return favoriteRepository.findByUser(user, pageable)
-                .map(FavoriteStoreResponse::from);
+                .map(favoriteStore -> {
+                    Store store = favoriteStore.getStore();
+                    Long reviewCountLong = reviewRepository.countByStoreIdAndParentReviewIsNull(store.getId());
+                    Integer reviewCount = reviewCountLong != null ? reviewCountLong.intValue() : 0;
+                    return FavoriteStoreResponse.from(favoriteStore, reviewCount);
+                });
     }
 }

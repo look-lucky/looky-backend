@@ -1,5 +1,6 @@
 package com.looky.domain.store.repository;
 
+import com.looky.domain.partnership.entity.Partnership;
 import com.looky.domain.store.entity.Store;
 import com.looky.domain.store.entity.StoreCategory;
 import com.looky.domain.store.entity.StoreMood;
@@ -54,5 +55,16 @@ public class StoreSpecification {
 
     public static Specification<Store> isNotSuspended() {
         return (root, query, cb) -> cb.isFalse(root.get("isSuspended"));
+    }
+
+    public static Specification<Store> hasPartnership(Boolean hasPartnership) {
+        return (root, query, cb) -> {
+            if (hasPartnership == null) return null;
+            var subquery = query.subquery(Long.class);
+            var partnership = subquery.from(Partnership.class);
+            subquery.select(partnership.get("store").get("id"))
+                    .where(cb.equal(partnership.get("store").get("id"), root.get("id")));
+            return hasPartnership ? cb.exists(subquery) : cb.not(cb.exists(subquery));
+        };
     }
 }

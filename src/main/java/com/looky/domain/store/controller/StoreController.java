@@ -194,11 +194,12 @@ public class StoreController {
                 @Parameter(description = "카테고리 필터 (복수 선택 가능)") @RequestParam(required = false) List<StoreCategory> categories,
                 @Parameter(description = "분위기 필터 (복수 선택 가능)") @RequestParam(required = false) List<StoreMood> moods,
                 @Parameter(description = "대학(상권) ID 필터") @RequestParam(required = false) Long universityId,
+                @Parameter(description = "제휴 업체 보유 여부 필터 (true: 있음, false: 없음, 생략: 전체)") @RequestParam(required = false) Boolean hasPartnership,
                 @Parameter(description = "페이징 정보 (page, size, sort)") @PageableDefault(size = 10) Pageable pageable,
                 @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails
         ) {
                 User user = principalDetails != null ? principalDetails.getUser() : null;
-                PageResponse<StoreResponse> response = storeService.getStores(keyword, categories, moods, universityId, pageable, user);
+                PageResponse<StoreResponse> response = storeService.getStores(keyword, categories, moods, universityId, hasPartnership, pageable, user);
                 return ResponseEntity.ok(CommonResponse.success(response));
         }
 

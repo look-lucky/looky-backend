@@ -7,6 +7,7 @@ import com.looky.domain.favorite.entity.FavoriteStore;
 import com.looky.domain.favorite.repository.FavoriteRepository;
 import com.looky.domain.store.entity.Store;
 import com.looky.domain.store.repository.StoreRepository;
+import com.looky.domain.user.entity.Role;
 import com.looky.domain.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -29,13 +30,10 @@ public class FavoriteService {
         Store store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "해당 상점을 찾을 수 없습니다."));
 
-        if (store.getUser().getId().equals(user.getId())) {
-            throw new CustomException(ErrorCode.BAD_REQUEST, "자신의 상점은 즐겨찾기할 수 없습니다.");
+        if (!user.getRole().equals(Role.ROLE_STUDENT)) {
+            throw new CustomException(ErrorCode.FORBIDDEN, "학생만 좋아요 등록이 가능합니다.");
         }
 
-        if (store.getUser().getId().equals(user.getId())) {
-            throw new CustomException(ErrorCode.BAD_REQUEST, "자신의 상점은 즐겨찾기할 수 없습니다.");
-        }
 
         if (favoriteRepository.existsByUserAndStore(user, store)) {
             throw new CustomException(ErrorCode.DUPLICATE_RESOURCE);

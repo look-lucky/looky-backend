@@ -226,10 +226,21 @@ public class StoreService {
         Store store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "가게를 찾을 수 없습니다."));
 
-        // 본인 소유 확인
-        if (!Objects.equals(store.getUser().getId(), owner.getId())) {
-            log.warn("[UpdateStore] Forbidden attempt. storeId={}, requesterUserId={}", storeId, owner.getId());
-            throw new CustomException(ErrorCode.FORBIDDEN, "본인 소유의 가게가 아닙니다.");
+        // 점유 상태에 따른 접근 제어
+        if (store.getStoreStatus() == StoreStatus.ACTIVE) {
+            // ACTIVE(점유됨): 관리자 접근 불가, 본인 소유 확인
+            if (owner.getRole() == Role.ROLE_ADMIN) {
+                throw new CustomException(ErrorCode.FORBIDDEN, "점유된 상점은 관리자가 수정할 수 없습니다.");
+            }
+            if (!Objects.equals(store.getUser().getId(), owner.getId())) {
+                log.warn("[UpdateStore] Forbidden attempt. storeId={}, requesterUserId={}", storeId, owner.getId());
+                throw new CustomException(ErrorCode.FORBIDDEN, "본인 소유의 가게가 아닙니다.");
+            }
+        } else {
+            // UNCLAIMED/BANNED: 관리자만 수정 가능
+            if (owner.getRole() != Role.ROLE_ADMIN) {
+                throw new CustomException(ErrorCode.FORBIDDEN, "해당 상점은 관리자만 수정할 수 있습니다.");
+            }
         }
 
         if (request.getName().isPresent() && request.getName().get() != null && !store.getName().equals(request.getName().get()) && storeRepository.existsByName(request.getName().get())) {
@@ -372,9 +383,20 @@ public class StoreService {
         Store store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "가게를 찾을 수 없습니다."));
 
-        // 본인 소유 확인
-        if (!Objects.equals(store.getUser().getId(), owner.getId())) {
-            throw new CustomException(ErrorCode.FORBIDDEN, "본인 소유의 가게가 아닙니다.");
+        // 점유 상태에 따른 접근 제어
+        if (store.getStoreStatus() == StoreStatus.ACTIVE) {
+            // ACTIVE(점유됨): 관리자 접근 불가, 본인 소유 확인
+            if (owner.getRole() == Role.ROLE_ADMIN) {
+                throw new CustomException(ErrorCode.FORBIDDEN, "점유된 상점은 관리자가 수정할 수 없습니다.");
+            }
+            if (!Objects.equals(store.getUser().getId(), owner.getId())) {
+                throw new CustomException(ErrorCode.FORBIDDEN, "본인 소유의 가게가 아닙니다.");
+            }
+        } else {
+            // UNCLAIMED/BANNED: 관리자만 수정 가능
+            if (owner.getRole() != Role.ROLE_ADMIN) {
+                throw new CustomException(ErrorCode.FORBIDDEN, "해당 상점은 관리자만 수정할 수 있습니다.");
+            }
         }
 
         // 삭제할 이미지 찾기
@@ -399,9 +421,20 @@ public class StoreService {
         Store store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "가게를 찾을 수 없습니다."));
 
-        // 본인 소유 확인
-        if (!Objects.equals(store.getUser().getId(), owner.getId())) {
-            throw new CustomException(ErrorCode.FORBIDDEN, "본인 소유의 가게가 아닙니다.");
+        // 점유 상태에 따른 접근 제어
+        if (store.getStoreStatus() == StoreStatus.ACTIVE) {
+            // ACTIVE(점유됨): 관리자 접근 불가, 본인 소유 확인
+            if (owner.getRole() == Role.ROLE_ADMIN) {
+                throw new CustomException(ErrorCode.FORBIDDEN, "점유된 상점은 관리자가 삭제할 수 없습니다.");
+            }
+            if (!Objects.equals(store.getUser().getId(), owner.getId())) {
+                throw new CustomException(ErrorCode.FORBIDDEN, "본인 소유의 가게가 아닙니다.");
+            }
+        } else {
+            // UNCLAIMED/BANNED: 관리자만 삭제 가능
+            if (owner.getRole() != Role.ROLE_ADMIN) {
+                throw new CustomException(ErrorCode.FORBIDDEN, "해당 상점은 관리자만 삭제할 수 있습니다.");
+            }
         }
 
         storeRepository.delete(store);

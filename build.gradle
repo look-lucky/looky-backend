@@ -67,9 +67,6 @@ dependencies {
     implementation 'org.flywaydb:flyway-core'
     implementation 'org.flywaydb:flyway-mysql'
 
-    // cool-sms
-    implementation 'net.nurigo:sdk:4.3.2'
-
     // .p8 키 파일을 읽기 위한 유틸리티
     implementation 'org.bouncycastle:bcpkix-jdk15on:1.70'
 

@@ -145,12 +145,13 @@ public class StoreService {
         return StoreResponse.of(store, averageRating, reviewCount != null ? reviewCount.intValue() : 0, myPartnerships, hasCoupon, store.getCloverGrade());
     }
 
-    public PageResponse<StoreResponse> getStores(String keyword, List<StoreCategory> categories, List<StoreMood> moods, Long universityId, Boolean hasPartnership, Pageable pageable, User user) {
+    public PageResponse<StoreResponse> getStores(String keyword, List<StoreCategory> categories, List<StoreMood> moods, Long universityId, Boolean hasPartnership, StoreStatus storeStatus, Pageable pageable, User user) {
         Specification<Store> spec = Specification.where(StoreSpecification.hasKeyword(keyword))
                 .and(StoreSpecification.hasCategories(categories))
                 .and(StoreSpecification.hasMoods(moods))
                 .and(StoreSpecification.hasUniversityId(universityId))
                 .and(StoreSpecification.hasPartnership(hasPartnership))
+                .and(StoreSpecification.hasStoreStatus(storeStatus))
                 .and(StoreSpecification.isNotSuspended());
 
         Page<Store> storePage = storeRepository.findAll(spec, pageable);

@@ -4,6 +4,7 @@ import com.looky.domain.partnership.entity.Partnership;
 import com.looky.domain.store.entity.Store;
 import com.looky.domain.store.entity.StoreCategory;
 import com.looky.domain.store.entity.StoreMood;
+import com.looky.domain.store.entity.StoreStatus;
 import jakarta.persistence.criteria.SetJoin;
 import org.springframework.data.jpa.domain.Specification;
 
@@ -55,6 +56,13 @@ public class StoreSpecification {
 
     public static Specification<Store> isNotSuspended() {
         return (root, query, cb) -> cb.isFalse(root.get("isSuspended"));
+    }
+
+    public static Specification<Store> hasStoreStatus(StoreStatus storeStatus) {
+        return (root, query, cb) -> {
+            if (storeStatus == null) return null;
+            return cb.equal(root.get("storeStatus"), storeStatus);
+        };
     }
 
     public static Specification<Store> hasPartnership(Boolean hasPartnership) {

@@ -62,5 +62,5 @@ public class PrincipalDetails implements UserDetails, OAuth2User {
     public boolean isCredentialsNonExpired() { return true; }
 
     @Override
-    public boolean isEnabled() { return true; }
+    public boolean isEnabled() { return !user.isDeleted(); }
 }

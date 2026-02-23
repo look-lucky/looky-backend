@@ -22,7 +22,6 @@ import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -191,16 +190,23 @@ public class AuthService {
 
     @Transactional
     public AuthTokens login(LoginRequest request) {
+        User user = userRepository.findByUsername(request.getUsername())
+                .orElseThrow(() -> new CustomException(ErrorCode.LOGIN_FAILED));
+                
+        if (user.isDeleted()) {
+            throw new CustomException(ErrorCode.UNAUTHORIZED, "탈퇴한 회원입니다.");
+        }
+
         try {
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
 
             PrincipalDetails principal = (PrincipalDetails) authentication.getPrincipal();
-            User user = principal.getUser();
+            User authenticatedUser = principal.getUser();
 
-            log.info("[Login] Success. userId={}", user.getId());
-            return generateTokenResponse(user);
-        } catch (BadCredentialsException e) {
+            log.info("[Login] Success. userId={}", authenticatedUser.getId());
+            return generateTokenResponse(authenticatedUser);
+        } catch (org.springframework.security.authentication.BadCredentialsException e) {
             log.warn("[Login] Failed. Invalid credentials for username: {}", request.getUsername());
             throw new CustomException(ErrorCode.LOGIN_FAILED);
         }

@@ -591,25 +591,61 @@ public class StoreService {
         }
 
         List<Store> stores = storeRepository.findAll(spec);
-        List<Long> storeIds = stores.stream().map(Store::getId).toList();
         LocalDateTime now = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
+        LocalDate today = now.toLocalDate();
 
-        // 2. 활성화된 제휴 정보 일괄 조회 (N+1 방지)
-        Map<Long, List<PartnershipInfo>> partnershipMap = partnershipService.getMyPartnershipOrganizations(storeIds, user);
+        // 학생 프로필 조회 (대학 ID 및 쿠폰 필터링 공통 사용)
+        StudentProfile studentProfile = null;
+        if (user != null && user.getRole() == Role.ROLE_STUDENT) {
+            studentProfile = studentProfileRepository.findById(user.getId()).orElse(null);
+        }
+
+        // 필터링 기준 대학 ID 결정: 학생이면 소속 대학, 아니면 요청 파라미터 사용
+        Long filterUniversityId = null;
+        if (studentProfile != null && studentProfile.getUniversity() != null) {
+            filterUniversityId = studentProfile.getUniversity().getId();
+        } else if (universityId != null) {
+            filterUniversityId = universityId;
+        }
+
+        // UNCLAIMED 상점 중 해당 대학의 어떤 조직과도 활성 제휴가 없는 상점 제외
+        Set<Long> unclaimedStoreIdsWithPartnership = new HashSet<>();
+        if (filterUniversityId != null) {
+            List<Long> unclaimedStoreIds = stores.stream()
+                    .filter(s -> s.getStoreStatus() == StoreStatus.UNCLAIMED)
+                    .map(Store::getId)
+                    .toList();
+            if (!unclaimedStoreIds.isEmpty()) {
+                unclaimedStoreIdsWithPartnership = new HashSet<>(
+                        partnershipRepository.findStoreIdsWithActivePartnershipsByUniversityId(
+                                unclaimedStoreIds, filterUniversityId, today)
+                );
+            }
+        }
+
+        final Set<Long> finalUnclaimedWithPartnership = unclaimedStoreIdsWithPartnership;
+        final Long finalFilterUniversityId = filterUniversityId;
+
+        List<Store> filteredStores = stores.stream()
+                .filter(store -> store.getStoreStatus() != StoreStatus.UNCLAIMED
+                        || finalFilterUniversityId == null
+                        || finalUnclaimedWithPartnership.contains(store.getId()))
+                .toList();
+
+        List<Long> filteredStoreIds = filteredStores.stream().map(Store::getId).toList();
+
+        // 활성화된 제휴 정보 일괄 조회 (N+1 방지)
+        Map<Long, List<PartnershipInfo>> partnershipMap = partnershipService.getMyPartnershipOrganizations(filteredStoreIds, user);
 
         Set<Long> batchedCouponStoreIds = new HashSet<>();
-
-        if (user != null && user.getRole() == Role.ROLE_STUDENT) {
-            StudentProfile studentProfile = studentProfileRepository.findById(user.getId()).orElse(null);
-            if (studentProfile != null && studentProfile.getUniversity() != null && !storeIds.isEmpty()) {
-                batchedCouponStoreIds = couponRepository.findActiveCouponsByStoreIds(storeIds, now)
-                        .stream().map(c -> c.getStore().getId()).collect(Collectors.toSet());
-            }
+        if (studentProfile != null && studentProfile.getUniversity() != null && !filteredStoreIds.isEmpty()) {
+            batchedCouponStoreIds = couponRepository.findActiveCouponsByStoreIds(filteredStoreIds, now)
+                    .stream().map(c -> c.getStore().getId()).collect(Collectors.toSet());
         }
 
         final Set<Long> finalCouponStoreIds = batchedCouponStoreIds;
 
-        return stores.stream().map(store -> {
+        return filteredStores.stream().map(store -> {
             Double averageRating = reviewRepository.findAverageRatingByStoreId(store.getId());
             Long reviewCount = reviewRepository.countByStoreIdAndParentReviewIsNull(store.getId());
             Long favoriteCount = favoriteRepository.countByStore(store);
@@ -617,6 +653,7 @@ public class StoreService {
             List<PartnershipInfo> myPartnerships = partnershipMap.get(store.getId());
             boolean hasCoupon = finalCouponStoreIds.contains(store.getId());
 
-            return StoreMapResponse.of(store, averageRating, reviewCount != null ? reviewCount.intValue() : 0, myPartnerships, hasCoupon, favoriteCount);}).toList();
+            return StoreMapResponse.of(store, averageRating, reviewCount != null ? reviewCount.intValue() : 0, myPartnerships, hasCoupon, favoriteCount);
+        }).toList();
     }
 }

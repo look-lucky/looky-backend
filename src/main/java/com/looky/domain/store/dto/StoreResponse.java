@@ -5,6 +5,7 @@ import com.looky.domain.store.entity.StoreCategory;
 import com.looky.domain.store.entity.StoreImage;
 import com.looky.domain.store.entity.StoreMood;
 import com.looky.domain.store.entity.CloverGrade;
+import com.looky.domain.partnership.dto.PartnershipInfo;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -37,11 +38,11 @@ public class StoreResponse {
     private Integer reviewCount;
     private List<LocalDate> holidayDates;
     private Boolean isSuspended;
-    private List<String> myPartnerships; // 내가 속한 조직 중 제휴 맺은 조직 이름 목록
+    private List<PartnershipInfo> myPartnerships; // 내가 속한 조직 중 제휴 맺은 조직 정보 목록
     private Boolean hasCoupon; // 쿠폰 보유 여부
     private CloverGrade cloverGrade; // 클로버 등급
 
-    public static StoreResponse of(Store store, Double averageRating, Integer reviewCount, List<String> myPartnerships, Boolean hasCoupon, CloverGrade cloverGrade) {
+    public static StoreResponse of(Store store, Double averageRating, Integer reviewCount, List<PartnershipInfo> myPartnerships, Boolean hasCoupon, CloverGrade cloverGrade) {
         return StoreResponse.builder()
                 .id(store.getId())
                 .userId(store.getUser() != null ? store.getUser().getId() : null)

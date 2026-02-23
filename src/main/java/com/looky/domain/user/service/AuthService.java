@@ -295,6 +295,7 @@ public class AuthService {
         // 유저 소프트 딜리트
         User currentUser = userRepository.findById(user.getId())
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+                
         currentUser.withdraw();
 
         // 리프레시 토큰 삭제

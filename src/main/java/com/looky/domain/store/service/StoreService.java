@@ -11,6 +11,7 @@ import com.looky.common.exception.CustomException;
 import com.looky.common.exception.ErrorCode;
 import com.looky.common.response.PageResponse;
 import com.looky.domain.store.dto.*;
+import com.looky.domain.partnership.dto.PartnershipInfo;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -123,7 +124,7 @@ public class StoreService {
         Double averageRating = reviewRepository.findAverageRatingByStoreId(storeId);
         Long reviewCount = reviewRepository.countByStoreIdAndParentReviewIsNull(storeId);
 
-        List<String> myPartnerships = null;
+        List<PartnershipInfo> myPartnerships = null;
         boolean hasCoupon = false;
 
         if (user != null && user.getRole() == Role.ROLE_STUDENT) {
@@ -133,7 +134,7 @@ public class StoreService {
                 LocalDateTime now = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
                 
                 // 내 혜택 조회
-                Map<Long, List<String>> partnershipsMap = partnershipService.getMyPartnershipOrganizations(List.of(storeId), user);
+                Map<Long, List<PartnershipInfo>> partnershipsMap = partnershipService.getMyPartnershipOrganizations(List.of(storeId), user);
                 myPartnerships = partnershipsMap.get(storeId);
                 
                 // 해당 상점의 쿠폰 보유 여부 확인
@@ -160,7 +161,7 @@ public class StoreService {
         List<Long> storeIds = storePage.getContent().stream().map(Store::getId).toList();
         
         // 상점 제휴-내 소속 매칭 조직 이름 목록 생성
-        Map<Long, List<String>> partnershipMap = partnershipService.getMyPartnershipOrganizations(storeIds, user);
+        Map<Long, List<PartnershipInfo>> partnershipMap = partnershipService.getMyPartnershipOrganizations(storeIds, user);
 
         Set<Long> batchedCouponStoreIds = new HashSet<>();
         // 학생 회원의 경우, 조회된 상점 목록에 대해 일괄적으로 쿠폰 보유 여부를 확인 (N+1 방지)
@@ -180,7 +181,7 @@ public class StoreService {
             Long reviewCount = reviewRepository.countByStoreIdAndParentReviewIsNull(store.getId());
             
             // 제휴 여부 및 쿠폰 보유 여부 설정
-            List<String> myPartnerships = partnershipMap.get(store.getId());
+            List<PartnershipInfo> myPartnerships = partnershipMap.get(store.getId());
             boolean hasCoupon = finalCouponStoreIds.contains(store.getId());
 
             return StoreResponse.of(store, averageRating, reviewCount != null ? reviewCount.intValue() : 0, myPartnerships, hasCoupon, store.getCloverGrade());
@@ -304,7 +305,7 @@ public class StoreService {
         
         List<Long> storeIds = stores.stream().map(Store::getId).toList();
         
-        Map<Long, List<String>> partnershipMap = partnershipService.getMyPartnershipOrganizations(storeIds, user);
+        Map<Long, List<PartnershipInfo>> partnershipMap = partnershipService.getMyPartnershipOrganizations(storeIds, user);
 
         Set<Long> batchedCouponStoreIds = new HashSet<>();
         if (user != null && user.getRole() == Role.ROLE_STUDENT) {
@@ -321,7 +322,7 @@ public class StoreService {
             Double averageRating = reviewRepository.findAverageRatingByStoreId(store.getId());
             Long reviewCount = reviewRepository.countByStoreIdAndParentReviewIsNull(store.getId());
             
-            List<String> myPartnerships = partnershipMap.get(store.getId());
+            List<PartnershipInfo> myPartnerships = partnershipMap.get(store.getId());
             boolean hasCoupon = finalCouponStoreIds.contains(store.getId());
             
             return StoreResponse.of(store, averageRating, reviewCount != null ? reviewCount.intValue() : 0, myPartnerships, hasCoupon, store.getCloverGrade());
@@ -336,7 +337,7 @@ public class StoreService {
 
         List<Long> storeIds = stores.stream().map(Store::getId).toList();
 
-        Map<Long, List<String>> partnershipMap = partnershipService.getMyPartnershipOrganizations(storeIds, user);
+        Map<Long, List<PartnershipInfo>> partnershipMap = partnershipService.getMyPartnershipOrganizations(storeIds, user);
 
         Set<Long> batchedCouponStoreIds = new HashSet<>();
         if (user != null && user.getRole() == Role.ROLE_STUDENT) {
@@ -353,7 +354,7 @@ public class StoreService {
             Double averageRating = reviewRepository.findAverageRatingByStoreId(store.getId());
             Long reviewCount = reviewRepository.countByStoreIdAndParentReviewIsNull(store.getId());
 
-            List<String> myPartnerships = partnershipMap.get(store.getId());
+            List<PartnershipInfo> myPartnerships = partnershipMap.get(store.getId());
             boolean hasCoupon = finalCouponStoreIds.contains(store.getId());
 
             return StoreResponse.of(store, averageRating, reviewCount != null ? reviewCount.intValue() : 0, myPartnerships, hasCoupon, store.getCloverGrade());
@@ -593,7 +594,7 @@ public class StoreService {
         LocalDateTime now = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
 
         // 2. 활성화된 제휴 정보 일괄 조회 (N+1 방지)
-        Map<Long, List<String>> partnershipMap = partnershipService.getMyPartnershipOrganizations(storeIds, user);
+        Map<Long, List<PartnershipInfo>> partnershipMap = partnershipService.getMyPartnershipOrganizations(storeIds, user);
 
         Set<Long> batchedCouponStoreIds = new HashSet<>();
 
@@ -612,7 +613,7 @@ public class StoreService {
             Long reviewCount = reviewRepository.countByStoreIdAndParentReviewIsNull(store.getId());
             Long favoriteCount = favoriteRepository.countByStore(store);
 
-            List<String> myPartnerships = partnershipMap.get(store.getId());
+            List<PartnershipInfo> myPartnerships = partnershipMap.get(store.getId());
             boolean hasCoupon = finalCouponStoreIds.contains(store.getId());
 
             return StoreMapResponse.of(store, averageRating, reviewCount != null ? reviewCount.intValue() : 0, myPartnerships, hasCoupon, favoriteCount);}).toList();

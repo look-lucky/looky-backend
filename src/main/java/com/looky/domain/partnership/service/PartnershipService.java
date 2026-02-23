@@ -18,6 +18,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
+import com.looky.domain.partnership.dto.PartnershipInfo;
 
 @Service
 @RequiredArgsConstructor
@@ -51,6 +52,7 @@ public class PartnershipService {
         
         return partnerships.stream()
                 .map(p -> StorePartnershipResponse.of(
+                        p.getOrganization().getCategory(),
                         p.getOrganization().getName(),
                         p.getBenefit(),
                         finalMyOrgIds.contains(p.getOrganization().getId())
@@ -59,8 +61,8 @@ public class PartnershipService {
     }
 
     // 상점 리스트에서 상점 제휴-내 소속 매칭 조직 이름 목록 반환
-    public Map<Long, List<String>> getMyPartnershipOrganizations(List<Long> storeIds, User user) {
-         Map<Long, List<String>> result = new HashMap<>();
+    public Map<Long, List<PartnershipInfo>> getMyPartnershipOrganizations(List<Long> storeIds, User user) {
+         Map<Long, List<PartnershipInfo>> result = new HashMap<>();
          if (storeIds.isEmpty() || user == null || user.getRole() != Role.ROLE_STUDENT) {
              return result; // 로그인 안했거나 학생이 아니거나 상점이 없으면 빈 맵 반환
          }
@@ -84,7 +86,7 @@ public class PartnershipService {
          return matchingPartnerships.stream()
                  .collect(Collectors.groupingBy(
                          p -> p.getStore().getId(),
-                         Collectors.mapping(p -> p.getOrganization().getName(), Collectors.toList())
+                         Collectors.mapping(p -> PartnershipInfo.of(p.getOrganization().getCategory(), p.getOrganization().getName()), Collectors.toList())
                  ));
     }
 }

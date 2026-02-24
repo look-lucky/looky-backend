@@ -80,4 +80,16 @@ public interface PartnershipRepository extends JpaRepository<Partnership, Long> 
             @Param("organizationIds") List<Long> organizationIds,
             @Param("today") LocalDate today
     );
+
+    // 특정 대학의 조직과 활성 제휴가 있는 상점 ID 목록 조회 (UNCLAIMED 필터링용)
+    @Query("SELECT DISTINCT p.store.id FROM Partnership p " +
+           "JOIN p.organization o " +
+           "WHERE p.store.id IN :storeIds " +
+           "AND o.university.id = :universityId " +
+           "AND p.startsAt <= :today AND p.endsAt >= :today")
+    List<Long> findStoreIdsWithActivePartnershipsByUniversityId(
+            @Param("storeIds") List<Long> storeIds,
+            @Param("universityId") Long universityId,
+            @Param("today") LocalDate today
+    );
 }

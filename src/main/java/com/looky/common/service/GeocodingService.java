@@ -1,5 +1,7 @@
 package com.looky.common.service;
 
+import com.looky.common.exception.CustomException;
+import com.looky.common.exception.ErrorCode;
 import com.looky.domain.store.entity.Store;
 import com.looky.domain.store.repository.StoreRepository;
 import lombok.RequiredArgsConstructor;
@@ -36,64 +38,74 @@ public class GeocodingService {
 
     private static final String NAVER_GEOCODE_URL = "https://maps.apigw.ntruss.com/map-geocode/v2/geocode";
 
+    public static class Coordinate {
+        public final Double latitude;
+        public final Double longitude;
+        
+        public Coordinate(Double latitude, Double longitude) {
+            this.latitude = latitude;
+            this.longitude = longitude;
+        }
+    }
+
+    public Coordinate getCoordinate(String roadAddress) {
+        if (roadAddress == null || roadAddress.trim().isEmpty()) {
+            throw new CustomException(ErrorCode.BAD_REQUEST, "주소가 비어있습니다.");
+        }
+
+        // 주소 전처리 (특수 공백 제거 등)
+        String query = refineAddress(roadAddress);
+
+        // 요청 URL 생성 (URLEncoder 사용)
+        String encodedQuery = URLEncoder.encode(query, StandardCharsets.UTF_8);
+        URI uri = URI.create(NAVER_GEOCODE_URL + "?query=" + encodedQuery);
+
+        log.info("[Geocoding] Generated URI: {}", uri);
+
+        // 헤더 설정
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("X-NCP-APIGW-API-KEY-ID", clientId != null ? clientId.trim() : "");
+        headers.set("X-NCP-APIGW-API-KEY", clientSecret != null ? clientSecret.trim() : "");
+
+        HttpEntity<Void> entity = new HttpEntity<>(headers);
+
+        // API 호출
+        ResponseEntity<Map> response = restTemplate.exchange(uri, HttpMethod.GET, entity, Map.class);
+        Map<String, Object> body = response.getBody();
+
+        if (body == null || !body.containsKey("addresses")) {
+            throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR, "지오코딩 API 응답 오류");
+        }
+
+        List<Map<String, Object>> addresses = (List<Map<String, Object>>) body.get("addresses");
+
+        if (addresses.isEmpty()) {
+            throw new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "지오코딩 좌표 검색 결과 없음");
+        }
+
+        Map<String, Object> firstResult = addresses.get(0);
+        Double latitude = Double.valueOf((String) firstResult.get("y"));
+        Double longitude = Double.valueOf((String) firstResult.get("x"));
+
+        return new Coordinate(latitude, longitude);
+    }
+
     //  도로명 주소 기반으로 위도 / 경도 업데이트
     @Async
     @Transactional
     public void updateLocation(Long storeId, String roadAddress) {
         try {
-            // 주소가 없으면 스킵
-            if (roadAddress == null || roadAddress.trim().isEmpty()) {
-                log.warn("[Geocoding] Address is empty for storeId={}", storeId);
-                markAsNeedCheck(storeId, "지오코딩 실패: 주소 없음");
-                return;
-            }
-
-            // 주소 전처리 (특수 공백 제거 등)
-            String query = refineAddress(roadAddress);
-
-            // 요청 URL 생성 (URLEncoder 사용)
-            String encodedQuery = URLEncoder.encode(query, StandardCharsets.UTF_8);
-            URI uri = URI.create(NAVER_GEOCODE_URL + "?query=" + encodedQuery);
-
-            log.info("[Geocoding] Generated URI: {}", uri);
-
-            // 헤더 설정
-            HttpHeaders headers = new HttpHeaders();
-            headers.set("X-NCP-APIGW-API-KEY-ID", clientId != null ? clientId.trim() : "");
-            headers.set("X-NCP-APIGW-API-KEY", clientSecret != null ? clientSecret.trim() : "");
-
-            HttpEntity<Void> entity = new HttpEntity<>(headers);
-
-            // API 호출
-            ResponseEntity<Map> response = restTemplate.exchange(uri, HttpMethod.GET, entity, Map.class);
-            Map<String, Object> body = response.getBody();
-
-            if (body == null || !body.containsKey("addresses")) {
-                log.error("[Geocoding] Invalid response for storeId={}", storeId);
-                markAsNeedCheck(storeId, "지오코딩 실패: API 응답 오류");
-                return;
-            }
-
-            List<Map<String, Object>> addresses = (List<Map<String, Object>>) body.get("addresses");
-
-            if (addresses.isEmpty()) {
-                log.warn("[Geocoding] No coordinates found for address: {}", roadAddress);
-                markAsNeedCheck(storeId, "지오코딩 실패: 좌표 검색 결과 없음");
-                return;
-            }
-
-            // 첫 번째 결과 사용
-            Map<String, Object> firstResult = addresses.get(0);
-            Double latitude = Double.valueOf((String) firstResult.get("y"));
-            Double longitude = Double.valueOf((String) firstResult.get("x"));
-
+            Coordinate coordinate = getCoordinate(roadAddress);
+            
             // DB 업데이트
             Store store = storeRepository.findById(storeId).orElse(null);
             if (store != null) {
-                store.updateLocation(latitude, longitude);
-                log.info("[Geocoding] Updated location for storeId={}: lat={}, lng={}", storeId, latitude, longitude);
+                store.updateLocation(coordinate.latitude, coordinate.longitude);
+                log.info("[Geocoding] Updated location for storeId={}: lat={}, lng={}", storeId, coordinate.latitude, coordinate.longitude);
             }
-
+        } catch (CustomException e) {
+            log.warn("[Geocoding] Failed for storeId={}: {}", storeId, e.getMessage());
+            markAsNeedCheck(storeId, "지오코딩 실패: " + e.getMessage());
         } catch (Exception e) {
             log.error("[Geocoding] Error processing storeId={}", storeId, e);
             markAsNeedCheck(storeId, "지오코딩 오류: " + e.getMessage());

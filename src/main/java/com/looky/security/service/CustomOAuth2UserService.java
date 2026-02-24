@@ -86,6 +86,12 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         User user = userRepository.findByUsername(username).orElse(null);
         
         if (user != null) {
+            if (user.isDeleted()) {
+                throw new OAuth2AuthenticationException(
+                    new org.springframework.security.oauth2.core.OAuth2Error("withdrawn_user"), 
+                    "탈퇴한 회원입니다."
+                );
+            }
             return userRepository.save(user);
         }
 

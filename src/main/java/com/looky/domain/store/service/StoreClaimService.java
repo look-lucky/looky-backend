@@ -119,6 +119,8 @@ public class StoreClaimService {
             }
 
             return response;
+        } catch (CustomException e) {
+            throw e;
         } catch (Exception e) {
             log.warn("사업자등록정보 진위 확인 중 오류 발생", e);
             throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR, "사업자등록정보 진위확인 중 오류가 발생했습니다.");

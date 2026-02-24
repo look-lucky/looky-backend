@@ -4,6 +4,7 @@ package com.looky.security.config;
 import com.looky.security.handler.CustomAccessDeniedHandler;
 import com.looky.security.handler.CustomAuthenticationEntryPoint;
 import com.looky.security.handler.OAuth2LoginSuccessHandler;
+import com.looky.security.handler.OAuth2LoginFailureHandler;
 import com.looky.security.service.CustomOAuth2UserService;
 import com.looky.security.jwt.JwtFilter;
 import lombok.RequiredArgsConstructor;
@@ -34,6 +35,7 @@ public class SecurityConfig {
         private final JwtFilter jwtFilter;
         private final CustomOAuth2UserService customOAuth2UserService;
         private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
+        private final OAuth2LoginFailureHandler oAuth2LoginFailureHandler;
         private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
         private final CustomAccessDeniedHandler customAccessDeniedHandler;
         private final AppleAccessTokenResponseClient appleAccessTokenResponseClient;
@@ -90,6 +92,7 @@ public class SecurityConfig {
                 // 경로별 인가 작업
                 http
                         .authorizeHttpRequests((auth) -> auth
+                                .requestMatchers(HttpMethod.DELETE, "/api/auth/withdraw").authenticated()
                                 .requestMatchers("/api/auth/**", "/reissue", "/docs", "/swagger-ui/**", "/v3/api-docs/**", "/health")
                                 .permitAll()
                                 .requestMatchers(HttpMethod.GET, "/api/universities/**", "/api/organizations/**", "/api/store-claims/search")
@@ -107,6 +110,7 @@ public class SecurityConfig {
                                 .accessTokenResponseClient(appleAccessTokenResponseClient)
                         )
                         .successHandler(oAuth2LoginSuccessHandler) // 로그인 성공 시 핸들러
+                        .failureHandler(oAuth2LoginFailureHandler) // 로그인 실패 시 핸들러
                 );
 
                 // 예외 처리 핸들러 등록

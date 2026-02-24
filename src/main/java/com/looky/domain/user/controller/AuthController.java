@@ -138,8 +138,8 @@ public class AuthController {
         })
         @PostMapping("/complete-social-signup")
         public ResponseEntity<CommonResponse<LoginResponse>> completeSocialSignup(
-                Long userId,
-                CompleteSocialSignupRequest request
+                @RequestParam Long userId,
+                @RequestBody @Valid CompleteSocialSignupRequest request
         )
         {
                 AuthTokens authTokens = authService.completeSocialSignup(userId, request);

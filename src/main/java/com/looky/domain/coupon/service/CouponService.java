@@ -225,9 +225,9 @@ public class CouponService {
         Long universityId = studentProfile.getUniversity().getId();
         LocalDate today = LocalDate.now();
         LocalDateTime startOfDay = today.atStartOfDay();
-        LocalDateTime endOfDay = today.atTime(23, 59, 59);
+        LocalDateTime now = LocalDateTime.now();
 
-        List<Coupon> coupons = couponRepository.findTodayCouponsByUniversity(universityId, startOfDay, endOfDay, today);
+        List<Coupon> coupons = couponRepository.findTodayCouponsByUniversity(universityId, startOfDay, now, today);
 
         List<CouponResponse> responses = coupons.stream()
                 .map(CouponResponse::from)

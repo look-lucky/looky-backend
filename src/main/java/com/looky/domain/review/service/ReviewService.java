@@ -8,6 +8,7 @@ import com.looky.common.exception.CustomException;
 import com.looky.common.exception.ErrorCode;
 import com.looky.domain.coupon.entity.CouponUsageStatus;
 import com.looky.domain.coupon.repository.StudentCouponRepository;
+import com.looky.domain.user.repository.StudentProfileRepository;
 import com.looky.domain.review.dto.*;
 
 import java.util.*;
@@ -43,6 +44,7 @@ public class ReviewService {
     private final ReviewLikeRepository reviewLikeRepository;
     private final StoreRepository storeRepository;
     private final StudentCouponRepository studentCouponRepository;
+    private final StudentProfileRepository studentProfileRepository;
     private final UserRepository userRepository;
     private final ReviewReportRepository reviewReportRepository;
     private final S3Service s3Service;
@@ -220,7 +222,15 @@ public class ReviewService {
         // 2. 조회된 부모 리뷰들의 ID 수집
         List<Review> parents = parentReviews.getContent();
         if (parents.isEmpty()) {
-            return parentReviews.map(review -> ReviewResponse.from(review, false));
+            return parentReviews.map(review -> {
+                String fallbackNickname = "알 수 없음";
+                if (review.getUser().getRole() == Role.ROLE_STUDENT) {
+                    fallbackNickname = studentProfileRepository.findNicknameByUser(review.getUser()).orElse("알 수 없음");
+                } else if (review.getUser().getRole() == Role.ROLE_OWNER) {
+                    fallbackNickname = store.getName() + " 사장님";
+                }
+                return ReviewResponse.from(review, false, fallbackNickname);
+            });
         }
 
         // 3. 부모 리뷰들에 대한 답글 일괄 조회
@@ -230,28 +240,56 @@ public class ReviewService {
         Map<Long, List<Review>> repliesByParentId = replies.stream()
                 .collect(Collectors.groupingBy(reply -> reply.getParentReview().getId()));
 
-        // 5. 로그인 한 경우, 좋아요 여부 확인 (부모 + 자식 모두)
+        // 5. 로그인 한 경우, 좋아요 여부 확인 (부모 + 자식 모두) 및 작성자 ID 추출
         Set<Long> likedReviewIds = new HashSet<>();
-        if (user != null) {
-            List<Review> allReviews = new ArrayList<>(parents);
-            allReviews.addAll(replies);
+        List<Review> allReviews = new ArrayList<>(parents);
+        allReviews.addAll(replies);
 
-            if (!allReviews.isEmpty()) {
-                likedReviewIds = reviewLikeRepository.findByUserAndReviewIn(user, allReviews).stream()
-                        .map(like -> like.getReview().getId())
-                        .collect(Collectors.toSet());
-            }
+        if (user != null && !allReviews.isEmpty()) {
+             likedReviewIds = reviewLikeRepository.findByUserAndReviewIn(user, allReviews).stream()
+                     .map(like -> like.getReview().getId())
+                     .collect(Collectors.toSet());
         }
 
         final Set<Long> finalLikedReviewIds = likedReviewIds;
 
-        // 6. ReviewResponse로 변환 및 답글 매핑
+        // 6. 리뷰 작성자 닉네임 일괄 매핑 (학생은 닉네임 조회, 점주는 "가게명 사장님")
+        List<Long> studentUserIds = allReviews.stream()
+                .filter(r -> r.getUser().getRole() == Role.ROLE_STUDENT)
+                .map(r -> r.getUser().getId())
+                .distinct()
+                .toList();
+                
+        Map<Long, String> nicknameMap = new java.util.HashMap<>();
+        
+        if (!studentUserIds.isEmpty()) {
+            List<com.looky.domain.user.entity.StudentProfile> students = studentProfileRepository.findAllById(studentUserIds);
+            students.forEach(p -> nicknameMap.put(p.getUserId(), p.getNickname()));
+        }
+
+        // 7. ReviewResponse로 변환 및 답글 매핑
         return parentReviews.map(review -> {
             boolean isLiked = finalLikedReviewIds.contains(review.getId());
-            ReviewResponse response = ReviewResponse.from(review, isLiked);
+            String nickname = "알 수 없음";
+            if (review.getUser().getRole() == Role.ROLE_STUDENT) {
+                nickname = nicknameMap.getOrDefault(review.getUser().getId(), "알 수 없음");
+            } else if (review.getUser().getRole() == Role.ROLE_OWNER) {
+                nickname = store.getName() + " 사장님";
+            }
+            
+            ReviewResponse response = ReviewResponse.from(review, isLiked, nickname);
+            
             List<Review> childReviews = repliesByParentId.getOrDefault(review.getId(), java.util.Collections.emptyList());
             response.setChildren(childReviews.stream()
-                    .map(r -> ReviewResponse.from(r, finalLikedReviewIds.contains(r.getId())))
+                    .map(r -> {
+                        String replyNickname = "알 수 없음";
+                        if (r.getUser().getRole() == Role.ROLE_STUDENT) {
+                            replyNickname = nicknameMap.getOrDefault(r.getUser().getId(), "알 수 없음");
+                        } else if (r.getUser().getRole() == Role.ROLE_OWNER) {
+                            replyNickname = store.getName() + " 사장님"; // 부모 상점과 동일
+                        }
+                        return ReviewResponse.from(r, finalLikedReviewIds.contains(r.getId()), replyNickname);
+                    })
                     .toList());
             return response;
         });
@@ -260,8 +298,20 @@ public class ReviewService {
     // 내가 작성한 리뷰 목록 조회
     public Page<ReviewResponse> getMyReviews(User user, Pageable pageable) {
         // 내 리뷰에는 좋아요를 누를 수 없으므로 isLiked는 항상 false
+        String nickname = "알 수 없음";
+        if (user.getRole() == Role.ROLE_STUDENT) {
+            nickname = studentProfileRepository.findNicknameByUser(user).orElse("알 수 없음");
+        }
+        final String finalNickname = nickname; // 학생인 경우 사용될 닉네임
+
         return reviewRepository.findByUserAndParentReviewIsNull(user, pageable)
-                .map(review -> ReviewResponse.from(review, false));
+                .map(review -> {
+                    String appliedNickname = finalNickname;
+                    if (user.getRole() == Role.ROLE_OWNER) {
+                        appliedNickname = review.getStore().getName() + " 사장님";
+                    }
+                    return ReviewResponse.from(review, false, appliedNickname);
+                });
     }
 
     // 특정 상점 리뷰 통계 조회

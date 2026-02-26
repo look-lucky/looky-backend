@@ -77,7 +77,7 @@ public class Event extends BaseEntity {
         this.university = university;
     }
 
-    public void update(String title, String description, String subtitle, Set<EventType> eventTypes, Double latitude, Double longitude, String place, LocalDateTime startDateTime, LocalDateTime endDateTime, EventStatus status) {
+    public void update(String title, String description, String subtitle, Set<EventType> eventTypes, Double latitude, Double longitude, String place, LocalDateTime startDateTime, LocalDateTime endDateTime, EventStatus status, University university) {
         this.title = title;
         this.description = description;
         this.subtitle = subtitle;
@@ -93,6 +93,7 @@ public class Event extends BaseEntity {
         this.startDateTime = startDateTime;
         this.endDateTime = endDateTime;
         this.status = status;
+        this.university = university;
     }
 
     public void addImage(EventImage image) {

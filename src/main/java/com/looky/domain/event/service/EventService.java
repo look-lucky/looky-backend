@@ -41,7 +41,7 @@ public class EventService {
     public Long createEvent(CreateEventRequest request, List<MultipartFile> images) throws IOException {
         
         University university = null;
-        if (request.getUniversityId() != null && request.getUniversityId() != 0L) {
+        if (request.getUniversityId() != null) {
             university = universityRepository.findById(request.getUniversityId())
                     .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "대학교를 찾을 수 없습니다."));
         }
@@ -101,7 +101,7 @@ public class EventService {
                 request.getEndDateTime().orElse(event.getEndDateTime()),
                 request.getStatus().orElse(event.getStatus()),
                 request.getUniversityId().isPresent() ? 
-                    (request.getUniversityId().get() != null && request.getUniversityId().get() != 0L ? 
+                    (request.getUniversityId().get() != null ? 
                         universityRepository.findById(request.getUniversityId().get())
                                 .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "대학교를 찾을 수 없습니다.")) 
                         : null) 

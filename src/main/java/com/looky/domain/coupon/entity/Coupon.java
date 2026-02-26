@@ -81,6 +81,9 @@ public class Coupon extends BaseEntity {
 
     public void increaseDownloadCount() {
         this.downloadCount++;
+        if (this.totalQuantity != null && this.downloadCount >= this.totalQuantity) {
+            this.status = CouponStatus.SOLD_OUT;
+        }
     }
 
     public void expire() {

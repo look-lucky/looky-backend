@@ -44,4 +44,7 @@ public class UpdateEventRequest {
 
     @Schema(description = "이벤트 상태", example = "LIVE")
     private JsonNullable<EventStatus> status = JsonNullable.undefined();
+
+    @Schema(description = "대학교 ID (null이면 모든 대학)", example = "null", nullable = true)
+    private JsonNullable<Long> universityId = JsonNullable.undefined();
 }

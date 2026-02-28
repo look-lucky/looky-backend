@@ -20,6 +20,7 @@ public class ReviewResponse {
     private String storeName;
     private Long parentReviewId;
     private String username;
+    private String nickname;
     private String content;
     private Integer rating;
     private LocalDateTime createdAt;
@@ -29,13 +30,14 @@ public class ReviewResponse {
     private List<String> imageUrls;
     private List<ReviewResponse> children;
 
-    public static ReviewResponse from(Review review, boolean isLiked) {
+    public static ReviewResponse from(Review review, boolean isLiked, String nickname) {
         return ReviewResponse.builder()
                 .reviewId(review.getId())
                 .storeId(review.getStore().getId())
                 .storeName(review.getStore().getName())
                 .parentReviewId(review.getParentReview() != null ? review.getParentReview().getId() : null)
                 .username(review.getUser().getUsername())
+                .nickname(nickname)
                 .content(review.getContent())
                 .imageUrls(review.getImages().stream().map(ReviewImage::getImageUrl).toList())
                 .rating(review.getRating())

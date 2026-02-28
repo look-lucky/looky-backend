@@ -20,9 +20,10 @@ import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.core.MethodParameter;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.ObjectError;
+import org.springframework.validation.FieldError;
 
 import java.util.Set;
 import org.springframework.data.domain.Page;
@@ -199,9 +200,23 @@ public class ReviewController {
         if (!violations.isEmpty()) {
             BindingResult bindingResult = new BeanPropertyBindingResult(request, request.getClass().getName());
             for (ConstraintViolation<T> violation : violations) {
-                bindingResult.addError(new ObjectError(request.getClass().getName(), violation.getMessage()));
+                bindingResult.addError(new FieldError(
+                        request.getClass().getName(),
+                        violation.getPropertyPath().toString(),
+                        violation.getInvalidValue(),
+                        false,
+                        null,
+                        null,
+                        violation.getMessage()
+                ));
             }
-            throw new MethodArgumentNotValidException(null, bindingResult);
+            try {
+                MethodParameter parameter = new MethodParameter(
+                        this.getClass().getDeclaredMethod("validateRequest", Object.class), 0);
+                throw new MethodArgumentNotValidException(parameter, bindingResult);
+            } catch (NoSuchMethodException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 }

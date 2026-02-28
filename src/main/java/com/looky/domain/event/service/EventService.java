@@ -40,8 +40,11 @@ public class EventService {
     @Transactional
     public Long createEvent(CreateEventRequest request, List<MultipartFile> images) throws IOException {
         
-        University university = universityRepository.findById(request.getUniversityId())
-                .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "대학교를 찾을 수 없습니다."));
+        University university = null;
+        if (request.getUniversityId() != null) {
+            university = universityRepository.findById(request.getUniversityId())
+                    .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "대학교를 찾을 수 없습니다."));
+        }
 
         Event event = Event.builder()
                 .title(request.getTitle())
@@ -96,7 +99,13 @@ public class EventService {
                 request.getPlace().orElse(event.getPlace()),
                 request.getStartDateTime().orElse(event.getStartDateTime()),
                 request.getEndDateTime().orElse(event.getEndDateTime()),
-                request.getStatus().orElse(event.getStatus())
+                request.getStatus().orElse(event.getStatus()),
+                request.getUniversityId().isPresent() ? 
+                    (request.getUniversityId().get() != null ? 
+                        universityRepository.findById(request.getUniversityId().get())
+                                .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "대학교를 찾을 수 없습니다.")) 
+                        : null) 
+                    : event.getUniversity()
         );
 
         // 새 이미지가 있으면 기존 이미지 삭제 후 새로 업로드

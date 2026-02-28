@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 public class EventResponse {
 
     private Long id;
+    private Long universityId;
     private String title;
     private String description;
     private String subtitle;
@@ -44,6 +45,7 @@ public class EventResponse {
                 .map(EventImage::getImageUrl)
                 .collect(Collectors.toList());
         this.createdAt = event.getCreatedAt();
+        this.universityId = event.getUniversity() != null ? event.getUniversity().getId() : null;
     }
 
     public static EventResponse from(Event event) {

@@ -15,6 +15,7 @@ public class MyStoreClaimResponse {
     private String storeName;
     private String representativeName;
     private StoreClaimStatus status;
+    private String rejectReason;
     private LocalDateTime createdAt;
 
     public static MyStoreClaimResponse from(StoreClaim storeClaim) {
@@ -24,6 +25,7 @@ public class MyStoreClaimResponse {
                 .storeName(storeClaim.getStoreName())
                 .representativeName(storeClaim.getRepresentativeName())
                 .status(storeClaim.getStatus())
+                .rejectReason(storeClaim.getStatus() == StoreClaimStatus.REJECTED ? storeClaim.getRejectReason() : null)
                 .createdAt(storeClaim.getCreatedAt())
                 .build();
     }

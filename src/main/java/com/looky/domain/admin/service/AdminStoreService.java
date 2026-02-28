@@ -53,6 +53,7 @@ public class AdminStoreService {
             // 5: Latitude
             // 6: Longitude
 
+            List<Store> storesToSave = new ArrayList<>();
             List<Long> storeIdsToGeocode = new ArrayList<>();
 
             for (int i = 1; i <= sheet.getLastRowNum(); i++) {
@@ -104,18 +105,24 @@ public class AdminStoreService {
                             .storeStatus(StoreStatus.UNCLAIMED)
                             .user(null) // 주인 없음
                             .build();
-                    storeRepository.save(store);
                 }
-
+                            
                 // 학교 연결 (기존 데이터에 계속 추가)
                 if (universityId != null) {
                     universityRepository.findById(universityId).ifPresent(store::addUniversity);
                 }
 
-                // 위도/경도가 없으면 지오코딩 대상에 추가
-                if (store.getLatitude() == null || store.getLongitude() == null) {
-                    storeIdsToGeocode.add(store.getId());
-                }
+                storesToSave.add(store);
+            }
+
+            // 일괄 저장 (Insert or Update 쿼리가 여기서 한 번에 발생)
+            storeRepository.saveAll(storesToSave);
+            
+            // 저장 후 ID가 할당된 Store들 중에서 좌표 없는 건들 찾기
+            for (Store savedStore : storesToSave) {
+                 if (savedStore.getLatitude() == null || savedStore.getLongitude() == null) {
+                      storeIdsToGeocode.add(savedStore.getId());
+                 }
             }
 
             // 비동기 지오코딩 트리거

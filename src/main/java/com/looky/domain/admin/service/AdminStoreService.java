@@ -45,7 +45,7 @@ public class AdminStoreService {
             validateHeader(sheet.getRow(0));
 
             // 헤더 순서
-            // 0: UniversityID 
+            // 0: UniversityID
             // 1: Name
             // 2: Branch
             // 3: RoadAddress
@@ -69,14 +69,12 @@ public class AdminStoreService {
                 Double latitude = getCellValueAsDouble(row.getCell(5));
                 Double longitude = getCellValueAsDouble(row.getCell(6));
 
-                Optional<Store> existingStore = storeRepository.findByNameAndRoadAddress(name, roadAddress);
+                Optional<Store> existingStore = storeRepository.findFirstByNameAndRoadAddress(name, roadAddress);
                 Store store;
 
                 // 이미 가게가 존재하는 경우 -> 엑셀 데이터로 덮어쓰기
                 if (existingStore.isPresent()) {
-
                     store = existingStore.get();
-
                     store.updateStore(
                             // 엑셀 데이터로 덮어쓰기
                             name,
@@ -95,9 +93,11 @@ public class AdminStoreService {
                             store.getIsSuspended(),
                             store.getRepresentativeName()
                     );
-                } else { // 가게가 존재하지 않는 경우 -> 생성
+                } else {
+                    // 신규 가게 생성
                     store = Store.builder()
                             .name(name)
+                            .branch(branch)
                             .roadAddress(roadAddress)
                             .jibunAddress(jibunAddress)
                             .latitude(latitude)
@@ -106,7 +106,7 @@ public class AdminStoreService {
                             .user(null) // 주인 없음
                             .build();
                 }
-                            
+
                 // 학교 연결 (기존 데이터에 계속 추가)
                 if (universityId != null) {
                     universityRepository.findById(universityId).ifPresent(store::addUniversity);
@@ -117,17 +117,18 @@ public class AdminStoreService {
 
             // 일괄 저장 (Insert or Update 쿼리가 여기서 한 번에 발생)
             storeRepository.saveAll(storesToSave);
-            
+
             // 저장 후 ID가 할당된 Store들 중에서 좌표 없는 건들 찾기
             for (Store savedStore : storesToSave) {
-                 if (savedStore.getLatitude() == null || savedStore.getLongitude() == null) {
-                      storeIdsToGeocode.add(savedStore.getId());
-                 }
+                if (savedStore.getLatitude() == null || savedStore.getLongitude() == null) {
+                    storeIdsToGeocode.add(savedStore.getId());
+                }
             }
 
             // 비동기 지오코딩 트리거
             for (Long storeId : storeIdsToGeocode) {
-                storeRepository.findById(storeId).ifPresent(s -> geocodingService.updateLocation(s.getId(), s.getRoadAddress()));
+                storeRepository.findById(storeId)
+                        .ifPresent(s -> geocodingService.updateLocation(s.getId(), s.getRoadAddress()));
             }
 
         } catch (IOException e) {
@@ -179,7 +180,8 @@ public class AdminStoreService {
         return null;
     }
 
-    private static final String[] EXPECTED_HEADERS = {"universityId", "name", "branch", "roadAddress", "jibunAddress", "latitude", "longitude"};
+    private static final String[] EXPECTED_HEADERS = { "universityId", "name", "branch", "roadAddress", "jibunAddress",
+            "latitude", "longitude" };
 
     private void validateHeader(Row headerRow) {
         if (headerRow == null) {
@@ -191,7 +193,8 @@ public class AdminStoreService {
             String cellValue = getCellValueAsString(cell);
             if (!EXPECTED_HEADERS[i].equals(cellValue)) {
                 throw new CustomException(ErrorCode.BAD_REQUEST,
-                        String.format("잘못된 헤더 형식입니다. 기대값: '%s', 실제값: '%s' (열: %d). 헤더 순서를 확인해주세요: [universityId, name, branch, roadAddress, jibunAddress, latitude, longitude]",
+                        String.format(
+                                "잘못된 헤더 형식입니다. 기대값: '%s', 실제값: '%s' (열: %d). 헤더 순서를 확인해주세요: [universityId, name, branch, roadAddress, jibunAddress, latitude, longitude]",
                                 EXPECTED_HEADERS[i], cellValue, i + 1));
             }
         }

@@ -20,7 +20,7 @@ public interface StoreRepository extends JpaRepository<Store, Long>, JpaSpecific
 
     List<Store> findAllByUser(User user);
 
-    Optional<Store> findByNameAndRoadAddress(String name, String roadAddress);
+    Optional<Store> findFirstByNameAndRoadAddress(String name, String roadAddress);
 
     boolean existsByNameAndRoadAddress(String name, String roadAddress);
 

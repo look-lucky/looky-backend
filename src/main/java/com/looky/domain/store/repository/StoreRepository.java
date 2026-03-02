@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,6 +22,8 @@ public interface StoreRepository extends JpaRepository<Store, Long>, JpaSpecific
     List<Store> findAllByUser(User user);
 
     Optional<Store> findFirstByNameAndRoadAddress(String name, String roadAddress);
+
+    List<Store> findAllByNameIn(Collection<String> names);
 
     boolean existsByNameAndRoadAddress(String name, String roadAddress);
 

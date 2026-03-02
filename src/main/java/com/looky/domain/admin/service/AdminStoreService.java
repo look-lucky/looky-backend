@@ -18,8 +18,11 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -53,37 +56,56 @@ public class AdminStoreService {
             // 5: Latitude
             // 6: Longitude
 
-            List<Store> storesToSave = new ArrayList<>();
-            List<Long> storeIdsToGeocode = new ArrayList<>();
+            // 1단계: 엑셀 전체 파싱 (유효한 행만)
+            record StoreRow(Long universityId, String name, String branch, String roadAddress, String jibunAddress, Double latitude, Double longitude) {}
+
+            List<StoreRow> storeRows = new ArrayList<>();
+            Set<String> allNames = new HashSet<>();
 
             for (int i = 1; i <= sheet.getLastRowNum(); i++) {
                 Row row = sheet.getRow(i);
-                if (row == null)
-                    continue;
+                if (row == null) continue;
 
-                Long universityId = getCellValueAsLong(row.getCell(0));
                 String name = getCellValueAsString(row.getCell(1));
-                String branch = getCellValueAsString(row.getCell(2));
-                String roadAddress = getCellValueAsString(row.getCell(3));
-                String jibunAddress = getCellValueAsString(row.getCell(4));
-                Double latitude = getCellValueAsDouble(row.getCell(5));
-                Double longitude = getCellValueAsDouble(row.getCell(6));
+                if (name.isBlank()) continue;
 
-                Optional<Store> existingStore = storeRepository.findFirstByNameAndRoadAddress(name, roadAddress);
-                Store store;
+                storeRows.add(new StoreRow(
+                        getCellValueAsLong(row.getCell(0)),
+                        name,
+                        getCellValueAsString(row.getCell(2)),
+                        getCellValueAsString(row.getCell(3)),
+                        getCellValueAsString(row.getCell(4)),
+                        getCellValueAsDouble(row.getCell(5)),
+                        getCellValueAsDouble(row.getCell(6))
+                ));
+                allNames.add(name);
+            }
 
-                // 이미 가게가 존재하는 경우 -> 엑셀 데이터로 덮어쓰기
-                if (existingStore.isPresent()) {
-                    store = existingStore.get();
+            // 2단계: DB에서 관련 가게 한 번에 조회 → Map<"name||roadAddress", Store>로 인덱싱
+            Map<String, Store> storeMap = storeRepository.findAllByNameIn(allNames)
+                    .stream()
+                    .collect(Collectors.toMap(
+                            s -> s.getName() + "||" + s.getRoadAddress(),
+                            s -> s,
+                            (a, b) -> a  // DB에 중복이 있어도 첫 번째 유지
+                    ));
+
+            // 3단계: 행별 처리 - Map 기준으로 신규/업데이트 분기
+            List<Store> newStores = new ArrayList<>();
+
+            for (StoreRow storeRow : storeRows) {
+                String key = storeRow.name() + "||" + storeRow.roadAddress();
+                Store store = storeMap.get(key);
+
+                if (store != null) {
+                    // 기존 가게 → 엑셀 데이터로 덮어쓰기
                     store.updateStore(
-                            // 엑셀 데이터로 덮어쓰기
-                            name,
-                            branch,
-                            roadAddress,
-                            jibunAddress,
-                            latitude != null ? latitude : store.getLatitude(),
-                            longitude != null ? longitude : store.getLongitude(),
-                            // 엑셀에 없는 나머지는 기존 데이터 유지
+                            storeRow.name(),
+                            storeRow.branch(),
+                            storeRow.roadAddress(),
+                            storeRow.jibunAddress(),
+                            storeRow.latitude() != null ? storeRow.latitude() : store.getLatitude(),
+                            storeRow.longitude() != null ? storeRow.longitude() : store.getLongitude(),
                             store.getStorePhone(),
                             store.getIntroduction(),
                             store.getOperatingHours(),
@@ -94,42 +116,34 @@ public class AdminStoreService {
                             store.getRepresentativeName()
                     );
                 } else {
-                    // 신규 가게 생성
+                    // 신규 가게 생성 후 Map에 즉시 등록 → 배치 내 중복 방지
                     store = Store.builder()
-                            .name(name)
-                            .branch(branch)
-                            .roadAddress(roadAddress)
-                            .jibunAddress(jibunAddress)
-                            .latitude(latitude)
-                            .longitude(longitude)
+                            .name(storeRow.name())
+                            .branch(storeRow.branch())
+                            .roadAddress(storeRow.roadAddress())
+                            .jibunAddress(storeRow.jibunAddress())
+                            .latitude(storeRow.latitude())
+                            .longitude(storeRow.longitude())
                             .storeStatus(StoreStatus.UNCLAIMED)
-                            .user(null) // 주인 없음
+                            .user(null)
                             .build();
+                    storeMap.put(key, store);
+                    newStores.add(store);
                 }
 
                 // 학교 연결 (기존 데이터에 계속 추가)
-                if (universityId != null) {
-                    universityRepository.findById(universityId).ifPresent(store::addUniversity);
-                }
-
-                storesToSave.add(store);
-            }
-
-            // 일괄 저장 (Insert or Update 쿼리가 여기서 한 번에 발생)
-            storeRepository.saveAll(storesToSave);
-
-            // 저장 후 ID가 할당된 Store들 중에서 좌표 없는 건들 찾기
-            for (Store savedStore : storesToSave) {
-                if (savedStore.getLatitude() == null || savedStore.getLongitude() == null) {
-                    storeIdsToGeocode.add(savedStore.getId());
+                if (storeRow.universityId() != null) {
+                    universityRepository.findById(storeRow.universityId()).ifPresent(store::addUniversity);
                 }
             }
 
-            // 비동기 지오코딩 트리거
-            for (Long storeId : storeIdsToGeocode) {
-                storeRepository.findById(storeId)
-                        .ifPresent(s -> geocodingService.updateLocation(s.getId(), s.getRoadAddress()));
-            }
+            // 신규 가게만 INSERT (기존 가게는 JPA dirty checking으로 자동 UPDATE)
+            storeRepository.saveAll(newStores);
+
+            // 비동기 지오코딩 트리거 (신규 가게 중 좌표 없는 것)
+            newStores.stream()
+                    .filter(s -> s.getLatitude() == null || s.getLongitude() == null)
+                    .forEach(s -> geocodingService.updateLocation(s.getId(), s.getRoadAddress()));
 
         } catch (IOException e) {
             log.error("Excel upload failed", e);

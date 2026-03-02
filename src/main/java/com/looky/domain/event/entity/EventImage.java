@@ -27,10 +27,15 @@ public class EventImage extends BaseEntity {
     @Column(name = "order_index")
     private Integer orderIndex;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "image_type", nullable = false, columnDefinition = "VARCHAR(20) DEFAULT 'GENERAL'")
+    private EventImageType imageType;
+
     @Builder
-    public EventImage(String imageUrl, Integer orderIndex) {
+    public EventImage(String imageUrl, Integer orderIndex, EventImageType imageType) {
         this.imageUrl = imageUrl;
         this.orderIndex = orderIndex;
+        this.imageType = imageType != null ? imageType : EventImageType.GENERAL;
     }
 
     public void setEvent(Event event) {

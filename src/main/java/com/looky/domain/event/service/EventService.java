@@ -7,8 +7,10 @@ import com.looky.common.service.S3Service;
 import com.looky.domain.event.dto.CreateEventRequest;
 import com.looky.domain.event.dto.EventResponse;
 import com.looky.domain.event.dto.UpdateEventRequest;
+import com.looky.common.util.FileValidator;
 import com.looky.domain.event.entity.Event;
 import com.looky.domain.event.entity.EventImage;
+import com.looky.domain.event.entity.EventImageType;
 import com.looky.domain.event.entity.EventStatus;
 import com.looky.domain.event.entity.EventType;
 import com.looky.domain.event.repository.EventRepository;
@@ -38,8 +40,8 @@ public class EventService {
     private final S3Service s3Service;
 
     @Transactional
-    public Long createEvent(CreateEventRequest request, List<MultipartFile> images) throws IOException {
-        
+    public Long createEvent(CreateEventRequest request, MultipartFile bannerImage, List<MultipartFile> images) throws IOException {
+
         University university = null;
         if (request.getUniversityId() != null) {
             university = universityRepository.findById(request.getUniversityId())
@@ -60,7 +62,10 @@ public class EventService {
                 .university(university)
                 .build();
 
-        // 이미지 업로드 및 저장
+        // 배너 이미지 업로드 (최대 1장)
+        uploadBannerImage(event, bannerImage);
+
+        // 일반 이미지 업로드
         uploadAndSaveImages(event, images);
 
         Event savedEvent = eventRepository.save(event);
@@ -85,7 +90,7 @@ public class EventService {
     }
 
     @Transactional
-    public void updateEvent(Long eventId, UpdateEventRequest request, List<MultipartFile> images) throws IOException {
+    public void updateEvent(Long eventId, UpdateEventRequest request, MultipartFile bannerImage, List<MultipartFile> images) throws IOException {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "이벤트를 찾을 수 없습니다."));
 
@@ -100,23 +105,29 @@ public class EventService {
                 request.getStartDateTime().orElse(event.getStartDateTime()),
                 request.getEndDateTime().orElse(event.getEndDateTime()),
                 request.getStatus().orElse(event.getStatus()),
-                request.getUniversityId().isPresent() ? 
-                    (request.getUniversityId().get() != null ? 
+                request.getUniversityId().isPresent() ?
+                    (request.getUniversityId().get() != null ?
                         universityRepository.findById(request.getUniversityId().get())
-                                .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "대학교를 찾을 수 없습니다.")) 
-                        : null) 
+                                .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "대학교를 찾을 수 없습니다."))
+                        : null)
                     : event.getUniversity()
         );
 
-        // 새 이미지가 있으면 기존 이미지 삭제 후 새로 업로드
+        // 배너 이미지 교체
+        if (bannerImage != null && !bannerImage.isEmpty()) {
+            event.getImages().stream()
+                    .filter(img -> img.getImageType() == EventImageType.BANNER)
+                    .forEach(img -> s3Service.deleteFile(img.getImageUrl()));
+            event.clearImagesByType(EventImageType.BANNER);
+            uploadBannerImage(event, bannerImage);
+        }
+
+        // 일반 이미지 교체
         if (images != null && !images.isEmpty()) {
-            // 기존 S3 이미지 삭제
-            for (EventImage oldImage : event.getImages()) {
-                s3Service.deleteFile(oldImage.getImageUrl());
-            }
-            event.clearImages();
-            
-            // 새 이미지 업로드
+            event.getImages().stream()
+                    .filter(img -> img.getImageType() == EventImageType.GENERAL)
+                    .forEach(img -> s3Service.deleteFile(img.getImageUrl()));
+            event.clearImagesByType(EventImageType.GENERAL);
             uploadAndSaveImages(event, images);
         }
     }
@@ -134,6 +145,20 @@ public class EventService {
         eventRepository.delete(event);
     }
 
+    private void uploadBannerImage(Event event, MultipartFile bannerImage) throws IOException {
+        if (bannerImage == null || bannerImage.isEmpty()) {
+            return;
+        }
+        FileValidator.validateImageFile(bannerImage, 10 * 1024 * 1024L);
+        String imageUrl = s3Service.uploadFile(bannerImage);
+        EventImage eventImage = EventImage.builder()
+                .imageUrl(imageUrl)
+                .orderIndex(0)
+                .imageType(EventImageType.BANNER)
+                .build();
+        event.addImage(eventImage);
+    }
+
     private void uploadAndSaveImages(Event event, List<MultipartFile> images) throws IOException {
         if (images == null || images.isEmpty()) {
             return;
@@ -147,6 +172,7 @@ public class EventService {
             EventImage eventImage = EventImage.builder()
                     .imageUrl(imageUrl)
                     .orderIndex(orderIndex++)
+                    .imageType(EventImageType.GENERAL)
                     .build();
             event.addImage(eventImage);
         }

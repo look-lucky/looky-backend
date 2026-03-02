@@ -104,4 +104,8 @@ public class Event extends BaseEntity {
     public void clearImages() {
         this.images.clear();
     }
+
+    public void clearImagesByType(EventImageType imageType) {
+        this.images.removeIf(image -> image.getImageType() == imageType);
+    }
 }

@@ -51,13 +51,14 @@ public class AdminEventController {
     @PostMapping(consumes = MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<CommonResponse<Long>> createEvent(
             @RequestPart("request") String requestJson,
-            @Parameter(description = "이벤트 이미지") @RequestPart(required = false) List<MultipartFile> images
+            @Parameter(description = "배너 이미지 (최대 1장)") @RequestPart(required = false) MultipartFile bannerImage,
+            @Parameter(description = "일반 이미지") @RequestPart(required = false) List<MultipartFile> images
     ) throws IOException, MethodArgumentNotValidException {
 
         CreateEventRequest request = objectMapper.readValue(requestJson, CreateEventRequest.class);
         validateRequest(request);
 
-        Long eventId = eventService.createEvent(request, images);
+        Long eventId = eventService.createEvent(request, bannerImage, images);
         return ResponseEntity.status(HttpStatus.CREATED).body(CommonResponse.success(eventId));
     }
 
@@ -71,12 +72,13 @@ public class AdminEventController {
     public ResponseEntity<CommonResponse<Void>> updateEvent(
             @Parameter(description = "이벤트 ID") @PathVariable Long eventId,
             @RequestPart("request") String requestJson,
-            @Parameter(description = "이벤트 이미지") @RequestPart(required = false) List<MultipartFile> images
+            @Parameter(description = "배너 이미지 (최대 1장)") @RequestPart(required = false) MultipartFile bannerImage,
+            @Parameter(description = "일반 이미지") @RequestPart(required = false) List<MultipartFile> images
     ) throws IOException, MethodArgumentNotValidException {
         UpdateEventRequest request = objectMapper.readValue(requestJson, UpdateEventRequest.class);
         validateRequest(request);
 
-        eventService.updateEvent(eventId, request, images);
+        eventService.updateEvent(eventId, request, bannerImage, images);
         return ResponseEntity.ok(CommonResponse.success(null));
     }
 

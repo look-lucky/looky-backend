@@ -313,6 +313,7 @@ create table event_image (
     event_id bigint not null,
     image_url varchar(255) not null,
     order_index int,
+    image_type varchar(20) not null default 'GENERAL',
     foreign key (event_id) references events (event_id)
 );
 

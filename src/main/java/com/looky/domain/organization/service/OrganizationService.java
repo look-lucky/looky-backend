@@ -41,8 +41,7 @@ public class OrganizationService {
                 University university = universityRepository.findById(universityId)
                                 .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "대학을 찾을 수 없습니다."));
 
-                return organizationRepository.findAll().stream()
-                                .filter(a -> a.getUniversity().getId().equals(universityId))
+                return organizationRepository.findByUniversityIdOrderByNameAsc(universityId).stream()
                                 .map(OrganizationResponse::from)
                                 .collect(Collectors.toList());
         }
@@ -55,7 +54,7 @@ public class OrganizationService {
                         throw new CustomException(ErrorCode.BAD_REQUEST, "단과대학만 조회할 수 있습니다.");
                 }
 
-                return organizationRepository.findByParentIdAndCategory(collegeId, OrganizationCategory.DEPARTMENT)
+                return organizationRepository.findByParentIdAndCategoryOrderByNameAsc(collegeId, OrganizationCategory.DEPARTMENT)
                                 .stream()
                                 .map(OrganizationResponse::from)
                                 .collect(Collectors.toList());

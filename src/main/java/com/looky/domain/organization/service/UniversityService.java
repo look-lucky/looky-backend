@@ -32,7 +32,7 @@ public class UniversityService {
     }
 
     public List<UniversityResponse> getUniversities() {
-        return universityRepository.findAll().stream()
+        return universityRepository.findAllByOrderByNameAsc().stream()
                 .map(UniversityResponse::from)
                 .collect(Collectors.toList());
     }

@@ -10,11 +10,11 @@ import java.time.LocalDateTime;
 
 @Getter
 @Builder
-public class IssueCouponResponse {
+public class DownloadCouponResponse {
     private Long studentCouponId;
     private String couponCode;
     private CouponUsageStatus status;
-    private LocalDateTime issuedAt;
+    private LocalDateTime downloadedAt;
     private LocalDateTime expiresAt;
     private String title;
 
@@ -22,18 +22,26 @@ public class IssueCouponResponse {
     private String benefitValue;
     private Integer minOrderAmount;
     private String storeName;
+    private LocalDateTime activationExpiresAt;
 
-    public static IssueCouponResponse from(StudentCoupon studentCoupon) {
+    public static DownloadCouponResponse from(StudentCoupon studentCoupon) {
         return from(studentCoupon, studentCoupon.getCoupon().getStore().getName());
     }
 
-    public static IssueCouponResponse from(StudentCoupon studentCoupon, String storeName) {
+    public static DownloadCouponResponse from(StudentCoupon studentCoupon, String storeName) {
         Coupon coupon = studentCoupon.getCoupon();
-        return IssueCouponResponse.builder()
+
+        // 쿠폰 사용 코드 만료 시간 계산
+        LocalDateTime activationExpiresAt = null;
+        if (studentCoupon.getStatus() == CouponUsageStatus.ACTIVATED && studentCoupon.getActivatedAt() != null) {
+            activationExpiresAt = studentCoupon.getActivatedAt().plusMinutes(5);
+        }
+
+        return DownloadCouponResponse.builder()
                 .studentCouponId(studentCoupon.getId())
                 .couponCode(studentCoupon.getVerificationCode())
                 .status(studentCoupon.getStatus())
-                .issuedAt(studentCoupon.getIssuedAt())
+                .downloadedAt(studentCoupon.getDownloadedAt())
                 .expiresAt(studentCoupon.getExpiresAt())
                 .title(coupon.getTitle())
 
@@ -41,6 +49,7 @@ public class IssueCouponResponse {
                 .benefitValue(coupon.getBenefitValue())
                 .minOrderAmount(coupon.getMinOrderAmount())
                 .storeName(storeName)
+                .activationExpiresAt(activationExpiresAt)
                 .build();
     }
 }

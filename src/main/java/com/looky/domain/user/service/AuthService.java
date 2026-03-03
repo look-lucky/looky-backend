@@ -291,7 +291,6 @@ public class AuthService {
         // 5. 신규 회원이면 게스트로 가입 처리
         User newSocialUser = User.builder()
                 .username(username)
-                .email(email)
                 .role(Role.ROLE_GUEST)
                 .socialType(SocialType.APPLE)
                 .socialId(sub)
@@ -359,7 +358,6 @@ public class AuthService {
         // 5. 신규 회원이면 게스트로 가입 처리
         User newSocialUser = User.builder()
                 .username(username)
-                .email(email)
                 .role(Role.ROLE_GUEST)
                 .socialType(SocialType.KAKAO)
                 .socialId(kakaoId)
@@ -403,7 +401,6 @@ public class AuthService {
         // 5. 신규 회원이면 게스트로 가입 처리
         User newSocialUser = User.builder()
                 .username(username)
-                .email(email)
                 .role(Role.ROLE_GUEST)
                 .socialType(SocialType.GOOGLE)
                 .socialId(sub)

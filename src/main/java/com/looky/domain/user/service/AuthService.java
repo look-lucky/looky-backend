@@ -27,6 +27,11 @@ import java.util.HashMap;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -294,6 +299,118 @@ public class AuthService {
 
         userRepository.save(newSocialUser);
         log.info("[Apple Login] New user signed up. userId={}", newSocialUser.getId());
+        
+        // 6. 토큰 발급
+        return generateTokenResponse(newSocialUser);
+    }
+
+    @Transactional
+    public AuthTokens kakaoLogin(KakaoLoginRequest request) {
+        // 1. 카카오 사용자 정보 요청
+        RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + request.getAccessToken());
+        headers.set("Content-type", "application/x-www-form-urlencoded;charset=utf-8");
+
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+        ResponseEntity<Map> response;
+        try {
+            response = restTemplate.exchange(
+                    "https://kapi.kakao.com/v2/user/me",
+                    HttpMethod.GET,
+                    entity,
+                    Map.class
+            );
+        } catch (Exception e) {
+            log.error("Failed to get user info from Kakao", e);
+            throw new CustomException(ErrorCode.UNAUTHORIZED, "카카오 로그인 사용자 정보 요청 실패: 유효하지 않은 액세스 토큰입니다.");
+        }
+
+        Map<String, Object> attributes = response.getBody();
+        if (attributes == null || !attributes.containsKey("id")) {
+             throw new CustomException(ErrorCode.UNAUTHORIZED, "카카오에서 정상적인 사용자 정보를 받지 못했습니다.");
+        }
+
+        // 2. id(고유 식별자) 및 email 추출
+        String kakaoId = String.valueOf(attributes.get("id"));
+        String email = null;
+        if (attributes.containsKey("kakao_account")) {
+            Map<String, Object> kakaoAccount = (Map<String, Object>) attributes.get("kakao_account");
+            if (kakaoAccount.containsKey("email")) {
+                email = (String) kakaoAccount.get("email");
+            }
+        }
+
+        // 3. 소셜 식별자 생성
+        String username = "kakao_" + kakaoId;
+
+        // 4. 유저 조회 또는 생성
+        User user = userRepository.findByUsername(username).orElse(null);
+
+        if (user != null) {
+            if (user.isDeleted()) {
+                throw new CustomException(ErrorCode.UNAUTHORIZED, "탈퇴한 회원입니다.");
+            }
+            // 기존 회원이면 토큰 발급 후 로그인 처리
+            log.info("[Kakao Login] Existing user logged in. userId={}", user.getId());
+            return generateTokenResponse(user);
+        }
+
+        // 5. 신규 회원이면 게스트로 가입 처리
+        User newSocialUser = User.builder()
+                .username(username)
+                .email(email)
+                .role(Role.ROLE_GUEST)
+                .socialType(SocialType.KAKAO)
+                .socialId(kakaoId)
+                .build();
+
+        userRepository.save(newSocialUser);
+        log.info("[Kakao Login] New user signed up. userId={}", newSocialUser.getId());
+
+        // 6. 토큰 발급
+        return generateTokenResponse(newSocialUser);
+    }
+
+    @Transactional
+    public AuthTokens googleLogin(GoogleLoginRequest request) {
+        // 1. idToken 페이로드 디코딩
+        Map<String, Object> payload = decodeJwtTokenPayload(request.getIdToken());
+        
+        // 2. sub (Google 고유 ID) 및 email 추출
+        String sub = (String) payload.get("sub");
+        String email = (String) payload.get("email");
+        
+        if (sub == null) {
+            throw new CustomException(ErrorCode.BAD_REQUEST, "유효하지 않은 Google id_token 입니다.");
+        }
+
+        // 3. 소셜 식별자 생성
+        String username = "google_" + sub;
+        
+        // 4. 유저 조회 또는 생성
+        User user = userRepository.findByUsername(username).orElse(null);
+
+        if (user != null) {
+            if (user.isDeleted()) {
+                throw new CustomException(ErrorCode.UNAUTHORIZED, "탈퇴한 회원입니다.");
+            }
+            // 기존 회원이면 토큰 발급 후 로그인 처리
+            log.info("[Google Login] Existing user logged in. userId={}", user.getId());
+            return generateTokenResponse(user);
+        }
+
+        // 5. 신규 회원이면 게스트로 가입 처리
+        User newSocialUser = User.builder()
+                .username(username)
+                .email(email)
+                .role(Role.ROLE_GUEST)
+                .socialType(SocialType.GOOGLE)
+                .socialId(sub)
+                .build();
+
+        userRepository.save(newSocialUser);
+        log.info("[Google Login] New user signed up. userId={}", newSocialUser.getId());
         
         // 6. 토큰 발급
         return generateTokenResponse(newSocialUser);

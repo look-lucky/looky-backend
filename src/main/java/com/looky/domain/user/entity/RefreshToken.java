@@ -1,5 +1,6 @@
 package com.looky.domain.user.entity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
@@ -21,6 +22,7 @@ public class RefreshToken {
     @Id
     private Long userId;
 
+    @Column(length = 512)
     private String token;
 
     private LocalDateTime expiryDate;

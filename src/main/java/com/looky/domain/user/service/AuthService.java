@@ -19,6 +19,12 @@ import com.looky.domain.user.repository.WithdrawalFeedbackRepository;
 import com.looky.security.details.PrincipalDetails;
 import com.looky.security.jwt.JwtTokenProvider;
 import io.jsonwebtoken.Claims;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
+import java.util.HashMap;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -41,6 +47,7 @@ public class AuthService {
     private final UserRepository userRepository;
     private final JwtTokenProvider jwtTokenProvider;
     private final RefreshTokenService refreshTokenService;
+    private final ObjectMapper objectMapper;
     private final OwnerProfileRepository ownerProfileRepository;
     private final StudentProfileRepository studentProfileRepository;
     private final CouncilProfileRepository councilProfileRepository;
@@ -247,6 +254,70 @@ public class AuthService {
             refreshTokenService.delete(userId);
         }
     }
+
+    @Transactional
+    public AuthTokens appleLogin(AppleLoginRequest request) {
+        // 1. idToken 페이로드 디코딩
+        Map<String, Object> payload = decodeJwtTokenPayload(request.getIdToken());
+        
+        // 2. sub (Apple 고유 ID) 및 email 추출
+        String sub = (String) payload.get("sub");
+        String email = (String) payload.get("email");
+        
+        if (sub == null) {
+            throw new CustomException(ErrorCode.BAD_REQUEST, "유효하지 않은 Apple id_token 입니다.");
+        }
+
+        // 3. 소셜 식별자 생성
+        String username = "apple_" + sub;
+        
+        // 4. 유저 조회 또는 생성
+        User user = userRepository.findByUsername(username).orElse(null);
+
+        if (user != null) {
+            if (user.isDeleted()) {
+                throw new CustomException(ErrorCode.UNAUTHORIZED, "탈퇴한 회원입니다.");
+            }
+            // 기존 회원이면 토큰 발급 후 로그인 처리
+            log.info("[Apple Login] Existing user logged in. userId={}", user.getId());
+            return generateTokenResponse(user);
+        }
+
+        // 5. 신규 회원이면 게스트로 가입 처리
+        User newSocialUser = User.builder()
+                .username(username)
+                .email(email)
+                .role(Role.ROLE_GUEST)
+                .socialType(SocialType.APPLE)
+                .socialId(sub)
+                .build();
+
+        userRepository.save(newSocialUser);
+        log.info("[Apple Login] New user signed up. userId={}", newSocialUser.getId());
+        
+        // 6. 토큰 발급
+        return generateTokenResponse(newSocialUser);
+    }
+
+    // JWT 토큰의 Payload를 디코딩하여 Map 형태로 반환합니다.
+    @SuppressWarnings("unchecked")
+    private Map<String, Object> decodeJwtTokenPayload(String jwtToken) {
+        Map<String, Object> jwtClaims = new HashMap<>();
+        try {
+            String[] parts = jwtToken.split("\\.");
+            if (parts.length < 2) {
+                throw new CustomException(ErrorCode.BAD_REQUEST, "잘못된 JWT 형식입니다.");
+            }
+            Base64.Decoder decoder = Base64.getUrlDecoder();
+            String payload = new String(decoder.decode(parts[1]), StandardCharsets.UTF_8);
+            jwtClaims = objectMapper.readValue(payload, Map.class);
+        } catch (JsonProcessingException e) {
+            log.error("Failed to decode JWT token", e);
+            throw new CustomException(ErrorCode.BAD_REQUEST, "Token 디코딩 중 오류가 발생했습니다.");
+        }
+        return jwtClaims;
+    }
+
 
     @Transactional
     public AuthTokens completeSocialSignup(Long userId, CompleteSocialSignupRequest request) {

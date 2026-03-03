@@ -89,6 +89,27 @@ public class AuthController {
                                                 authTokens.getExpiresIn())));
         }
 
+        @Operation(summary = "[공통] 애플 로그인 (네이티브)", description = "애플 인증 후 발급받은 id_token을 통해 로그인/회원가입을 진행합니다.")
+        @ApiResponses(value = {
+                @ApiResponse(responseCode = "200", description = "로그인 성공"),
+                @ApiResponse(responseCode = "400", description = "잘못된 토큰 또는 파라미터", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class))),
+                @ApiResponse(responseCode = "401", description = "인증/디코딩 실패", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class)))
+        })
+        @PostMapping("/apple/login")
+        public ResponseEntity<CommonResponse<LoginResponse>> appleLogin(
+                @RequestBody @Valid AppleLoginRequest request
+        )
+        {
+                AuthTokens authTokens = authService.appleLogin(request);
+
+                ResponseCookie refreshCookie = cookieUtil.createRefreshTokenCookie(authTokens.getRefreshToken());
+
+                return ResponseEntity.ok()
+                                .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
+                                .body(CommonResponse.success(LoginResponse.of(authTokens.getAccessToken(),
+                                                authTokens.getExpiresIn())));
+        }
+
         @Operation(summary = "[공통] 토큰 갱신", description = "RefreshToken으로 AccessToken을 갱신합니다.")
         @ApiResponses(value = {
                 @ApiResponse(responseCode = "200", description = "토큰 갱신 성공"),

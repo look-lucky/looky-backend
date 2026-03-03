@@ -23,7 +23,7 @@ public class StoreMapResponse {
     private Integer reviewCount;
     private List<StoreCategory> storeCategories;
     private String operatingHours;
-    private List<PartnershipInfo> myPartnerships;
+    private List<PartnershipInfo> myPartnerships; // 내가 속한 조직 중 제휴 맺은 조직 정보 목록
     private Boolean hasCoupon;
     private Long favoriteCount;
 

@@ -3,6 +3,7 @@ package com.looky.security.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.looky.security.oauth.AppleOAuth2UserInfo;
+import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
@@ -88,9 +89,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         if (user != null) {
             if (user.isDeleted()) {
                 throw new OAuth2AuthenticationException(
-                    new org.springframework.security.oauth2.core.OAuth2Error("withdrawn_user"), 
-                    "탈퇴한 회원입니다."
-                );
+                    new OAuth2Error("withdrawn_user"), "탈퇴한 회원입니다.");
             }
             return userRepository.save(user);
         }

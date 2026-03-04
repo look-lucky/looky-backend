@@ -35,7 +35,7 @@ public class StudentCoupon extends BaseEntity {
     @Column(nullable = false)
     private CouponUsageStatus status = CouponUsageStatus.UNUSED;
 
-    private LocalDateTime issuedAt = LocalDateTime.now();
+    private LocalDateTime downloadedAt = LocalDateTime.now(); // 다운로드 받은 시점
 
     private LocalDateTime activatedAt; // 사용 버튼 누른 시점 (타이머용)
 
@@ -45,11 +45,11 @@ public class StudentCoupon extends BaseEntity {
     private LocalDateTime expiresAt; // 쿠폰 만료 시점
 
     @Builder
-    public StudentCoupon(User user, Coupon coupon, CouponUsageStatus status, LocalDateTime issuedAt, LocalDateTime expiresAt) {
+    public StudentCoupon(User user, Coupon coupon, CouponUsageStatus status, LocalDateTime downloadedAt, LocalDateTime expiresAt) {
         this.user = user;
         this.coupon = coupon;
         this.status = status != null ? status : CouponUsageStatus.UNUSED;
-        this.issuedAt = issuedAt != null ? issuedAt : LocalDateTime.now();
+        this.downloadedAt = downloadedAt != null ? downloadedAt : LocalDateTime.now();
         this.expiresAt = expiresAt;
     }
 

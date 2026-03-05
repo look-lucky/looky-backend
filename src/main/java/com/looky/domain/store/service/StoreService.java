@@ -93,11 +93,26 @@ public class StoreService {
             throw new CustomException(ErrorCode.DUPLICATE_RESOURCE, "이미 등록된 사업자등록번호입니다.");
         }
 
-        // 이미지 유효성 검사 (최대 3장, 10MB)
-        FileValidator.validateImageFiles(images, 3, 10 * 1024 * 1024);
+        // 일반 이미지 유효성 검사 (최대 3장, 10MB)
+        try {
+            FileValidator.validateImageFiles(images, 3, 10 * 1024 * 1024);
+        } catch (CustomException e) {
+            if (e.getErrorCode() == ErrorCode.FILE_COUNT_EXCEEDED) {
+                throw new CustomException(ErrorCode.FILE_COUNT_EXCEEDED, "일반 이미지는 최대 3장까지 업로드 가능합니다.");
+            }
+            throw e;
+        }
 
+        // 프로필 이미지 유효성 검사 (최대 1장, 10MB)
         if (profileImage != null && !profileImage.isEmpty()) {
-            FileValidator.validateImageFiles(List.of(profileImage), 1, 10 * 1024 * 1024);
+            try {
+                FileValidator.validateImageFiles(List.of(profileImage), 1, 10 * 1024 * 1024);
+            } catch (CustomException e) {
+                if (e.getErrorCode() == ErrorCode.FILE_COUNT_EXCEEDED) {
+                    throw new CustomException(ErrorCode.FILE_COUNT_EXCEEDED, "프로필 이미지는 1장만 등록 가능합니다.");
+                }
+                throw e;
+            }
         }
 
         Store store = request.toEntity(owner);
@@ -264,7 +279,14 @@ public class StoreService {
         // 프로필 이미지 수정 처리
         String profileImageUrl = store.getProfileImageUrl();
         if (profileImage != null && !profileImage.isEmpty()) {
-            FileValidator.validateImageFiles(List.of(profileImage), 1, 10 * 1024 * 1024);
+            try {
+                FileValidator.validateImageFiles(List.of(profileImage), 1, 10 * 1024 * 1024);
+            } catch (CustomException e) {
+                if (e.getErrorCode() == ErrorCode.FILE_COUNT_EXCEEDED) {
+                    throw new CustomException(ErrorCode.FILE_COUNT_EXCEEDED, "프로필 이미지는 1장만 등록 가능합니다.");
+                }
+                throw e;
+            }
             // 기존 이미지 삭제
             if (profileImageUrl != null) {
                 s3Service.deleteFile(profileImageUrl);
@@ -324,12 +346,19 @@ public class StoreService {
         int newImageCount = (images != null) ? images.size() : 0;
 
         if (currentImageCount + newImageCount > 3) {
-            throw new CustomException(ErrorCode.BAD_REQUEST, "이미지는 최대 3장까지 등록할 수 있습니다.");
+            throw new CustomException(ErrorCode.BAD_REQUEST, "일반 이미지는 최대 3장까지 등록할 수 있습니다.");
         }
 
         // 새 이미지 업로드 및 저장
         if (newImageCount > 0) {
-            FileValidator.validateImageFiles(images, 3, 10 * 1024 * 1024);
+            try {
+                FileValidator.validateImageFiles(images, 3, 10 * 1024 * 1024);
+            } catch (CustomException e) {
+                if (e.getErrorCode() == ErrorCode.FILE_COUNT_EXCEEDED) {
+                    throw new CustomException(ErrorCode.FILE_COUNT_EXCEEDED, "일반 이미지는 최대 3장까지 업로드 가능합니다.");
+                }
+                throw e;
+            }
             uploadAndSaveImages(store, images);
         }
 

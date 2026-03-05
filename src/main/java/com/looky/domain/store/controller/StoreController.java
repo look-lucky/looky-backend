@@ -66,13 +66,14 @@ public class StoreController {
         @PostMapping(consumes = MULTIPART_FORM_DATA_VALUE)
         public ResponseEntity<CommonResponse<Long>> createStore(
                 @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,
-                @Parameter(description = "상품 이미지 목록") @RequestPart(required = false) List<MultipartFile> images,
+                @Parameter(description = "프로필 이미지") @RequestPart(required = false) MultipartFile profileImage,
+                @Parameter(description = "갤러리 이미지 목록") @RequestPart(required = false) List<MultipartFile> images,
                 @RequestPart("request") String requestJson
         ) throws IOException, MethodArgumentNotValidException {
                 StoreCreateRequest request = objectMapper.readValue(requestJson, StoreCreateRequest.class);
                 validateRequest(request);
 
-                Long storeId = storeService.createStore(principalDetails.getUser(), request, images);
+                Long storeId = storeService.createStore(principalDetails.getUser(), request, profileImage, images);
                 return ResponseEntity.status(HttpStatus.CREATED).body(CommonResponse.success(storeId));
         }
 
@@ -88,21 +89,19 @@ public class StoreController {
                 @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,
                 @Parameter(description = "상점 ID") @PathVariable Long storeId,
                 @RequestPart("request") String requestJson,
-                @RequestPart(required = false) List<MultipartFile> images
+                @Parameter(description = "프로필 이미지") @RequestPart(required = false) MultipartFile profileImage,
+                @Parameter(description = "갤러리 이미지 목록") @RequestPart(required = false) List<MultipartFile> images
         ) throws IOException, MethodArgumentNotValidException {
                 StoreUpdateRequest request = objectMapper.readValue(requestJson, StoreUpdateRequest.class);
                 validateRequest(request);
 
-                if (images != null) {
-                    log.info("Update Store Request: storeId={}, images count={}", storeId, images.size());
-                    for (MultipartFile img : images) {
-                        log.info("Received Image: name={}, originalFilename={}, size={}, contentType={}", 
-                                img.getName(), img.getOriginalFilename(), img.getSize(), img.getContentType());
-                    }
+                if (images != null || profileImage != null) {
+                    log.info("Update Store Request: storeId={}, profileImage={}, images count={}", 
+                            storeId, profileImage != null, images != null ? images.size() : 0);
                 } else {
-                    log.info("Update Store Request: storeId={}, images=null", storeId);
+                    log.info("Update Store Request: storeId={}, images=null, profileImage=null", storeId);
                 }
-                storeService.updateStore(storeId, principalDetails.getUser(), request, images);
+                storeService.updateStore(storeId, principalDetails.getUser(), request, profileImage, images);
                 return ResponseEntity.ok(CommonResponse.success(null));
         }
 

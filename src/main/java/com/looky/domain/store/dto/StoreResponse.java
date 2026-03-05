@@ -42,8 +42,9 @@ public class StoreResponse {
     private StoreStatus storeStatus;
     private List<PartnershipInfo> myPartnerships; // 내가 속한 조직 중 제휴 맺은 조직 정보 목록
     private CloverGrade cloverGrade; // 클로버 등급
+    private String profileImageUrl; // 가게 프로필 이미지 URL
 
-    public static StoreResponse of(Store store, Double averageRating, Integer reviewCount, List<PartnershipInfo> myPartnerships, Boolean hasCoupon, CloverGrade cloverGrade) {
+    public static StoreResponse of(Store store, Double averageRating, Integer reviewCount, List<PartnershipInfo> myPartnerships, CloverGrade cloverGrade) {
         return StoreResponse.builder()
                 .id(store.getId())
                 .userId(store.getUser() != null ? store.getUser().getId() : null)
@@ -69,10 +70,11 @@ public class StoreResponse {
                 .storeStatus(store.getStoreStatus())
                 .myPartnerships(myPartnerships)
                 .cloverGrade(cloverGrade)
+                .profileImageUrl(store.getProfileImageUrl())
                 .build();
     }
 
     public static StoreResponse from(Store store) {
-        return of(store, 0.0, 0, null, false, store.getCloverGrade());
+        return of(store, 0.0, 0, null, store.getCloverGrade());
     }
 }

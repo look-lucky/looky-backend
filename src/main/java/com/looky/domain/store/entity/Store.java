@@ -129,7 +129,10 @@ public class Store extends BaseEntity {
     private User user; // 사장님 (미등록 가게일 경우 null)
 
     @OneToMany(mappedBy = "store", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<StoreImage> images = new ArrayList<>();
+    private List<StoreImage> images = new ArrayList<>(); // 가게 썸네일 및 일반 이미지 (0번째가 썸네일)
+
+    @Column(name = "profile_image_url")
+    private String profileImageUrl; // 가게 프로필 이미지 URL
 
     @ElementCollection
     @CollectionTable(name = "store_holidays", joinColumns = @JoinColumn(name = "store_id"))
@@ -143,8 +146,10 @@ public class Store extends BaseEntity {
     @Column(nullable = false)
     private CloverGrade cloverGrade = CloverGrade.SEED; // 클로버 등급 (Default: SEED)
 
+
+
     @Builder
-    public Store(User user, String name, String branch, String roadAddress, String jibunAddress, String bizRegNo, Double latitude, Double longitude, String storePhone, String introduction, String operatingHours, Set<StoreCategory> storeCategories, Set<StoreMood> storeMoods, StoreStatus storeStatus, Boolean needToCheck, String checkReason, List<LocalDate> holidayDates, Boolean isSuspended, String representativeName) {
+    public Store(User user, String name, String branch, String roadAddress, String jibunAddress, String bizRegNo, Double latitude, Double longitude, String storePhone, String introduction, String operatingHours, Set<StoreCategory> storeCategories, Set<StoreMood> storeMoods, StoreStatus storeStatus, Boolean needToCheck, String checkReason, List<LocalDate> holidayDates, Boolean isSuspended, String representativeName, String profileImageUrl) {
         this.user = user;
         this.name = name;
         this.branch = branch;
@@ -164,9 +169,10 @@ public class Store extends BaseEntity {
         this.holidayDates = holidayDates != null ? holidayDates : new ArrayList<>();
         this.isSuspended = isSuspended != null ? isSuspended : false;
         this.representativeName = representativeName;
+        this.profileImageUrl = profileImageUrl;
     }
 
-    public void updateStore(String name, String branch, String roadAddress, String jibunAddress, Double latitude, Double longitude, String phone, String introduction, String operatingHours, Set<StoreCategory> storeCategories, Set<StoreMood> storeMoods, List<LocalDate> holidayDates, Boolean isSuspended, String representativeName) {
+    public void updateStore(String name, String branch, String roadAddress, String jibunAddress, Double latitude, Double longitude, String phone, String introduction, String operatingHours, Set<StoreCategory> storeCategories, Set<StoreMood> storeMoods, List<LocalDate> holidayDates, Boolean isSuspended, String representativeName, String profileImageUrl) {
         this.name = name;
         this.branch = branch;
         this.roadAddress = roadAddress;
@@ -178,6 +184,7 @@ public class Store extends BaseEntity {
         this.operatingHours = operatingHours;
         this.isSuspended = isSuspended;
         this.representativeName = representativeName;
+        this.profileImageUrl = profileImageUrl;
 
         if (storeCategories != null) {
             this.storeCategories.clear(); // JPA 영속성 컨텍스트 유지를 위해 컬렉션 전체 교체 대신 내용물 교체

@@ -60,5 +60,8 @@ public class StoreUpdateRequest {
 
     @Schema(description = "유지할 이미지 ID 목록 (누락된 ID는 삭제됨)")
     private JsonNullable<List<Long>> preserveImageIds = JsonNullable.undefined();
+
+    @Schema(description = "프로필 이미지 삭제 여부 (true일 경우 삭제됨)", example = "false")
+    private JsonNullable<Boolean> deleteProfileImage = JsonNullable.undefined();
 }
 

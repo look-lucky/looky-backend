@@ -75,7 +75,7 @@ public class StoreService {
     private final UniversityRepository universityRepository;
 
     @Transactional
-    public Long createStore(User user, StoreCreateRequest request, List<MultipartFile> images) throws IOException {
+    public Long createStore(User user, StoreCreateRequest request, MultipartFile profileImage, List<MultipartFile> images) throws IOException {
 
         User owner = userRepository.findByUsername(user.getUsername())
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
@@ -96,9 +96,25 @@ public class StoreService {
         // 이미지 유효성 검사 (최대 3장, 10MB)
         FileValidator.validateImageFiles(images, 3, 10 * 1024 * 1024);
 
+        if (profileImage != null && !profileImage.isEmpty()) {
+            FileValidator.validateImageFiles(List.of(profileImage), 1, 10 * 1024 * 1024);
+        }
+
         Store store = request.toEntity(owner);
 
-        // 이미지 S3 업로드 및 리스트 순서대로 DB 저장
+        // 프로필 이미지 S3 업로드
+        if (profileImage != null && !profileImage.isEmpty()) {
+            String profileImageUrl = s3Service.uploadFile(profileImage);
+            store.updateStore(
+                    store.getName(), store.getBranch(), store.getRoadAddress(), store.getJibunAddress(),
+                    store.getLatitude(), store.getLongitude(), store.getStorePhone(), store.getIntroduction(),
+                    store.getOperatingHours(), store.getStoreCategories(), store.getStoreMoods(),
+                    store.getHolidayDates(), store.getIsSuspended(), store.getRepresentativeName(),
+                    profileImageUrl
+            );
+        }
+
+        // 배너 및 일반 이미지 S3 업로드 및 리스트 순서대로 DB 저장
         uploadAndSaveImages(store, images);
 
         Store savedStore = storeRepository.save(store);
@@ -142,7 +158,7 @@ public class StoreService {
             }
         }
 
-        return StoreResponse.of(store, averageRating, reviewCount != null ? reviewCount.intValue() : 0, myPartnerships, hasCoupon, store.getCloverGrade());
+        return StoreResponse.of(store, averageRating, reviewCount != null ? reviewCount.intValue() : 0, myPartnerships, store.getCloverGrade());
     }
 
     public PageResponse<StoreResponse> getStores(String keyword, List<StoreCategory> categories, List<StoreMood> moods, Long universityId, Boolean hasPartnership, StoreStatus storeStatus, Pageable pageable, User user) {
@@ -183,9 +199,8 @@ public class StoreService {
             
             // 제휴 여부 및 쿠폰 보유 여부 설정
             List<PartnershipInfo> myPartnerships = partnershipMap.get(store.getId());
-            boolean hasCoupon = finalCouponStoreIds.contains(store.getId());
 
-            return StoreResponse.of(store, averageRating, reviewCount != null ? reviewCount.intValue() : 0, myPartnerships, hasCoupon, store.getCloverGrade());
+            return StoreResponse.of(store, averageRating, reviewCount != null ? reviewCount.intValue() : 0, myPartnerships, store.getCloverGrade());
         });
         return PageResponse.from(responsePage);
     }
@@ -217,7 +232,7 @@ public class StoreService {
     }
     
     @Transactional
-    public void updateStore(Long storeId, User user, StoreUpdateRequest request, List<MultipartFile> images)
+    public void updateStore(Long storeId, User user, StoreUpdateRequest request, MultipartFile profileImage, List<MultipartFile> images)
             throws IOException {
         User owner = userRepository.findByUsername(user.getUsername())
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
@@ -246,6 +261,23 @@ public class StoreService {
             throw new CustomException(ErrorCode.DUPLICATE_RESOURCE, "이미 존재하는 상점 이름입니다.");
         }
 
+        // 프로필 이미지 수정 처리
+        String profileImageUrl = store.getProfileImageUrl();
+        if (profileImage != null && !profileImage.isEmpty()) {
+            FileValidator.validateImageFiles(List.of(profileImage), 1, 10 * 1024 * 1024);
+            // 기존 이미지 삭제
+            if (profileImageUrl != null) {
+                s3Service.deleteFile(profileImageUrl);
+            }
+            profileImageUrl = s3Service.uploadFile(profileImage);
+        } else if (request.getDeleteProfileImage().isPresent() && request.getDeleteProfileImage().get()) {
+            // 명시적 삭제 요청 시
+            if (profileImageUrl != null) {
+                s3Service.deleteFile(profileImageUrl);
+            }
+            profileImageUrl = null;
+        }
+
         store.updateStore(
             request.getName().orElse(store.getName()),
             request.getBranch().orElse(store.getBranch()),
@@ -267,7 +299,8 @@ public class StoreService {
             
             request.getHolidayDates().orElse(store.getHolidayDates()),
             request.getIsSuspended().orElse(store.getIsSuspended()),
-            request.getRepresentativeName().orElse(store.getRepresentativeName())
+            request.getRepresentativeName().orElse(store.getRepresentativeName()),
+            profileImageUrl
         );
 
         // 1. 이미지 삭제 처리 (preserveImageIds 기준)
@@ -334,9 +367,8 @@ public class StoreService {
             Long reviewCount = reviewRepository.countByStoreIdAndParentReviewIsNull(store.getId());
             
             List<PartnershipInfo> myPartnerships = partnershipMap.get(store.getId());
-            boolean hasCoupon = finalCouponStoreIds.contains(store.getId());
-            
-            return StoreResponse.of(store, averageRating, reviewCount != null ? reviewCount.intValue() : 0, myPartnerships, hasCoupon, store.getCloverGrade());
+
+            return StoreResponse.of(store, averageRating, reviewCount != null ? reviewCount.intValue() : 0, myPartnerships, store.getCloverGrade());
         }).toList();
     }
 
@@ -367,7 +399,7 @@ public class StoreService {
             List<PartnershipInfo> myPartnerships = partnershipMap.get(store.getId());
             boolean hasCoupon = finalCouponStoreIds.contains(store.getId());
 
-            return StoreResponse.of(store, averageRating, reviewCount != null ? reviewCount.intValue() : 0, myPartnerships, hasCoupon, store.getCloverGrade());
+            return StoreResponse.of(store, averageRating, reviewCount != null ? reviewCount.intValue() : 0, myPartnerships, store.getCloverGrade());
         }).toList();
     }
     
@@ -446,7 +478,7 @@ public class StoreService {
             Double averageRating = reviewRepository.findAverageRatingByStoreId(store.getId());
             Long reviewCount = reviewRepository.countByStoreIdAndParentReviewIsNull(store.getId());
 
-            return StoreResponse.of(store, averageRating, reviewCount != null ? reviewCount.intValue() : 0, null, false, store.getCloverGrade());
+            return StoreResponse.of(store, averageRating, reviewCount != null ? reviewCount.intValue() : 0, null, store.getCloverGrade());
         }).toList();
     }
 

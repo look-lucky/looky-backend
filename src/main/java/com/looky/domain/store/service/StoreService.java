@@ -345,8 +345,11 @@ public class StoreService {
         int currentImageCount = store.getImages().size(); // 삭제 후 남은 개수
         int newImageCount = (images != null) ? images.size() : 0;
 
+        log.info("[UpdateStore Debug] storeId={}, currentImageCount={}, newImageCount={}, total={}", 
+                storeId, currentImageCount, newImageCount, currentImageCount + newImageCount);
+
         if (currentImageCount + newImageCount > 3) {
-            throw new CustomException(ErrorCode.BAD_REQUEST, "일반 이미지는 최대 3장까지 등록할 수 있습니다.");
+            throw new CustomException(ErrorCode.BAD_REQUEST, "일반 이미지는 최대 3장까지 등록할 수 있습니다. (현재: " + currentImageCount + "장, 추가: " + newImageCount + "장)");
         }
 
         // 새 이미지 업로드 및 저장

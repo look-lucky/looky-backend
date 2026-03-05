@@ -129,6 +129,7 @@ public class Store extends BaseEntity {
     private User user; // 사장님 (미등록 가게일 경우 null)
 
     @OneToMany(mappedBy = "store", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("orderIndex ASC")
     private List<StoreImage> images = new ArrayList<>(); // 가게 썸네일 및 일반 이미지 (0번째가 썸네일)
 
     @Column(name = "profile_image_url")

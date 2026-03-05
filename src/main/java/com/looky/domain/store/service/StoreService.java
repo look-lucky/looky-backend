@@ -348,8 +348,12 @@ public class StoreService {
         log.info("[UpdateStore Debug] storeId={}, currentImageCount={}, newImageCount={}, total={}", 
                 storeId, currentImageCount, newImageCount, currentImageCount + newImageCount);
 
-        if (currentImageCount + newImageCount > 3) {
-            throw new CustomException(ErrorCode.BAD_REQUEST, "일반 이미지는 최대 3장까지 등록할 수 있습니다. (현재: " + currentImageCount + "장, 추가: " + newImageCount + "장)");
+        // 검증 조건: 새 이미지를 추가하려고 하거나, 유지할 이미지 목록(삭제 등)을 명시한 경우에만 전체 개수가 3장을 넘는지 체크합니다.
+        // 이를 통해 프로필 이미지만 수정하는 등 갤러리와 무관한 수정 요청이 기존의 잘못된 데이터(3장 초과) 때문에 차단되는 것을 방지합니다.
+        boolean isGalleryModified = request.getPreserveImageIds().isPresent() || (images != null && !images.isEmpty());
+
+        if (isGalleryModified && (currentImageCount + newImageCount > 3)) {
+            throw new CustomException(ErrorCode.BAD_REQUEST, "일반 이미지는 최대 3장까지 등록할 수 있습니다. (현재 유지: " + currentImageCount + "장, 추가: " + newImageCount + "장)");
         }
 
         // 새 이미지 업로드 및 저장
@@ -471,6 +475,11 @@ public class StoreService {
 
         // DB 삭제
         store.removeImage(targetImage);
+
+        // 삭제 후 중간 이빨이 빠진 인덱스를 0부터 다시 순서대로 재정렬
+        for (int i = 0; i < store.getImages().size(); i++) {
+            store.getImages().get(i).updateOrderIndex(i);
+        }
     }
 
     // 상점 삭제

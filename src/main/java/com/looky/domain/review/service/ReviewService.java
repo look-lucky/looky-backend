@@ -117,7 +117,7 @@ public class ReviewService {
                 .build();
 
         // 이미지 유효성 검사 (최대 3장, 10MB)
-        FileValidator.validateImageFiles(images, 3, 10 * 1024 * 1024);
+        FileValidator.validateImageFiles(images, 3, 10 * 1024 * 1024L);
 
         // 이미지 S3 업로드 및 저장
         uploadAndSaveImages(review, images);
@@ -184,7 +184,7 @@ public class ReviewService {
 
         // 새 이미지 업로드 및 저장
         if (newImageCount > 0) {
-            FileValidator.validateImageFiles(images, 3, 10 * 1024 * 1024);
+            FileValidator.validateImageFiles(images, 3, 10 * 1024 * 1024L);
             uploadAndSaveImages(review, images);
         }
 

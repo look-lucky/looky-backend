@@ -26,6 +26,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
@@ -122,13 +123,51 @@ public class EventService {
             uploadBannerImage(event, bannerImage);
         }
 
-        // 일반 이미지 교체
-        if (images != null && !images.isEmpty()) {
-            event.getImages().stream()
+        // 1. 일반 이미지 삭제 처리 (preserveImageIds 기준)
+        if (request.getPreserveImageIds().isPresent()) {
+            List<Long> preserveIds = request.getPreserveImageIds().get();
+            List<Long> finalPreserveIds = preserveIds != null ? preserveIds : Collections.emptyList();
+
+            List<EventImage> imagesToDelete = event.getImages().stream()
                     .filter(img -> img.getImageType() == EventImageType.GENERAL)
-                    .forEach(img -> s3Service.deleteFile(img.getImageUrl()));
-            event.clearImagesByType(EventImageType.GENERAL);
-            uploadAndSaveImages(event, images);
+                    .filter(img -> !finalPreserveIds.contains(img.getId()))
+                    .toList();
+
+            for (EventImage img : imagesToDelete) {
+                s3Service.deleteFile(img.getImageUrl());
+                event.getImages().remove(img);
+                img.setEvent(null);
+            }
+        }
+
+        // 2. 새 일반 이미지 추가 
+        if (images != null && !images.isEmpty()) {
+            // 새로 부여할 초기 orderIndex
+            int currentOrderIndex = (int) event.getImages().stream()
+                    .filter(img -> img.getImageType() == EventImageType.GENERAL)
+                    .count();
+                    
+            for (MultipartFile file : images) {
+                if (file.isEmpty()) continue;
+                String imageUrl = s3Service.uploadFile(file);
+                EventImage eventImage = EventImage.builder()
+                        .imageUrl(imageUrl)
+                        .orderIndex(currentOrderIndex++)
+                        .imageType(EventImageType.GENERAL)
+                        .build();
+                event.addImage(eventImage);
+            }
+        }
+        
+        // 3. 인덱스 재정렬 (리인덱스 로직)
+        List<EventImage> generalImages = event.getImages().stream()
+                .filter(img -> img.getImageType() == EventImageType.GENERAL)
+                // orderIndex ASC 정렬은 @OrderBy가 해주지만, Java 컬렉션 내에서는 삽입/삭제 순서대로 있을 수 있어 정렬 후 재할당
+                .sorted(java.util.Comparator.comparingInt(EventImage::getOrderIndex))
+                .toList();
+
+        for (int i = 0; i < generalImages.size(); i++) {
+             generalImages.get(i).updateOrderIndex(i);
         }
     }
 

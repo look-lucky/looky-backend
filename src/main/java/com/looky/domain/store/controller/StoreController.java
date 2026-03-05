@@ -105,16 +105,7 @@ public class StoreController {
                 return ResponseEntity.ok(CommonResponse.success(null));
         }
 
-        @Operation(summary = "[점주] 상점 이미지 개별 삭제", description = "상점의 특정 이미지를 삭제합니다.")
-        @DeleteMapping("/{storeId}/images/{imageId}")
-        public ResponseEntity<CommonResponse<Void>> deleteStoreImage(
-                @PathVariable Long storeId,
-                @PathVariable Long imageId,
-                @AuthenticationPrincipal PrincipalDetails principalDetails
-        ) {
-                storeService.deleteStoreImage(storeId, imageId, principalDetails.getUser());
-                return ResponseEntity.status(HttpStatus.NO_CONTENT).body(CommonResponse.success(null));
-        }
+
 
         @Operation(summary = "[점주] 상점 삭제", description = "상점을 삭제합니다. (본인 상점만 가능)")
         @ApiResponses(value = {

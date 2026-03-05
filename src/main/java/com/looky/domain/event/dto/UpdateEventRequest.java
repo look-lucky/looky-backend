@@ -47,4 +47,7 @@ public class UpdateEventRequest {
 
     @Schema(description = "대학교 ID (null이면 모든 대학)", example = "null", nullable = true)
     private JsonNullable<Long> universityId = JsonNullable.undefined();
+
+    @Schema(description = "유지할 일반 이미지 ID 목록 (해당 배열에 없는 요소는 배열에서 제외됩니다. 명시적으로 null을 보내면 모든 갤러리 이미지가 삭제됩니다. 전달하지 않으면 이미지를 수정하지 않습니다.)")
+    private JsonNullable<List<Long>> preserveImageIds = JsonNullable.undefined();
 }

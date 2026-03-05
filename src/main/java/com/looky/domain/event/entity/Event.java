@@ -60,6 +60,7 @@ public class Event extends BaseEntity {
     private String place;
 
     @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("orderIndex ASC")
     private List<EventImage> images = new ArrayList<>();
 
     @Builder

@@ -137,8 +137,8 @@ public class StoreService {
                 Map<Long, List<PartnershipInfo>> partnershipsMap = partnershipService.getMyPartnershipOrganizations(List.of(storeId), user);
                 myPartnerships = partnershipsMap.get(storeId);
                 
-                // 해당 상점의 쿠폰 보유 여부 확인
-                hasCoupon = couponRepository.existsActiveCoupon(storeId, now);
+                // 해당 상점의 다운로드 가능한 쿠폰 보유 여부 확인
+                hasCoupon = couponRepository.existsDownloadableCoupon(storeId, now, user.getId());
             }
         }
 
@@ -170,8 +170,7 @@ public class StoreService {
         if (user != null && user.getRole() == Role.ROLE_STUDENT) {
             StudentProfile studentProfile = studentProfileRepository.findById(user.getId()).orElse(null);
             if (studentProfile != null && studentProfile.getUniversity() != null) {
-                 batchedCouponStoreIds = couponRepository.findActiveCouponsByStoreIds(storeIds, now)
-                         .stream().map(c -> c.getStore().getId()).collect(Collectors.toSet());
+                 batchedCouponStoreIds = new HashSet<>(couponRepository.findStoreIdsWithDownloadableCoupons(storeIds, now, user.getId()));
             }
         }
 
@@ -324,8 +323,7 @@ public class StoreService {
         if (user != null && user.getRole() == Role.ROLE_STUDENT) {
             StudentProfile studentProfile = studentProfileRepository.findById(user.getId()).orElse(null);
             if (studentProfile != null && studentProfile.getUniversity() != null && !storeIds.isEmpty()) {
-                 batchedCouponStoreIds = couponRepository.findActiveCouponsByStoreIds(storeIds, now)
-                         .stream().map(c -> c.getStore().getId()).collect(Collectors.toSet());
+                 batchedCouponStoreIds = new HashSet<>(couponRepository.findStoreIdsWithDownloadableCoupons(storeIds, now, user.getId()));
             }
         }
 
@@ -356,8 +354,7 @@ public class StoreService {
         if (user != null && user.getRole() == Role.ROLE_STUDENT) {
             StudentProfile studentProfile = studentProfileRepository.findById(user.getId()).orElse(null);
             if (studentProfile != null && studentProfile.getUniversity() != null && !storeIds.isEmpty()) {
-                batchedCouponStoreIds = couponRepository.findActiveCouponsByStoreIds(storeIds, now)
-                        .stream().map(c -> c.getStore().getId()).collect(Collectors.toSet());
+                batchedCouponStoreIds = new HashSet<>(couponRepository.findStoreIdsWithDownloadableCoupons(storeIds, now, user.getId()));
             }
         }
 
@@ -673,8 +670,7 @@ public class StoreService {
 
         Set<Long> batchedCouponStoreIds = new HashSet<>();
         if (studentProfile != null && studentProfile.getUniversity() != null && !filteredStoreIds.isEmpty()) {
-            batchedCouponStoreIds = couponRepository.findActiveCouponsByStoreIds(filteredStoreIds, now)
-                    .stream().map(c -> c.getStore().getId()).collect(Collectors.toSet());
+            batchedCouponStoreIds = new HashSet<>(couponRepository.findStoreIdsWithDownloadableCoupons(filteredStoreIds, now, user.getId()));
         }
 
         final Set<Long> finalCouponStoreIds = batchedCouponStoreIds;

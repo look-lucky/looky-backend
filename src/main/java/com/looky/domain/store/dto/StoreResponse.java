@@ -41,7 +41,6 @@ public class StoreResponse {
     private Boolean isSuspended;
     private StoreStatus storeStatus;
     private List<PartnershipInfo> myPartnerships; // 내가 속한 조직 중 제휴 맺은 조직 정보 목록
-    private Boolean hasCoupon; // 쿠폰 보유 여부
     private CloverGrade cloverGrade; // 클로버 등급
 
     public static StoreResponse of(Store store, Double averageRating, Integer reviewCount, List<PartnershipInfo> myPartnerships, Boolean hasCoupon, CloverGrade cloverGrade) {
@@ -69,7 +68,6 @@ public class StoreResponse {
                 .isSuspended(store.getIsSuspended())
                 .storeStatus(store.getStoreStatus())
                 .myPartnerships(myPartnerships)
-                .hasCoupon(hasCoupon)
                 .cloverGrade(cloverGrade)
                 .build();
     }

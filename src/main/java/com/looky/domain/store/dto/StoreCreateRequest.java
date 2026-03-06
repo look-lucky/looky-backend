@@ -51,7 +51,7 @@ public class StoreCreateRequest {
         return Store.builder()
                 .user(user)
                 .name(name)
-                .bizRegNo(bizRegNo)
+                .bizRegNo(bizRegNo != null && bizRegNo.trim().isEmpty() ? null : bizRegNo)
                 .roadAddress(roadAddress)
                 .jibunAddress(jibunAddress)
                 .latitude(latitude)

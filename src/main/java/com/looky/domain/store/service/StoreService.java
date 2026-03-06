@@ -80,8 +80,8 @@ public class StoreService {
         User owner = userRepository.findByUsername(user.getUsername())
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
-        if (owner.getRole() != Role.ROLE_OWNER) {
-            throw new CustomException(ErrorCode.FORBIDDEN, "점주 회원만 가게를 등록할 수 있습니다.");
+        if (owner.getRole() != Role.ROLE_OWNER && owner.getRole() != Role.ROLE_ADMIN) {
+            throw new CustomException(ErrorCode.FORBIDDEN, "점주 회원 또는 관리자만 가게를 등록할 수 있습니다.");
         }
 
 

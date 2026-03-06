@@ -61,7 +61,7 @@ public class StoreClaimService {
                 .collect(Collectors.toList());
     }
 
-    // 사업자등록번호 유효성 검증
+    // 사업자등록번호 유효성 검증 (사업자등록번호, 개업일자, 대표자명)
     public BizVerificationResponse verifyBizRegNo(BizVerificationRequest request) {
         log.info("사업자등록정보 진위확인 요청: {}", request);
 

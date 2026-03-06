@@ -89,7 +89,7 @@ public class StoreService {
             throw new CustomException(ErrorCode.DUPLICATE_RESOURCE, "이미 등록된 상점입니다.");
         }
 
-        if (storeRepository.existsByBizRegNo(request.getBizRegNo())) {
+        if (StringUtils.hasText(request.getBizRegNo()) && storeRepository.existsByBizRegNo(request.getBizRegNo())) {
             throw new CustomException(ErrorCode.DUPLICATE_RESOURCE, "이미 등록된 사업자등록번호입니다.");
         }
 

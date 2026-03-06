@@ -1,7 +1,4 @@
-
 package com.looky.domain.review.service;
-
-import com.looky.common.util.FileValidator;
 
 import com.looky.common.service.S3Service;
 import com.looky.common.exception.CustomException;
@@ -30,9 +27,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.util.stream.Collectors;
 
 @Service
@@ -50,7 +45,7 @@ public class ReviewService {
     private final S3Service s3Service;
 
     @Transactional
-    public Long createReview(User user, Long storeId, CreateReviewRequest request, List<MultipartFile> images) throws IOException {
+    public Long createReview(User user, Long storeId, CreateReviewRequest request) {
         Store store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "해당 상점을 찾을 수 없습니다."));
 
@@ -58,37 +53,25 @@ public class ReviewService {
         boolean isVerified = false;
         Integer rating = request.getRating();
 
-        // 답글 작성인 경우
         if (request.getParentReviewId() != null) {
             parentReview = reviewRepository.findById(request.getParentReviewId())
                     .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "원본 리뷰를 찾을 수 없습니다."));
 
-            // 답글의 답글 불가 (Depth 1 제한)
             if (parentReview.getParentReview() != null) {
                 throw new CustomException(ErrorCode.BAD_REQUEST, "답글에 답글을 달 수 없습니다.");
             }
-            
-            // 점주인 경우
-            if (user.getRole() == Role.ROLE_OWNER) {
-                // 본인 가게 리뷰에만 답글 가능
-                if (!store.getUser().getId().equals(user.getId())) {
-                     throw new CustomException(ErrorCode.FORBIDDEN, "본인 가게의 리뷰에만 답글을 달 수 있습니다.");
-                }
-                // 답글은 평점 없음
-                rating = null;
-            } 
-            // 학생인 경우
-            else if (user.getRole() == Role.ROLE_STUDENT) {
-                 // 답글은 평점 없음
-                 rating = null;
-            } else {
-                 throw new CustomException(ErrorCode.FORBIDDEN);
-            }
 
-        } 
-        // 일반 리뷰 작성인 경우
-        else {
-            // 점주는 일반 리뷰 작성 불가
+            if (user.getRole() == Role.ROLE_OWNER) {
+                if (!store.getUser().getId().equals(user.getId())) {
+                    throw new CustomException(ErrorCode.FORBIDDEN, "본인 가게의 리뷰에만 답글을 달 수 있습니다.");
+                }
+                rating = null;
+            } else if (user.getRole() == Role.ROLE_STUDENT) {
+                rating = null;
+            } else {
+                throw new CustomException(ErrorCode.FORBIDDEN);
+            }
+        } else {
             if (user.getRole() == Role.ROLE_OWNER) {
                 throw new CustomException(ErrorCode.BAD_REQUEST, "점주는 답글만 가능합니다.");
             }
@@ -97,14 +80,16 @@ public class ReviewService {
                 throw new CustomException(ErrorCode.BAD_REQUEST, "평점은 필수입니다.");
             }
 
-            // 학생: 중복 리뷰 확인 (일반 리뷰는 상점당 1개 제한 유지)
             if (reviewRepository.existsByUserAndStoreAndParentReviewIsNull(user, store)) {
                 throw new CustomException(ErrorCode.DUPLICATE_RESOURCE, "이미 해당 상점에 대한 리뷰를 작성했습니다.");
             }
-            
-            // 학생: 쿠폰 사용 여부로 인증 확인
-            isVerified = studentCouponRepository.existsByUserAndCoupon_StoreAndStatus(user, store,
-                    CouponUsageStatus.USED);
+
+            isVerified = studentCouponRepository.existsByUserAndCoupon_StoreAndStatus(user, store, CouponUsageStatus.USED);
+        }
+
+        List<String> imageUrls = request.getImageUrls();
+        if (imageUrls != null && imageUrls.size() > 3) {
+            throw new CustomException(ErrorCode.BAD_REQUEST, "이미지는 최대 3장까지 등록할 수 있습니다.");
         }
 
         Review review = Review.builder()
@@ -116,20 +101,22 @@ public class ReviewService {
                 .parentReview(parentReview)
                 .build();
 
-        // 이미지 유효성 검사 (최대 3장, 10MB)
-        FileValidator.validateImageFiles(images, 3, 10 * 1024 * 1024L);
-
-        // 이미지 S3 업로드 및 저장
-        uploadAndSaveImages(review, images);
+        if (imageUrls != null) {
+            for (int i = 0; i < imageUrls.size(); i++) {
+                review.addImage(ReviewImage.builder()
+                        .review(review)
+                        .imageUrl(imageUrls.get(i))
+                        .orderIndex(i)
+                        .build());
+            }
+        }
 
         reviewRepository.save(review);
         return review.getId();
     }
 
     @Transactional
-    public void updateReview(Long reviewId, User user, UpdateReviewRequest request, List<MultipartFile> images)
-            throws IOException {
-
+    public void updateReview(Long reviewId, User user, UpdateReviewRequest request) {
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "해당 리뷰를 찾을 수 없습니다."));
 
@@ -137,12 +124,11 @@ public class ReviewService {
             throw new CustomException(ErrorCode.FORBIDDEN);
         }
 
-        // 학생 리뷰인 경우 인증 상태 업데이트 체크
         Boolean isVerified = review.getIsVerified();
         Store store = review.getStore();
 
         if (user.getRole() == Role.ROLE_STUDENT) {
-             isVerified = studentCouponRepository.existsByUserAndCoupon_StoreAndStatus(user, store, CouponUsageStatus.USED);
+            isVerified = studentCouponRepository.existsByUserAndCoupon_StoreAndStatus(user, store, CouponUsageStatus.USED);
         }
 
         if (request.getRating().isPresent()) {
@@ -158,39 +144,47 @@ public class ReviewService {
                 isVerified
         );
 
-        // 새 이미지가 존재하면 기존 것 모두 삭제 후 새로 등록
-        // 1. 이미지 삭제 처리 (preserveImageIds 기준)
-        if (request.getPreserveImageIds().isPresent()) {
-            List<Long> preserveIds = request.getPreserveImageIds().get();
-            List<Long> finalPreserveIds = preserveIds != null ? preserveIds : Collections.emptyList();
+        // 이미지 처리
+        if (request.getImageUrls().isPresent()) {
+            List<String> desiredUrls = request.getImageUrls().get() != null
+                    ? request.getImageUrls().get() : Collections.emptyList();
 
-            List<ReviewImage> imagesToDelete = review.getImages().stream()
-                    .filter(img -> !finalPreserveIds.contains(img.getId()))
-                    .toList();
-
-            for (ReviewImage img : imagesToDelete) {
-                s3Service.deleteFile(img.getImageUrl());
-                review.removeImage(img);
+            if (desiredUrls.size() > 3) {
+                throw new CustomException(ErrorCode.BAD_REQUEST, "이미지는 최대 3장까지 등록할 수 있습니다.");
             }
-        }
 
-        // 2. 새 이미지 추가 및 전체 개수 검증
-        int currentImageCount = review.getImages().size(); 
-        int newImageCount = (images != null) ? images.size() : 0;
+            Set<String> desiredSet = new HashSet<>(desiredUrls);
 
-        if (currentImageCount + newImageCount > 3) {
-            throw new CustomException(ErrorCode.BAD_REQUEST, "이미지는 최대 3장까지 등록할 수 있습니다.");
-        }
+            // desired에 없는 기존 이미지 삭제
+            review.getImages().stream()
+                    .filter(img -> !desiredSet.contains(img.getImageUrl()))
+                    .toList()
+                    .forEach(img -> {
+                        s3Service.deleteFile(img.getImageUrl());
+                        review.removeImage(img);
+                    });
 
-        // 새 이미지 업로드 및 저장
-        if (newImageCount > 0) {
-            FileValidator.validateImageFiles(images, 3, 10 * 1024 * 1024L);
-            uploadAndSaveImages(review, images);
-        }
+            // DB에 없는 새 URL 추가
+            Set<String> existingUrls = review.getImages().stream()
+                    .map(ReviewImage::getImageUrl)
+                    .collect(Collectors.toSet());
+            for (String url : desiredUrls) {
+                if (!existingUrls.contains(url)) {
+                    review.addImage(ReviewImage.builder()
+                            .review(review)
+                            .imageUrl(url)
+                            .orderIndex(0)
+                            .build());
+                }
+            }
 
-        // 3. 인덱스 재정렬
-        for (int i = 0; i < review.getImages().size(); i++) {
-             review.getImages().get(i).updateOrderIndex(i);
+            // desiredUrls 순서대로 인덱스 재정렬
+            Map<String, ReviewImage> urlToImage = review.getImages().stream()
+                    .collect(Collectors.toMap(ReviewImage::getImageUrl, img -> img));
+            for (int i = 0; i < desiredUrls.size(); i++) {
+                ReviewImage img = urlToImage.get(desiredUrls.get(i));
+                if (img != null) img.updateOrderIndex(i);
+            }
         }
     }
 
@@ -203,7 +197,6 @@ public class ReviewService {
             throw new CustomException(ErrorCode.FORBIDDEN);
         }
 
-        // S3 이미지 삭제
         for (ReviewImage image : review.getImages()) {
             s3Service.deleteFile(image.getImageUrl());
         }
@@ -211,15 +204,12 @@ public class ReviewService {
         reviewRepository.delete(review);
     }
 
-    // 특정 상점 리뷰 목록 조회
     public Page<ReviewResponse> getReviews(Long storeId, Pageable pageable, User user) {
         Store store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "해당 상점을 찾을 수 없습니다."));
 
-        // 1. 부모 리뷰만 페이징 조회
         Page<Review> parentReviews = reviewRepository.findByStoreAndParentReviewIsNull(store, pageable);
 
-        // 2. 조회된 부모 리뷰들의 ID 수집
         List<Review> parents = parentReviews.getContent();
         if (parents.isEmpty()) {
             return parentReviews.map(review -> {
@@ -233,41 +223,36 @@ public class ReviewService {
             });
         }
 
-        // 3. 부모 리뷰들에 대한 답글 일괄 조회
         List<Review> replies = reviewRepository.findByParentReviewIn(parents);
 
-        // 4. 답글을 부모 리뷰 ID로 그룹화
         Map<Long, List<Review>> repliesByParentId = replies.stream()
                 .collect(Collectors.groupingBy(reply -> reply.getParentReview().getId()));
 
-        // 5. 로그인 한 경우, 좋아요 여부 확인 (부모 + 자식 모두) 및 작성자 ID 추출
         Set<Long> likedReviewIds = new HashSet<>();
         List<Review> allReviews = new ArrayList<>(parents);
         allReviews.addAll(replies);
 
         if (user != null && !allReviews.isEmpty()) {
-             likedReviewIds = reviewLikeRepository.findByUserAndReviewIn(user, allReviews).stream()
-                     .map(like -> like.getReview().getId())
-                     .collect(Collectors.toSet());
+            likedReviewIds = reviewLikeRepository.findByUserAndReviewIn(user, allReviews).stream()
+                    .map(like -> like.getReview().getId())
+                    .collect(Collectors.toSet());
         }
 
         final Set<Long> finalLikedReviewIds = likedReviewIds;
 
-        // 6. 리뷰 작성자 닉네임 일괄 매핑 (학생은 닉네임 조회, 점주는 "가게명 사장님")
         List<Long> studentUserIds = allReviews.stream()
                 .filter(r -> r.getUser().getRole() == Role.ROLE_STUDENT)
                 .map(r -> r.getUser().getId())
                 .distinct()
                 .toList();
-                
+
         Map<Long, String> nicknameMap = new java.util.HashMap<>();
-        
+
         if (!studentUserIds.isEmpty()) {
             List<com.looky.domain.user.entity.StudentProfile> students = studentProfileRepository.findAllById(studentUserIds);
             students.forEach(p -> nicknameMap.put(p.getUserId(), p.getNickname()));
         }
 
-        // 7. ReviewResponse로 변환 및 답글 매핑
         return parentReviews.map(review -> {
             boolean isLiked = finalLikedReviewIds.contains(review.getId());
             String nickname = "알 수 없음";
@@ -276,9 +261,9 @@ public class ReviewService {
             } else if (review.getUser().getRole() == Role.ROLE_OWNER) {
                 nickname = store.getName() + " 사장님";
             }
-            
+
             ReviewResponse response = ReviewResponse.from(review, isLiked, nickname);
-            
+
             List<Review> childReviews = repliesByParentId.getOrDefault(review.getId(), java.util.Collections.emptyList());
             response.setChildren(childReviews.stream()
                     .map(r -> {
@@ -286,7 +271,7 @@ public class ReviewService {
                         if (r.getUser().getRole() == Role.ROLE_STUDENT) {
                             replyNickname = nicknameMap.getOrDefault(r.getUser().getId(), "알 수 없음");
                         } else if (r.getUser().getRole() == Role.ROLE_OWNER) {
-                            replyNickname = store.getName() + " 사장님"; // 부모 상점과 동일
+                            replyNickname = store.getName() + " 사장님";
                         }
                         return ReviewResponse.from(r, finalLikedReviewIds.contains(r.getId()), replyNickname);
                     })
@@ -295,14 +280,12 @@ public class ReviewService {
         });
     }
 
-    // 내가 작성한 리뷰 목록 조회
     public Page<ReviewResponse> getMyReviews(User user, Pageable pageable) {
-        // 내 리뷰에는 좋아요를 누를 수 없으므로 isLiked는 항상 false
         String nickname = "알 수 없음";
         if (user.getRole() == Role.ROLE_STUDENT) {
             nickname = studentProfileRepository.findNicknameByUser(user).orElse("알 수 없음");
         }
-        final String finalNickname = nickname; // 학생인 경우 사용될 닉네임
+        final String finalNickname = nickname;
 
         return reviewRepository.findByUserAndParentReviewIsNull(user, pageable)
                 .map(review -> {
@@ -314,12 +297,10 @@ public class ReviewService {
                 });
     }
 
-    // 특정 상점 리뷰 통계 조회
     public ReviewStatsResponse getReviewStats(Long storeId) {
-        // 평점 및 개수 산정 시 답글 제외
         Double avgRating = reviewRepository.findAverageRatingByStoreId(storeId);
         Long totalReviews = reviewRepository.countByStoreIdAndParentReviewIsNull(storeId);
-        
+
         Long rating1 = reviewRepository.countByStoreIdAndRatingAndParentReviewIsNull(storeId, 1);
         Long rating2 = reviewRepository.countByStoreIdAndRatingAndParentReviewIsNull(storeId, 2);
         Long rating3 = reviewRepository.countByStoreIdAndRatingAndParentReviewIsNull(storeId, 3);
@@ -337,7 +318,6 @@ public class ReviewService {
                 .build();
     }
 
-    // 리뷰 신고
     @Transactional
     public void reportReview(Long reviewId, Long reporterId, ReportRequest request) {
         Review review = reviewRepository.findById(reviewId)
@@ -355,7 +335,6 @@ public class ReviewService {
         review.increaseReportCount();
     }
 
-    // 리뷰 좋아요
     @Transactional
     public void addLike(User user, Long reviewId) {
         Review review = reviewRepository.findById(reviewId)
@@ -378,7 +357,6 @@ public class ReviewService {
         review.increaseLikeCount();
     }
 
-    // 리뷰 좋아요 취소
     @Transactional
     public void removeLike(User user, Long reviewId) {
         Review review = reviewRepository.findById(reviewId)
@@ -390,27 +368,5 @@ public class ReviewService {
 
         reviewLikeRepository.deleteByUserAndReview(user, review);
         review.decreaseLikeCount();
-    }
-
-    private void uploadAndSaveImages(Review review, List<MultipartFile> images) throws IOException {
-        if (images == null || images.isEmpty()) {
-            return;
-        }
-
-        int currentOrderIndex = review.getImages().size();
-
-        for (MultipartFile file : images) {
-            if (file.isEmpty())
-                continue;
-
-            String imageUrl = s3Service.uploadFile(file);
-
-            ReviewImage reviewImage = ReviewImage.builder()
-                    .review(review)
-                    .imageUrl(imageUrl)
-                    .orderIndex(currentOrderIndex++)
-                    .build();
-            review.addImage(reviewImage);
-        }
     }
 }

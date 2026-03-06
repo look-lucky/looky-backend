@@ -2,7 +2,6 @@ package com.looky.domain.inquiry.service;
 
 import com.looky.common.exception.CustomException;
 import com.looky.common.exception.ErrorCode;
-import com.looky.common.service.S3Service;
 import com.looky.domain.inquiry.dto.CreateInquiryRequest;
 import com.looky.domain.inquiry.dto.InquiryResponse;
 import com.looky.domain.inquiry.entity.Inquiry;
@@ -15,9 +14,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.util.List;
 
 @Service
@@ -27,32 +24,28 @@ public class InquiryService {
 
     private final InquiryRepository inquiryRepository;
     private final UserRepository userRepository;
-    private final S3Service s3Service;
 
     @Transactional
-    public Long createInquiry(User user, CreateInquiryRequest request, List<MultipartFile> images) throws IOException {
+    public Long createInquiry(User user, CreateInquiryRequest request) {
         User writer = userRepository.findById(user.getId())
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
-        if (images != null && images.size() > 5) {
+        List<String> imageUrls = request.getImageUrls();
+        if (imageUrls != null && imageUrls.size() > 5) {
             throw new CustomException(ErrorCode.BAD_REQUEST, "이미지는 최대 5장까지 첨부 가능합니다.");
         }
 
         Inquiry inquiry = request.toEntity(writer);
         Inquiry savedInquiry = inquiryRepository.save(inquiry);
 
-        if (images != null) {
-            int orderIndex = 0;
-            for (MultipartFile image : images) {
-                if (!image.isEmpty()) {
-                    String imageUrl = s3Service.uploadFile(image);
-                    InquiryImage inquiryImage = InquiryImage.builder()
-                            .inquiry(savedInquiry)
-                            .imageUrl(imageUrl)
-                            .orderIndex(orderIndex++)
-                            .build();
-                    savedInquiry.addImage(inquiryImage);
-                }
+        if (imageUrls != null) {
+            for (int i = 0; i < imageUrls.size(); i++) {
+                InquiryImage inquiryImage = InquiryImage.builder()
+                        .inquiry(savedInquiry)
+                        .imageUrl(imageUrls.get(i))
+                        .orderIndex(i)
+                        .build();
+                savedInquiry.addImage(inquiryImage);
             }
         }
 

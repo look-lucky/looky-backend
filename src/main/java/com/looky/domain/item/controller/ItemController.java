@@ -14,29 +14,14 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.Validator;
-
-import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.core.MethodParameter;
-import org.springframework.validation.BeanPropertyBindingResult;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
-
-import java.util.Set;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.util.List;
-
-import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
 
 @Tag(name = "Item", description = "상품 관련 API")
 @RestController
@@ -45,8 +30,6 @@ import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
 public class ItemController {
 
         private final ItemService itemService;
-        private final ObjectMapper objectMapper;
-        private final Validator validator;
 
         @Operation(summary = "[점주] 상품 등록", description = "상점에 새로운 상품을 등록합니다. (본인 상점만 가능)")
         @ApiResponses(value = {
@@ -55,20 +38,13 @@ public class ItemController {
                 @ApiResponse(responseCode = "403", description = "권한 없음 (본인 소유 상점 아님)", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class))),
                 @ApiResponse(responseCode = "404", description = "상점 없음", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class)))
         })
-        @PostMapping(value = "/stores/{storeId}/items", consumes = MULTIPART_FORM_DATA_VALUE)
+        @PostMapping("/stores/{storeId}/items")
         public ResponseEntity<CommonResponse<Long>> createItem(
                 @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,
-                @Parameter(description = "상품 ID") @PathVariable Long storeId,
-                @Parameter(description = "상품 이미지") @RequestPart(required = false) MultipartFile image,
-                @RequestPart(value = "request", required = false) String requestJson
-        ) throws IOException, MethodArgumentNotValidException {
-                CreateItemRequest request = null;
-                if (requestJson != null) {
-                    request = objectMapper.readValue(requestJson, CreateItemRequest.class);
-                    validateRequest(request);
-                }
-
-                Long itemId = itemService.createItem(storeId, principalDetails.getUser(), request, image);
+                @Parameter(description = "상점 ID") @PathVariable Long storeId,
+                @RequestBody @Valid CreateItemRequest request
+        ) {
+                Long itemId = itemService.createItem(storeId, principalDetails.getUser(), request);
                 return ResponseEntity.status(HttpStatus.CREATED).body(CommonResponse.success(itemId));
         }
 
@@ -78,10 +54,9 @@ public class ItemController {
                 @ApiResponse(responseCode = "404", description = "상점 없음", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class)))
         })
         @GetMapping("/stores/{storeId}/items")
-        public ResponseEntity<CommonResponse<List<ItemResponse>>> getItems (
+        public ResponseEntity<CommonResponse<List<ItemResponse>>> getItems(
                 @Parameter(description = "상점 ID") @PathVariable Long storeId
-        )
-        {
+        ) {
                 List<ItemResponse> response = itemService.getItems(storeId);
                 return ResponseEntity.ok(CommonResponse.success(response));
         }
@@ -94,8 +69,7 @@ public class ItemController {
         @GetMapping("/items/{itemId}")
         public ResponseEntity<CommonResponse<ItemResponse>> getItem(
                 @Parameter(description = "상품 ID") @PathVariable Long itemId
-        )
-        {
+        ) {
                 ItemResponse response = itemService.getItem(itemId);
                 return ResponseEntity.ok(CommonResponse.success(response));
         }
@@ -106,21 +80,13 @@ public class ItemController {
                 @ApiResponse(responseCode = "403", description = "권한 없음 (본인 소유 상점 아님)", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class))),
                 @ApiResponse(responseCode = "404", description = "상품 없음", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class)))
         })
-        @PatchMapping(value = "/items/{itemId}", consumes = MULTIPART_FORM_DATA_VALUE)
+        @PatchMapping("/items/{itemId}")
         public ResponseEntity<CommonResponse<Void>> updateItem(
                 @Parameter(description = "상품 ID") @PathVariable Long itemId,
-                @Parameter(description = "변경할 상품 이미지") @RequestPart(required = false) MultipartFile image,
-                @RequestPart(value = "request", required = false) String requestJson,
+                @RequestBody @Valid UpdateItemRequest request,
                 @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails
-        ) throws IOException, MethodArgumentNotValidException {
-                UpdateItemRequest request = null;
-                if (requestJson != null) {
-                    request = objectMapper.readValue(requestJson, UpdateItemRequest.class);
-                    validateRequest(request);
-                }
-
-                itemService.updateItem(itemId, principalDetails.getUser(), request, image);
-
+        ) {
+                itemService.updateItem(itemId, principalDetails.getUser(), request);
                 return ResponseEntity.ok(CommonResponse.success(null));
         }
 
@@ -134,34 +100,8 @@ public class ItemController {
         public ResponseEntity<CommonResponse<Void>> deleteItem(
                 @Parameter(description = "상품 ID") @PathVariable Long itemId,
                 @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails
-        )
-        {
+        ) {
                 itemService.deleteItem(itemId, principalDetails.getUser());
                 return ResponseEntity.status(HttpStatus.NO_CONTENT).body(CommonResponse.success(null));
-        }
-
-        private <T> void validateRequest(T request) throws MethodArgumentNotValidException {
-                Set<ConstraintViolation<T>> violations = validator.validate(request);
-                if (!violations.isEmpty()) {
-                        BindingResult bindingResult = new BeanPropertyBindingResult(request, request.getClass().getName());
-                        for (ConstraintViolation<T> violation : violations) {
-                                bindingResult.addError(new FieldError(
-                                        request.getClass().getName(),
-                                        violation.getPropertyPath().toString(),
-                                        violation.getInvalidValue(),
-                                        false,
-                                        null,
-                                        null,
-                                        violation.getMessage()
-                                ));
-                        }
-                        try {
-                                MethodParameter parameter = new MethodParameter(
-                                        this.getClass().getDeclaredMethod("validateRequest", Object.class), 0);
-                                throw new MethodArgumentNotValidException(parameter, bindingResult);
-                        } catch (NoSuchMethodException e) {
-                                throw new RuntimeException(e);
-                        }
-                }
         }
 }

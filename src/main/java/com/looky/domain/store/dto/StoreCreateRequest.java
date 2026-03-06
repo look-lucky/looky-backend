@@ -47,6 +47,10 @@ public class StoreCreateRequest {
 
     private List<Long> universityIds;
 
+    private String profileImageUrl;
+
+    private List<String> imageUrls;
+
     public Store toEntity(User user) {
         return Store.builder()
                 .user(user)

@@ -1,7 +1,6 @@
 package com.looky.domain.store.service;
 
 import com.looky.common.service.S3Service;
-import com.looky.common.util.FileValidator;
 import com.looky.domain.coupon.entity.CouponUsageStatus;
 import com.looky.domain.store.entity.*;
 import com.looky.domain.store.repository.StoreSpecification;
@@ -14,6 +13,7 @@ import com.looky.domain.store.dto.*;
 import com.looky.domain.partnership.dto.PartnershipInfo;
 
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import com.looky.domain.store.repository.StoreReportRepository;
 import com.looky.domain.store.repository.StoreRepository;
@@ -29,9 +29,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -48,9 +47,7 @@ import com.looky.domain.partnership.service.PartnershipService;
 import com.looky.domain.coupon.repository.CouponRepository;
 import com.looky.domain.partnership.entity.Partnership;
 import com.looky.domain.coupon.entity.Coupon;
-import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.Collections;
 import com.looky.domain.coupon.repository.StudentCouponRepository;
 import com.looky.domain.organization.repository.UniversityRepository;
 
@@ -75,7 +72,7 @@ public class StoreService {
     private final UniversityRepository universityRepository;
 
     @Transactional
-    public Long createStore(User user, StoreCreateRequest request, MultipartFile profileImage, List<MultipartFile> images) throws IOException {
+    public Long createStore(User user, StoreCreateRequest request) {
 
         User owner = userRepository.findByUsername(user.getUsername())
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
@@ -83,7 +80,6 @@ public class StoreService {
         if (owner.getRole() != Role.ROLE_OWNER && owner.getRole() != Role.ROLE_ADMIN) {
             throw new CustomException(ErrorCode.FORBIDDEN, "점주 회원 또는 관리자만 가게를 등록할 수 있습니다.");
         }
-
 
         if (storeRepository.existsByNameAndRoadAddress(request.getName(), request.getRoadAddress())) {
             throw new CustomException(ErrorCode.DUPLICATE_RESOURCE, "이미 등록된 상점입니다.");
@@ -93,48 +89,35 @@ public class StoreService {
             throw new CustomException(ErrorCode.DUPLICATE_RESOURCE, "이미 등록된 사업자등록번호입니다.");
         }
 
-        // 일반 이미지 유효성 검사 (최대 3장, 10MB)
-        try {
-            FileValidator.validateImageFiles(images, 3, 10 * 1024 * 1024);
-        } catch (CustomException e) {
-            if (e.getErrorCode() == ErrorCode.FILE_COUNT_EXCEEDED) {
-                throw new CustomException(ErrorCode.FILE_COUNT_EXCEEDED, "일반 이미지는 최대 3장까지 업로드 가능합니다.");
-            }
-            throw e;
-        }
-
-        // 프로필 이미지 유효성 검사 (최대 1장, 10MB)
-        if (profileImage != null && !profileImage.isEmpty()) {
-            try {
-                FileValidator.validateImageFiles(List.of(profileImage), 1, 10 * 1024 * 1024);
-            } catch (CustomException e) {
-                if (e.getErrorCode() == ErrorCode.FILE_COUNT_EXCEEDED) {
-                    throw new CustomException(ErrorCode.FILE_COUNT_EXCEEDED, "프로필 이미지는 1장만 등록 가능합니다.");
-                }
-                throw e;
-            }
+        List<String> imageUrls = request.getImageUrls();
+        if (imageUrls != null && imageUrls.size() > 3) {
+            throw new CustomException(ErrorCode.BAD_REQUEST, "일반 이미지는 최대 3장까지 등록할 수 있습니다.");
         }
 
         Store store = request.toEntity(owner);
 
-        // 프로필 이미지 S3 업로드
-        if (profileImage != null && !profileImage.isEmpty()) {
-            String profileImageUrl = s3Service.uploadFile(profileImage);
+        if (request.getProfileImageUrl() != null) {
             store.updateStore(
                     store.getName(), store.getBranch(), store.getRoadAddress(), store.getJibunAddress(),
                     store.getLatitude(), store.getLongitude(), store.getStorePhone(), store.getIntroduction(),
                     store.getOperatingHours(), store.getStoreCategories(), store.getStoreMoods(),
                     store.getHolidayDates(), store.getIsSuspended(), store.getRepresentativeName(),
-                    profileImageUrl
+                    request.getProfileImageUrl()
             );
         }
 
-        // 배너 및 일반 이미지 S3 업로드 및 리스트 순서대로 DB 저장
-        uploadAndSaveImages(store, images);
+        if (imageUrls != null) {
+            for (int i = 0; i < imageUrls.size(); i++) {
+                store.addImage(StoreImage.builder()
+                        .store(store)
+                        .imageUrl(imageUrls.get(i))
+                        .orderIndex(i)
+                        .build());
+            }
+        }
 
         Store savedStore = storeRepository.save(store);
 
-        // 대학 연결
         if (request.getUniversityIds() != null) {
             for (Long universityId : request.getUniversityIds()) {
                 universityRepository.findById(universityId)
@@ -142,7 +125,6 @@ public class StoreService {
             }
         }
 
-        // 초기 등급 계산 (SEED 할당)
         recalculateCloverGrade(savedStore);
 
         return savedStore.getId();
@@ -156,20 +138,13 @@ public class StoreService {
         Long reviewCount = reviewRepository.countByStoreIdAndParentReviewIsNull(storeId);
 
         List<PartnershipInfo> myPartnerships = null;
-        boolean hasCoupon = false;
 
         if (user != null && user.getRole() == Role.ROLE_STUDENT) {
             StudentProfile studentProfile = studentProfileRepository.findById(user.getId()).orElse(null);
-            // 학생이고 소속 대학이 있는 경우
             if (studentProfile != null && studentProfile.getUniversity() != null) {
                 LocalDateTime now = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
-                
-                // 내 혜택 조회
                 Map<Long, List<PartnershipInfo>> partnershipsMap = partnershipService.getMyPartnershipOrganizations(List.of(storeId), user);
                 myPartnerships = partnershipsMap.get(storeId);
-                
-                // 해당 상점의 다운로드 가능한 쿠폰 보유 여부 확인
-                hasCoupon = couponRepository.existsDownloadableCoupon(storeId, now, user.getId());
             }
         }
 
@@ -187,40 +162,30 @@ public class StoreService {
 
         Page<Store> storePage = storeRepository.findAll(spec, pageable);
 
-        // 배치 최적화를 위한 정보 준비
-        LocalDate today = LocalDate.now(ZoneId.of("Asia/Seoul"));
         LocalDateTime now = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
-        
+
         List<Long> storeIds = storePage.getContent().stream().map(Store::getId).toList();
-        
-        // 상점 제휴-내 소속 매칭 조직 이름 목록 생성
+
         Map<Long, List<PartnershipInfo>> partnershipMap = partnershipService.getMyPartnershipOrganizations(storeIds, user);
 
         Set<Long> batchedCouponStoreIds = new HashSet<>();
-        // 학생 회원의 경우, 조회된 상점 목록에 대해 일괄적으로 쿠폰 보유 여부를 확인 (N+1 방지)
         if (user != null && user.getRole() == Role.ROLE_STUDENT) {
             StudentProfile studentProfile = studentProfileRepository.findById(user.getId()).orElse(null);
             if (studentProfile != null && studentProfile.getUniversity() != null) {
-                 batchedCouponStoreIds = new HashSet<>(couponRepository.findStoreIdsWithDownloadableCoupons(storeIds, now, user.getId()));
+                batchedCouponStoreIds = new HashSet<>(couponRepository.findStoreIdsWithDownloadableCoupons(storeIds, now, user.getId()));
             }
         }
-
-        // 람다 표현식에서 사용하기 위해 effectively final 변수로 선언
-        final Set<Long> finalCouponStoreIds = batchedCouponStoreIds;
 
         Page<StoreResponse> responsePage = storePage.map(store -> {
             Double averageRating = reviewRepository.findAverageRatingByStoreId(store.getId());
             Long reviewCount = reviewRepository.countByStoreIdAndParentReviewIsNull(store.getId());
-            
-            // 제휴 여부 및 쿠폰 보유 여부 설정
             List<PartnershipInfo> myPartnerships = partnershipMap.get(store.getId());
-
             return StoreResponse.of(store, averageRating, reviewCount != null ? reviewCount.intValue() : 0, myPartnerships, store.getCloverGrade());
         });
         return PageResponse.from(responsePage);
     }
 
-        public StoreStatsResponse getStoreStats(Long storeId, User user) {
+    public StoreStatsResponse getStoreStats(Long storeId, User user) {
         User owner = userRepository.findByUsername(user.getUsername())
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
@@ -245,19 +210,16 @@ public class StoreService {
                 .favoriteIncreaseCount(favoriteIncreaseCount)
                 .build();
     }
-    
+
     @Transactional
-    public void updateStore(Long storeId, User user, StoreUpdateRequest request, MultipartFile profileImage, List<MultipartFile> images)
-            throws IOException {
+    public void updateStore(Long storeId, User user, StoreUpdateRequest request) {
         User owner = userRepository.findByUsername(user.getUsername())
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         Store store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "가게를 찾을 수 없습니다."));
 
-        // 점유 상태에 따른 접근 제어
         if (store.getStoreStatus() == StoreStatus.ACTIVE) {
-            // ACTIVE(점유됨): 관리자 접근 불가, 본인 소유 확인
             if (owner.getRole() == Role.ROLE_ADMIN) {
                 throw new CustomException(ErrorCode.FORBIDDEN, "점유된 상점은 관리자가 수정할 수 없습니다.");
             }
@@ -266,7 +228,6 @@ public class StoreService {
                 throw new CustomException(ErrorCode.FORBIDDEN, "본인 소유의 가게가 아닙니다.");
             }
         } else {
-            // UNCLAIMED/BANNED: 관리자만 수정 가능
             if (owner.getRole() != Role.ROLE_ADMIN) {
                 throw new CustomException(ErrorCode.FORBIDDEN, "해당 상점은 관리자만 수정할 수 있습니다.");
             }
@@ -276,139 +237,116 @@ public class StoreService {
             throw new CustomException(ErrorCode.DUPLICATE_RESOURCE, "이미 존재하는 상점 이름입니다.");
         }
 
-        // 프로필 이미지 수정 처리
+        // 프로필 이미지 처리
         String profileImageUrl = store.getProfileImageUrl();
-        if (profileImage != null && !profileImage.isEmpty()) {
-            try {
-                FileValidator.validateImageFiles(List.of(profileImage), 1, 10 * 1024 * 1024);
-            } catch (CustomException e) {
-                if (e.getErrorCode() == ErrorCode.FILE_COUNT_EXCEEDED) {
-                    throw new CustomException(ErrorCode.FILE_COUNT_EXCEEDED, "프로필 이미지는 1장만 등록 가능합니다.");
+        if (request.getProfileImageUrl().isPresent()) {
+            String newProfileImageUrl = request.getProfileImageUrl().get();
+            if (!Objects.equals(profileImageUrl, newProfileImageUrl)) {
+                if (profileImageUrl != null) {
+                    s3Service.deleteFile(profileImageUrl);
                 }
-                throw e;
+                profileImageUrl = newProfileImageUrl; // null(삭제) 또는 새 URL(교체)
             }
-            // 기존 이미지 삭제
-            if (profileImageUrl != null) {
-                s3Service.deleteFile(profileImageUrl);
-            }
-            profileImageUrl = s3Service.uploadFile(profileImage);
-        } else if (request.getDeleteProfileImage().isPresent() && request.getDeleteProfileImage().get()) {
-            // 명시적 삭제 요청 시
-            if (profileImageUrl != null) {
-                s3Service.deleteFile(profileImageUrl);
-            }
-            profileImageUrl = null;
         }
 
         store.updateStore(
-            request.getName().orElse(store.getName()),
-            request.getBranch().orElse(store.getBranch()),
-            request.getRoadAddress().orElse(store.getRoadAddress()),
-            request.getJibunAddress().orElse(store.getJibunAddress()),
-            request.getLatitude().orElse(store.getLatitude()),
-            request.getLongitude().orElse(store.getLongitude()),
-            request.getPhone().orElse(store.getStorePhone()),
-            request.getIntroduction().orElse(store.getIntroduction()),
-            request.getOperatingHours().orElse(store.getOperatingHours()),
-            
-            request.getStoreCategories().isPresent()
-                    ? (request.getStoreCategories().get() == null ? new HashSet<>() : new HashSet<>(request.getStoreCategories().get()))
-                    : null,
-            
-            request.getStoreMoods().isPresent()
-                    ? (request.getStoreMoods().get() == null ? new HashSet<>() : new HashSet<>(request.getStoreMoods().get()))
-                    : null,
-            
-            request.getHolidayDates().orElse(store.getHolidayDates()),
-            request.getIsSuspended().orElse(store.getIsSuspended()),
-            request.getRepresentativeName().orElse(store.getRepresentativeName()),
-            profileImageUrl
+                request.getName().orElse(store.getName()),
+                request.getBranch().orElse(store.getBranch()),
+                request.getRoadAddress().orElse(store.getRoadAddress()),
+                request.getJibunAddress().orElse(store.getJibunAddress()),
+                request.getLatitude().orElse(store.getLatitude()),
+                request.getLongitude().orElse(store.getLongitude()),
+                request.getPhone().orElse(store.getStorePhone()),
+                request.getIntroduction().orElse(store.getIntroduction()),
+                request.getOperatingHours().orElse(store.getOperatingHours()),
+
+                request.getStoreCategories().isPresent()
+                        ? (request.getStoreCategories().get() == null ? new HashSet<>() : new HashSet<>(request.getStoreCategories().get()))
+                        : null,
+
+                request.getStoreMoods().isPresent()
+                        ? (request.getStoreMoods().get() == null ? new HashSet<>() : new HashSet<>(request.getStoreMoods().get()))
+                        : null,
+
+                request.getHolidayDates().orElse(store.getHolidayDates()),
+                request.getIsSuspended().orElse(store.getIsSuspended()),
+                request.getRepresentativeName().orElse(store.getRepresentativeName()),
+                profileImageUrl
         );
 
-        // 1. 이미지 삭제 처리 (preserveImageIds 기준)
-        if (request.getPreserveImageIds().isPresent()) {
-            List<Long> preserveIds = request.getPreserveImageIds().get();
-            // preserveIds가 null이면 빈 리스트로 처리 (모두 삭제)
-            List<Long> finalPreserveIds = preserveIds != null ? preserveIds : Collections.emptyList();
+        // 갤러리 이미지 처리
+        if (request.getImageUrls().isPresent()) {
+            List<String> desiredUrls = request.getImageUrls().get() != null
+                    ? request.getImageUrls().get() : Collections.emptyList();
 
-            List<StoreImage> imagesToDelete = store.getImages().stream()
-                    .filter(img -> !finalPreserveIds.contains(img.getId()))
-                    .toList();
-
-            for (StoreImage img : imagesToDelete) {
-                s3Service.deleteFile(img.getImageUrl());
-                store.removeImage(img);
+            if (desiredUrls.size() > 3) {
+                throw new CustomException(ErrorCode.BAD_REQUEST, "일반 이미지는 최대 3장까지 등록할 수 있습니다.");
             }
-        }
 
-        // 2. 새 이미지 추가 및 전체 개수 검증
-        int currentImageCount = store.getImages().size(); // 삭제 후 남은 개수
-        int newImageCount = (images != null) ? images.size() : 0;
+            Set<String> desiredSet = new HashSet<>(desiredUrls);
 
-        log.info("[UpdateStore Debug] storeId={}, currentImageCount={}, newImageCount={}, total={}", 
-                storeId, currentImageCount, newImageCount, currentImageCount + newImageCount);
+            // desired에 없는 기존 이미지 삭제
+            store.getImages().stream()
+                    .filter(img -> !desiredSet.contains(img.getImageUrl()))
+                    .toList()
+                    .forEach(img -> {
+                        s3Service.deleteFile(img.getImageUrl());
+                        store.removeImage(img);
+                    });
 
-        // 검증 조건: 새 이미지를 추가하려고 하거나, 유지할 이미지 목록(삭제 등)을 명시한 경우에만 전체 개수가 3장을 넘는지 체크합니다.
-        // 이를 통해 프로필 이미지만 수정하는 등 갤러리와 무관한 수정 요청이 기존의 잘못된 데이터(3장 초과) 때문에 차단되는 것을 방지합니다.
-        boolean isGalleryModified = request.getPreserveImageIds().isPresent() || (images != null && !images.isEmpty());
-
-        if (isGalleryModified && (currentImageCount + newImageCount > 3)) {
-            throw new CustomException(ErrorCode.BAD_REQUEST, "일반 이미지는 최대 3장까지 등록할 수 있습니다. (현재 유지: " + currentImageCount + "장, 추가: " + newImageCount + "장)");
-        }
-
-        // 새 이미지 업로드 및 저장
-        if (newImageCount > 0) {
-            try {
-                FileValidator.validateImageFiles(images, 3, 10 * 1024 * 1024);
-            } catch (CustomException e) {
-                if (e.getErrorCode() == ErrorCode.FILE_COUNT_EXCEEDED) {
-                    throw new CustomException(ErrorCode.FILE_COUNT_EXCEEDED, "일반 이미지는 최대 3장까지 업로드 가능합니다.");
+            // DB에 없는 새 URL 추가
+            Set<String> existingUrls = store.getImages().stream()
+                    .map(StoreImage::getImageUrl)
+                    .collect(Collectors.toSet());
+            for (String url : desiredUrls) {
+                if (!existingUrls.contains(url)) {
+                    store.addImage(StoreImage.builder()
+                            .store(store)
+                            .imageUrl(url)
+                            .orderIndex(0)
+                            .build());
                 }
-                throw e;
             }
-            uploadAndSaveImages(store, images);
+
+            // desiredUrls 순서대로 인덱스 재정렬
+            Map<String, StoreImage> urlToImage = store.getImages().stream()
+                    .collect(Collectors.toMap(StoreImage::getImageUrl, img -> img));
+            for (int i = 0; i < desiredUrls.size(); i++) {
+                StoreImage img = urlToImage.get(desiredUrls.get(i));
+                if (img != null) img.updateOrderIndex(i);
+            }
         }
 
-        // 3. 인덱스 재정렬 (중간 삭제 시 빈 번호 채우기 위함)
-        for (int i = 0; i < store.getImages().size(); i++) {
-             store.getImages().get(i).updateOrderIndex(i);
-        }
-        
-        // 등급 재계산
         recalculateCloverGrade(store);
     }
 
-    // 위치 기반 상점 목록 조회
     public List<StoreResponse> getNearbyStores(Double latitude, Double longitude, Double radius, User user) {
         List<Store> stores = storeRepository.findByLocationWithin(latitude, longitude, radius);
-        
+
         LocalDateTime now = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
-        
+
         List<Long> storeIds = stores.stream().map(Store::getId).toList();
-        
+
         Map<Long, List<PartnershipInfo>> partnershipMap = partnershipService.getMyPartnershipOrganizations(storeIds, user);
 
         Set<Long> batchedCouponStoreIds = new HashSet<>();
         if (user != null && user.getRole() == Role.ROLE_STUDENT) {
             StudentProfile studentProfile = studentProfileRepository.findById(user.getId()).orElse(null);
             if (studentProfile != null && studentProfile.getUniversity() != null && !storeIds.isEmpty()) {
-                 batchedCouponStoreIds = new HashSet<>(couponRepository.findStoreIdsWithDownloadableCoupons(storeIds, now, user.getId()));
+                batchedCouponStoreIds = new HashSet<>(couponRepository.findStoreIdsWithDownloadableCoupons(storeIds, now, user.getId()));
             }
         }
 
         final Set<Long> finalCouponStoreIds = batchedCouponStoreIds;
-        
+
         return stores.stream().map(store -> {
             Double averageRating = reviewRepository.findAverageRatingByStoreId(store.getId());
             Long reviewCount = reviewRepository.countByStoreIdAndParentReviewIsNull(store.getId());
-            
             List<PartnershipInfo> myPartnerships = partnershipMap.get(store.getId());
-
             return StoreResponse.of(store, averageRating, reviewCount != null ? reviewCount.intValue() : 0, myPartnerships, store.getCloverGrade());
         }).toList();
     }
 
-    // 특정 위치 상점 목록 조회 (같은 건물 상점 목록 조회)
     public List<StoreResponse> getStoresByLocation(Double latitude, Double longitude, User user) {
         List<Store> stores = storeRepository.findByLatitudeAndLongitude(latitude, longitude);
 
@@ -431,58 +369,12 @@ public class StoreService {
         return stores.stream().map(store -> {
             Double averageRating = reviewRepository.findAverageRatingByStoreId(store.getId());
             Long reviewCount = reviewRepository.countByStoreIdAndParentReviewIsNull(store.getId());
-
             List<PartnershipInfo> myPartnerships = partnershipMap.get(store.getId());
             boolean hasCoupon = finalCouponStoreIds.contains(store.getId());
-
             return StoreResponse.of(store, averageRating, reviewCount != null ? reviewCount.intValue() : 0, myPartnerships, store.getCloverGrade());
         }).toList();
     }
-    
-    // 상점 이미지 개별 삭제
-    @Transactional
-    public void deleteStoreImage(Long storeId, Long imageId, User user) {
-        User owner = userRepository.findByUsername(user.getUsername())
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
-        Store store = storeRepository.findById(storeId)
-                .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "가게를 찾을 수 없습니다."));
-
-        // 점유 상태에 따른 접근 제어
-        if (store.getStoreStatus() == StoreStatus.ACTIVE) {
-            // ACTIVE(점유됨): 관리자 접근 불가, 본인 소유 확인
-            if (owner.getRole() == Role.ROLE_ADMIN) {
-                throw new CustomException(ErrorCode.FORBIDDEN, "점유된 상점은 관리자가 수정할 수 없습니다.");
-            }
-            if (!Objects.equals(store.getUser().getId(), owner.getId())) {
-                throw new CustomException(ErrorCode.FORBIDDEN, "본인 소유의 가게가 아닙니다.");
-            }
-        } else {
-            // UNCLAIMED/BANNED: 관리자만 수정 가능
-            if (owner.getRole() != Role.ROLE_ADMIN) {
-                throw new CustomException(ErrorCode.FORBIDDEN, "해당 상점은 관리자만 수정할 수 있습니다.");
-            }
-        }
-
-        // 삭제할 이미지 찾기
-        StoreImage targetImage = store.getImages().stream()
-                .filter(img -> img.getId().equals(imageId))
-                .findFirst()
-                .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "해당 이미지가 존재하지 않습니다."));
-
-        // S3 삭제
-        s3Service.deleteFile(targetImage.getImageUrl());
-
-        // DB 삭제
-        store.removeImage(targetImage);
-
-        // 삭제 후 중간 이빨이 빠진 인덱스를 0부터 다시 순서대로 재정렬
-        for (int i = 0; i < store.getImages().size(); i++) {
-            store.getImages().get(i).updateOrderIndex(i);
-        }
-    }
-
-    // 상점 삭제
     @Transactional
     public void deleteStore(Long storeId, User user) {
         User owner = userRepository.findByUsername(user.getUsername())
@@ -491,9 +383,7 @@ public class StoreService {
         Store store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "가게를 찾을 수 없습니다."));
 
-        // 점유 상태에 따른 접근 제어
         if (store.getStoreStatus() == StoreStatus.ACTIVE) {
-            // ACTIVE(점유됨): 관리자 접근 불가, 본인 소유 확인
             if (owner.getRole() == Role.ROLE_ADMIN) {
                 throw new CustomException(ErrorCode.FORBIDDEN, "점유된 상점은 관리자가 삭제할 수 없습니다.");
             }
@@ -501,7 +391,6 @@ public class StoreService {
                 throw new CustomException(ErrorCode.FORBIDDEN, "본인 소유의 가게가 아닙니다.");
             }
         } else {
-            // UNCLAIMED/BANNED: 관리자만 삭제 가능
             if (owner.getRole() != Role.ROLE_ADMIN) {
                 throw new CustomException(ErrorCode.FORBIDDEN, "해당 상점은 관리자만 삭제할 수 있습니다.");
             }
@@ -518,40 +407,10 @@ public class StoreService {
         return stores.stream().map(store -> {
             Double averageRating = reviewRepository.findAverageRatingByStoreId(store.getId());
             Long reviewCount = reviewRepository.countByStoreIdAndParentReviewIsNull(store.getId());
-
             return StoreResponse.of(store, averageRating, reviewCount != null ? reviewCount.intValue() : 0, null, store.getCloverGrade());
         }).toList();
     }
 
-    // S3에 업로드 및 DB 저장
-    private void uploadAndSaveImages(Store store, List<MultipartFile> images) throws IOException {
-
-        if (images == null || images.isEmpty()) {
-            return;
-        }
-
-        // 기존 이미지 개수 파악하여 인덱스 시작점 설정
-        int currentOrderIndex = store.getImages().size();
-
-        for (MultipartFile file : images) {
-
-            if (file.isEmpty())
-                continue;
-
-            // S3에 저장
-            String imageUrl = s3Service.uploadFile(file);
-
-            // DB에 저장
-            StoreImage storeImage = StoreImage.builder()
-                    .store(store)
-                    .imageUrl(imageUrl)
-                    .orderIndex(currentOrderIndex++) // 인덱스 1씩 증가 시키며 저장
-                    .build();
-            store.addImage(storeImage);
-        }
-    }
-
-    // 상점 신고
     @Transactional
     public void reportStore(Long storeId, Long reporterId, StoreReportRequest request) {
         Store store = storeRepository.findById(storeId)
@@ -563,7 +422,6 @@ public class StoreService {
             throw new CustomException(ErrorCode.STATE_CONFLICT, "이미 신고한 상점입니다.");
         }
 
-        // List -> Set 변환
         Set<StoreReportReason> reasons = new HashSet<>(request.getReasons());
 
         if (reasons.contains(StoreReportReason.ETC)) {
@@ -582,14 +440,12 @@ public class StoreService {
         storeReportRepository.save(report);
     }
 
-
-    // 상점 등록 상태 조회 (메뉴 정보 등록 여부, 매장 정보 등록 여부)
     public StoreRegistrationStatusResponse getStoreRegistrationStatus(Long storeId) {
         Store store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "가게를 찾을 수 없습니다."));
 
         boolean hasMenu = itemRepository.existsByStoreId(storeId);
-        boolean hasStoreInfo = StringUtils.hasText(store.getIntroduction()) 
+        boolean hasStoreInfo = StringUtils.hasText(store.getIntroduction())
                 && store.getStoreCategories() != null && !store.getStoreCategories().isEmpty()
                 && store.getStoreMoods() != null && !store.getStoreMoods().isEmpty();
 
@@ -601,7 +457,7 @@ public class StoreService {
                 .orElseThrow(() -> new CustomException(ErrorCode.FORBIDDEN, "학생 회원만 이용 가능합니다."));
 
         if (studentProfile.getUniversity() == null) {
-             throw new CustomException(ErrorCode.FORBIDDEN, "소속 대학이 없습니다.");
+            throw new CustomException(ErrorCode.FORBIDDEN, "소속 대학이 없습니다.");
         }
 
         Long universityId = studentProfile.getUniversity().getId();
@@ -613,7 +469,6 @@ public class StoreService {
         LocalDateTime endOfWeek = now.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY))
                 .withHour(23).withMinute(59).withSecond(59).withNano(999999999);
 
-        // 1. 핫한 상점 조회 (Object[]: Store, Long count) - 이번 주 찜이 가장 많이 늘어난 상점 Top 10 조회
         List<Object[]> results = favoriteRepository.findHotStores(universityId, startOfWeek, endOfWeek, Pageable.ofSize(10));
 
         if (results.isEmpty()) {
@@ -625,34 +480,25 @@ public class StoreService {
                 .toList();
         List<Long> storeIds = stores.stream().map(Store::getId).toList();
 
-        // 2. 활성화된 제휴 정보 일괄 조회 (N+1 방지)
-        // 해당 대학과 제휴 맺은 상점들의 현재 유효한 제휴 정보를 조회
         List<Partnership> partnerships = partnershipRepository.findActivePartnershipsByStoreIdsAndUniversityId(storeIds, universityId, today);
         Map<Long, List<Partnership>> partnershipMap = partnerships.stream()
                 .collect(Collectors.groupingBy(p -> p.getStore().getId()));
 
-        // 3. 활성화된 쿠폰 정보 일괄 조회 (N+1 방지)
-        // 상점들의 현재 유효한 쿠폰 정보를 조회
         List<Coupon> coupons = couponRepository.findActiveCouponsByStoreIds(storeIds, now);
         Map<Long, List<Coupon>> couponMap = coupons.stream()
                 .collect(Collectors.groupingBy(c -> c.getStore().getId()));
 
-
-        // 4. 응답 객체로 매핑 (혜택 우선순위 적용)
         return results.stream()
                 .map(result -> {
                     Store store = (Store) result[0];
                     Long count = (Long) result[1];
-                    Long storeId = store.getId();
+                    Long sId = store.getId();
                     String benefitContent = null;
 
-                    // 우선순위 1: 제휴 혜택 (소속 대학과 제휴된 경우)
-                    if (partnershipMap.containsKey(storeId) && !partnershipMap.get(storeId).isEmpty()) {
-                        benefitContent = partnershipMap.get(storeId).get(0).getBenefit();
-                    } 
-                    // 우선순위 2: 쿠폰 혜택 (제휴가 없고, 발급 가능한 쿠폰이 있는 경우)
-                    else if (couponMap.containsKey(storeId) && !couponMap.get(storeId).isEmpty()) {
-                        benefitContent = couponMap.get(storeId).get(0).getTitle();
+                    if (partnershipMap.containsKey(sId) && !partnershipMap.get(sId).isEmpty()) {
+                        benefitContent = partnershipMap.get(sId).get(0).getBenefit();
+                    } else if (couponMap.containsKey(sId) && !couponMap.get(sId).isEmpty()) {
+                        benefitContent = couponMap.get(sId).get(0).getTitle();
                     }
 
                     return HotStoreResponse.from(store, count, benefitContent);
@@ -660,22 +506,18 @@ public class StoreService {
                 .toList();
     }
 
-    // 클로버 등급 재계산 및 업데이트
     @Transactional
     public void recalculateCloverGrade(Store store) {
-
         if (store.getUser() == null) {
             store.updateCloverGrade(CloverGrade.SEED);
             return;
         }
 
-        // 매장 정보: 소개글(introduction), 운영시간(operatingHours) 등 필수 정보 확인.
-        // 메뉴 정보: ItemRepository를 통해 확인.
-        boolean hasStoreInfo = StringUtils.hasText(store.getIntroduction()) 
+        boolean hasStoreInfo = StringUtils.hasText(store.getIntroduction())
                 && StringUtils.hasText(store.getOperatingHours())
                 && !store.getStoreCategories().isEmpty()
                 && !store.getStoreMoods().isEmpty();
-        
+
         boolean hasMenu = itemRepository.existsByStoreId(store.getId());
 
         if (hasStoreInfo && hasMenu) {
@@ -685,9 +527,7 @@ public class StoreService {
         }
     }
 
-    // 지도에 필요한 상점 목록 조회 (대학 기반)
     public List<StoreMapResponse> getStoreMap(Long universityId, User user) {
-        // 대학 ID 필터링 적용 (StoreSpecification 활용)
         Specification<Store> spec = Specification.where(StoreSpecification.isNotSuspended());
 
         if (universityId != null) {
@@ -698,13 +538,11 @@ public class StoreService {
         LocalDateTime now = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
         LocalDate today = now.toLocalDate();
 
-        // 학생 프로필 조회 (대학 ID 및 쿠폰 필터링 공통 사용)
         StudentProfile studentProfile = null;
         if (user != null && user.getRole() == Role.ROLE_STUDENT) {
             studentProfile = studentProfileRepository.findById(user.getId()).orElse(null);
         }
 
-        // 필터링 기준 대학 ID 결정: 학생이면 소속 대학, 아니면 요청 파라미터 사용
         Long filterUniversityId = null;
         if (studentProfile != null && studentProfile.getUniversity() != null) {
             filterUniversityId = studentProfile.getUniversity().getId();
@@ -712,7 +550,6 @@ public class StoreService {
             filterUniversityId = universityId;
         }
 
-        // UNCLAIMED 상점 중 해당 대학의 어떤 조직과도 활성 제휴가 없는 상점 제외
         Set<Long> unclaimedStoreIdsWithPartnership = new HashSet<>();
         if (filterUniversityId != null) {
             List<Long> unclaimedStoreIds = stores.stream()
@@ -738,7 +575,6 @@ public class StoreService {
 
         List<Long> filteredStoreIds = filteredStores.stream().map(Store::getId).toList();
 
-        // 활성화된 제휴 정보 일괄 조회 (N+1 방지)
         Map<Long, List<PartnershipInfo>> partnershipMap = partnershipService.getMyPartnershipOrganizations(filteredStoreIds, user);
 
         Set<Long> batchedCouponStoreIds = new HashSet<>();
@@ -752,10 +588,8 @@ public class StoreService {
             Double averageRating = reviewRepository.findAverageRatingByStoreId(store.getId());
             Long reviewCount = reviewRepository.countByStoreIdAndParentReviewIsNull(store.getId());
             Long favoriteCount = favoriteRepository.countByStore(store);
-
             List<PartnershipInfo> myPartnerships = partnershipMap.get(store.getId());
             boolean hasCoupon = finalCouponStoreIds.contains(store.getId());
-
             return StoreMapResponse.of(store, averageRating, reviewCount != null ? reviewCount.intValue() : 0, myPartnerships, hasCoupon, favoriteCount);
         }).toList();
     }

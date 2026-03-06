@@ -13,30 +13,15 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.Validator;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.core.MethodParameter;
-import org.springframework.validation.BeanPropertyBindingResult;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
-
-import java.util.Set;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.io.IOException;
-import java.util.List;
 
 @Tag(name = "고객센터 API")
 @RestController
@@ -45,24 +30,18 @@ import java.util.List;
 public class InquiryController {
 
     private final InquiryService inquiryService;
-    private final ObjectMapper objectMapper;
-    private final Validator validator;
 
     @Operation(summary = "문의하기", description = "고객센터에 문의를 등록합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "성공"),
             @ApiResponse(responseCode = "400", description = "입력값 검증 실패 (제목 길이, 이미지 개수 초과 등)", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class)))
     })
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping
     public ResponseEntity<CommonResponse<Long>> createInquiry(
             @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,
-            @RequestPart("request") String requestJson,
-            @RequestPart(value = "images", required = false) List<MultipartFile> images
-    ) throws IOException, MethodArgumentNotValidException {
-        CreateInquiryRequest request = objectMapper.readValue(requestJson, CreateInquiryRequest.class);
-        validateRequest(request);
-
-        Long inquiryId = inquiryService.createInquiry(principalDetails.getUser(), request, images);
+            @RequestBody @Valid CreateInquiryRequest request
+    ) {
+        Long inquiryId = inquiryService.createInquiry(principalDetails.getUser(), request);
         return ResponseEntity.ok(CommonResponse.success(inquiryId));
     }
 
@@ -89,30 +68,5 @@ public class InquiryController {
     ) {
         InquiryResponse response = inquiryService.getInquiry(principalDetails.getUser(), inquiryId);
         return ResponseEntity.ok(CommonResponse.success(response));
-    }
-
-    private <T> void validateRequest(T request) throws MethodArgumentNotValidException {
-        Set<ConstraintViolation<T>> violations = validator.validate(request);
-        if (!violations.isEmpty()) {
-            BindingResult bindingResult = new BeanPropertyBindingResult(request, request.getClass().getName());
-            for (ConstraintViolation<T> violation : violations) {
-                bindingResult.addError(new FieldError(
-                        request.getClass().getName(),
-                        violation.getPropertyPath().toString(),
-                        violation.getInvalidValue(),
-                        false,
-                        null,
-                        null,
-                        violation.getMessage()
-                ));
-            }
-            try {
-                MethodParameter parameter = new MethodParameter(
-                        this.getClass().getDeclaredMethod("validateRequest", Object.class), 0);
-                throw new MethodArgumentNotValidException(parameter, bindingResult);
-            } catch (NoSuchMethodException e) {
-                throw new RuntimeException(e);
-            }
-        }
     }
 }

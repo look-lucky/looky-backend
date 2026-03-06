@@ -8,6 +8,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
@@ -22,4 +24,6 @@ public class CreateReviewRequest {
     private Integer rating;
 
     private Long parentReviewId;
+
+    private List<String> imageUrls;
 }

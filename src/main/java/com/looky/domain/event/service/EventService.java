@@ -7,7 +7,6 @@ import com.looky.common.service.S3Service;
 import com.looky.domain.event.dto.CreateEventRequest;
 import com.looky.domain.event.dto.EventResponse;
 import com.looky.domain.event.dto.UpdateEventRequest;
-import com.looky.common.util.FileValidator;
 import com.looky.domain.event.entity.Event;
 import com.looky.domain.event.entity.EventImage;
 import com.looky.domain.event.entity.EventImageType;
@@ -24,11 +23,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
-import java.io.IOException;
+
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -41,7 +43,7 @@ public class EventService {
     private final S3Service s3Service;
 
     @Transactional
-    public Long createEvent(CreateEventRequest request, MultipartFile bannerImage, List<MultipartFile> images) throws IOException {
+    public Long createEvent(CreateEventRequest request) {
 
         University university = null;
         if (request.getUniversityId() != null) {
@@ -63,11 +65,29 @@ public class EventService {
                 .university(university)
                 .build();
 
-        // 배너 이미지 업로드 (최대 1장)
-        uploadBannerImage(event, bannerImage);
+        // 배너 이미지
+        if (request.getBannerImageUrl() != null) {
+            event.addImage(EventImage.builder()
+                    .imageUrl(request.getBannerImageUrl())
+                    .orderIndex(0)
+                    .imageType(EventImageType.BANNER)
+                    .build());
+        }
 
-        // 일반 이미지 업로드
-        uploadAndSaveImages(event, images);
+        // 일반 이미지
+        List<String> imageUrls = request.getImageUrls();
+        if (imageUrls != null && imageUrls.size() > 10) {
+            throw new CustomException(ErrorCode.BAD_REQUEST, "이미지는 최대 10장까지 등록할 수 있습니다.");
+        }
+        if (imageUrls != null) {
+            for (int i = 0; i < imageUrls.size(); i++) {
+                event.addImage(EventImage.builder()
+                        .imageUrl(imageUrls.get(i))
+                        .orderIndex(i)
+                        .imageType(EventImageType.GENERAL)
+                        .build());
+            }
+        }
 
         Event savedEvent = eventRepository.save(event);
         return savedEvent.getId();
@@ -91,7 +111,7 @@ public class EventService {
     }
 
     @Transactional
-    public void updateEvent(Long eventId, UpdateEventRequest request, MultipartFile bannerImage, List<MultipartFile> images) throws IOException {
+    public void updateEvent(Long eventId, UpdateEventRequest request) {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "이벤트를 찾을 수 없습니다."));
 
@@ -107,67 +127,87 @@ public class EventService {
                 request.getEndDateTime().orElse(event.getEndDateTime()),
                 request.getStatus().orElse(event.getStatus()),
                 request.getUniversityId().isPresent() ?
-                    (request.getUniversityId().get() != null ?
-                        universityRepository.findById(request.getUniversityId().get())
-                                .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "대학교를 찾을 수 없습니다."))
-                        : null)
-                    : event.getUniversity()
+                        (request.getUniversityId().get() != null ?
+                                universityRepository.findById(request.getUniversityId().get())
+                                        .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "대학교를 찾을 수 없습니다."))
+                                : null)
+                        : event.getUniversity()
         );
 
-        // 배너 이미지 교체
-        if (bannerImage != null && !bannerImage.isEmpty()) {
-            event.getImages().stream()
+        // 배너 이미지 처리
+        if (request.getBannerImageUrl().isPresent()) {
+            String newBannerUrl = request.getBannerImageUrl().get();
+            String currentBannerUrl = event.getImages().stream()
                     .filter(img -> img.getImageType() == EventImageType.BANNER)
-                    .forEach(img -> s3Service.deleteFile(img.getImageUrl()));
-            event.clearImagesByType(EventImageType.BANNER);
-            uploadBannerImage(event, bannerImage);
-        }
+                    .map(EventImage::getImageUrl)
+                    .findFirst().orElse(null);
 
-        // 1. 일반 이미지 삭제 처리 (preserveImageIds 기준)
-        if (request.getPreserveImageIds().isPresent()) {
-            List<Long> preserveIds = request.getPreserveImageIds().get();
-            List<Long> finalPreserveIds = preserveIds != null ? preserveIds : Collections.emptyList();
-
-            List<EventImage> imagesToDelete = event.getImages().stream()
-                    .filter(img -> img.getImageType() == EventImageType.GENERAL)
-                    .filter(img -> !finalPreserveIds.contains(img.getId()))
-                    .toList();
-
-            for (EventImage img : imagesToDelete) {
-                s3Service.deleteFile(img.getImageUrl());
-                event.getImages().remove(img);
-                img.setEvent(null);
+            if (!Objects.equals(currentBannerUrl, newBannerUrl)) {
+                // 기존 배너 S3 삭제 + DB 제거
+                event.getImages().stream()
+                        .filter(img -> img.getImageType() == EventImageType.BANNER)
+                        .toList()
+                        .forEach(img -> {
+                            s3Service.deleteFile(img.getImageUrl());
+                            event.getImages().remove(img);
+                            img.setEvent(null);
+                        });
+                // 새 배너 추가 (null이면 삭제만)
+                if (newBannerUrl != null) {
+                    event.addImage(EventImage.builder()
+                            .imageUrl(newBannerUrl)
+                            .orderIndex(0)
+                            .imageType(EventImageType.BANNER)
+                            .build());
+                }
             }
         }
 
-        // 2. 새 일반 이미지 추가 
-        if (images != null && !images.isEmpty()) {
-            // 새로 부여할 초기 orderIndex
-            int currentOrderIndex = (int) event.getImages().stream()
-                    .filter(img -> img.getImageType() == EventImageType.GENERAL)
-                    .count();
-                    
-            for (MultipartFile file : images) {
-                if (file.isEmpty()) continue;
-                String imageUrl = s3Service.uploadFile(file);
-                EventImage eventImage = EventImage.builder()
-                        .imageUrl(imageUrl)
-                        .orderIndex(currentOrderIndex++)
-                        .imageType(EventImageType.GENERAL)
-                        .build();
-                event.addImage(eventImage);
-            }
-        }
-        
-        // 3. 인덱스 재정렬 (리인덱스 로직)
-        List<EventImage> generalImages = event.getImages().stream()
-                .filter(img -> img.getImageType() == EventImageType.GENERAL)
-                // orderIndex ASC 정렬은 @OrderBy가 해주지만, Java 컬렉션 내에서는 삽입/삭제 순서대로 있을 수 있어 정렬 후 재할당
-                .sorted(java.util.Comparator.comparingInt(EventImage::getOrderIndex))
-                .toList();
+        // 일반 이미지 처리
+        if (request.getImageUrls().isPresent()) {
+            List<String> desiredUrls = request.getImageUrls().get() != null
+                    ? request.getImageUrls().get() : Collections.emptyList();
 
-        for (int i = 0; i < generalImages.size(); i++) {
-             generalImages.get(i).updateOrderIndex(i);
+            if (desiredUrls.size() > 10) {
+                throw new CustomException(ErrorCode.BAD_REQUEST, "이미지는 최대 10장까지 등록할 수 있습니다.");
+            }
+
+            Set<String> desiredSet = new HashSet<>(desiredUrls);
+
+            // desired에 없는 GENERAL 이미지 삭제
+            event.getImages().stream()
+                    .filter(img -> img.getImageType() == EventImageType.GENERAL)
+                    .filter(img -> !desiredSet.contains(img.getImageUrl()))
+                    .toList()
+                    .forEach(img -> {
+                        s3Service.deleteFile(img.getImageUrl());
+                        event.getImages().remove(img);
+                        img.setEvent(null);
+                    });
+
+            // DB에 없는 새 URL 추가
+            Set<String> existingGeneralUrls = event.getImages().stream()
+                    .filter(img -> img.getImageType() == EventImageType.GENERAL)
+                    .map(EventImage::getImageUrl)
+                    .collect(Collectors.toSet());
+            for (String url : desiredUrls) {
+                if (!existingGeneralUrls.contains(url)) {
+                    event.addImage(EventImage.builder()
+                            .imageUrl(url)
+                            .orderIndex(0)
+                            .imageType(EventImageType.GENERAL)
+                            .build());
+                }
+            }
+
+            // desiredUrls 순서대로 인덱스 재정렬
+            Map<String, EventImage> urlToImage = event.getImages().stream()
+                    .filter(img -> img.getImageType() == EventImageType.GENERAL)
+                    .collect(Collectors.toMap(EventImage::getImageUrl, img -> img));
+            for (int i = 0; i < desiredUrls.size(); i++) {
+                EventImage img = urlToImage.get(desiredUrls.get(i));
+                if (img != null) img.updateOrderIndex(i);
+            }
         }
     }
 
@@ -176,44 +216,10 @@ public class EventService {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "이벤트를 찾을 수 없습니다."));
 
-        // S3 이미지 삭제
         for (EventImage image : event.getImages()) {
             s3Service.deleteFile(image.getImageUrl());
         }
 
         eventRepository.delete(event);
-    }
-
-    private void uploadBannerImage(Event event, MultipartFile bannerImage) throws IOException {
-        if (bannerImage == null || bannerImage.isEmpty()) {
-            return;
-        }
-        FileValidator.validateImageFile(bannerImage, 10 * 1024 * 1024L);
-        String imageUrl = s3Service.uploadFile(bannerImage);
-        EventImage eventImage = EventImage.builder()
-                .imageUrl(imageUrl)
-                .orderIndex(0)
-                .imageType(EventImageType.BANNER)
-                .build();
-        event.addImage(eventImage);
-    }
-
-    private void uploadAndSaveImages(Event event, List<MultipartFile> images) throws IOException {
-        if (images == null || images.isEmpty()) {
-            return;
-        }
-
-        int orderIndex = 0;
-        for (MultipartFile file : images) {
-            if (file.isEmpty()) continue;
-
-            String imageUrl = s3Service.uploadFile(file);
-            EventImage eventImage = EventImage.builder()
-                    .imageUrl(imageUrl)
-                    .orderIndex(orderIndex++)
-                    .imageType(EventImageType.GENERAL)
-                    .build();
-            event.addImage(eventImage);
-        }
     }
 }

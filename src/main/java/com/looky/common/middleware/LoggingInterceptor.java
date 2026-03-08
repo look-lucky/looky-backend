@@ -23,10 +23,44 @@ public class LoggingInterceptor implements HandlerInterceptor {
         long startTime = System.currentTimeMillis();
         request.setAttribute("startTime", startTime);
 
+        // 클라이언트 IP 추출
+        String clientIp = getClientIp(request);
+        request.setAttribute("clientIp", clientIp);
+
         // 요청 로그 출력
-        log.info("[REQUEST] [{}] {} {}", requestId, request.getMethod(), request.getRequestURI());
+        log.info("[REQUEST] [{}] {} {} | IP: {}", requestId, request.getMethod(), request.getRequestURI(), clientIp);
 
         return true;
+    }
+
+    private String getClientIp(HttpServletRequest request) {
+
+        String ip = request.getHeader("X-Forwarded-For");
+        
+        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getHeader("Proxy-Client-IP");
+        }
+        
+        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getHeader("WL-Proxy-Client-IP");
+        }
+        
+        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getHeader("HTTP_CLIENT_IP");
+        }
+        
+        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getHeader("HTTP_X_FORWARDED_FOR");
+        }
+        
+        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getRemoteAddr();
+        }
+        // 다중 프록시를 거칠 경우 콤마(,)로 구분되어 첫 번째 IP가 실제 클라이언트 IP임
+        if (ip != null && ip.contains(",")) {
+            ip = ip.split(",")[0].trim();
+        }
+        return ip;
     }
 
     @Override

@@ -2,6 +2,7 @@ package com.looky.domain.event.dto;
 
 import com.looky.domain.event.entity.Event;
 import com.looky.domain.event.entity.EventImage;
+import com.looky.domain.event.entity.EventImageType;
 import com.looky.domain.event.entity.EventStatus;
 import com.looky.domain.event.entity.EventType;
 import lombok.Getter;
@@ -15,6 +16,7 @@ import java.util.stream.Collectors;
 public class EventResponse {
 
     private Long id;
+    private Long universityId;
     private String title;
     private String description;
     private String subtitle;
@@ -25,6 +27,7 @@ public class EventResponse {
     private LocalDateTime endDateTime;
     private String place;
     private EventStatus status;
+    private String bannerImageUrl;
     private List<String> imageUrls;
     private LocalDateTime createdAt;
 
@@ -40,10 +43,17 @@ public class EventResponse {
         this.endDateTime = event.getEndDateTime();
         this.place = event.getPlace();
         this.status = event.getStatus();
+        this.bannerImageUrl = event.getImages().stream()
+                .filter(img -> img.getImageType() == EventImageType.BANNER)
+                .map(EventImage::getImageUrl)
+                .findFirst()
+                .orElse(null);
         this.imageUrls = event.getImages().stream()
+                .filter(img -> img.getImageType() == EventImageType.GENERAL)
                 .map(EventImage::getImageUrl)
                 .collect(Collectors.toList());
         this.createdAt = event.getCreatedAt();
+        this.universityId = event.getUniversity() != null ? event.getUniversity().getId() : null;
     }
 
     public static EventResponse from(Event event) {

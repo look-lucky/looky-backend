@@ -17,7 +17,7 @@ public class VerifyCouponResponse {
 
     private CouponBenefitType benefitType;
     private String benefitValue;
-    private LocalDateTime issuedAt;
+    private LocalDateTime downloadedAt;
     private LocalDateTime expiresAt;
     private Boolean isExpired;
 
@@ -30,7 +30,7 @@ public class VerifyCouponResponse {
 
                 .benefitType(coupon.getBenefitType())
                 .benefitValue(coupon.getBenefitValue())
-                .issuedAt(studentCoupon.getIssuedAt())
+                .downloadedAt(studentCoupon.getDownloadedAt())
                 .expiresAt(studentCoupon.getExpiresAt())
                 .isExpired(studentCoupon.getExpiresAt().isBefore(LocalDateTime.now()))
                 .build();

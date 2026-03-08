@@ -58,7 +58,10 @@ public class StoreUpdateRequest {
     @Schema(description = "영업 중지 여부", example = "false")
     private JsonNullable<Boolean> isSuspended = JsonNullable.undefined();
 
-    @Schema(description = "유지할 이미지 ID 목록 (누락된 ID는 삭제됨)")
-    private JsonNullable<List<Long>> preserveImageIds = JsonNullable.undefined();
+    @Schema(description = "프로필 이미지 URL (미전송 시 유지, null 전송 시 삭제, URL 전송 시 변경)")
+    private JsonNullable<String> profileImageUrl = JsonNullable.undefined();
+
+    @Schema(description = "갤러리 이미지 URL 목록 (미전송 시 유지, null/빈배열 전송 시 전체 삭제, 배열 전송 시 해당 목록으로 교체. 기존 유지할 URL과 새 URL을 모두 포함해야 합니다.)")
+    private JsonNullable<List<String>> imageUrls = JsonNullable.undefined();
 }
 

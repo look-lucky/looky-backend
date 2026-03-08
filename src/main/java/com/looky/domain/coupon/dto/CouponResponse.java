@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 public class CouponResponse {
     private Long id;
     private Long storeId;
+    private String storeName;
     private String title;
 
     private LocalDateTime issueStartsAt;
@@ -33,6 +34,7 @@ public class CouponResponse {
         return CouponResponse.builder()
                 .id(coupon.getId())
                 .storeId(coupon.getStore().getId())
+                .storeName(coupon.getStore().getName())
                 .title(coupon.getTitle())
 
                 .issueStartsAt(coupon.getIssueStartsAt())

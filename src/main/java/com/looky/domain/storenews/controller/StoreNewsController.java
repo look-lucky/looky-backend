@@ -10,18 +10,8 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.Validator;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.core.MethodParameter;
-import org.springframework.validation.BeanPropertyBindingResult;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
-
-import java.util.Set;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -29,11 +19,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-import java.io.IOException;
-import java.util.List;
-
-import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
 
 @Tag(name = "StoreNews", description = "가게 소식 관련 API")
 @RestController
@@ -42,8 +27,6 @@ import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
 public class StoreNewsController {
 
     private final StoreNewsService storeNewsService;
-    private final ObjectMapper objectMapper;
-    private final Validator validator;
 
     @Operation(summary = "[점주] 소식 등록", description = "가게에 새로운 소식을 등록합니다.")
     @ApiResponses(value = {
@@ -51,16 +34,12 @@ public class StoreNewsController {
             @ApiResponse(responseCode = "403", description = "권한 없음 (본인 가게 아님)"),
             @ApiResponse(responseCode = "404", description = "가게 찾을 수 없음")
     })
-    @PostMapping(value = "/stores/{storeId}/news", consumes = MULTIPART_FORM_DATA_VALUE)
+    @PostMapping("/stores/{storeId}/news")
     public ResponseEntity<CommonResponse<Long>> createStoreNews(
             @Parameter(description = "가게 ID") @PathVariable Long storeId,
             @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,
-            @Parameter(description = "소식 이미지 목록") @RequestPart(required = false) List<MultipartFile> images,
-            @RequestPart("request") String requestJson) throws IOException, MethodArgumentNotValidException {
-        CreateStoreNewsRequest request = objectMapper.readValue(requestJson, CreateStoreNewsRequest.class);
-        validateRequest(request);
-
-        Long newsId = storeNewsService.createStoreNews(principalDetails.getUser(), request, storeId, images);
+            @RequestBody @Valid CreateStoreNewsRequest request) {
+        Long newsId = storeNewsService.createStoreNews(principalDetails.getUser(), request, storeId);
         return ResponseEntity.status(HttpStatus.CREATED).body(CommonResponse.success(newsId));
     }
 
@@ -86,16 +65,12 @@ public class StoreNewsController {
     }
 
     @Operation(summary = "[점주] 소식 수정", description = "소식을 수정합니다.")
-    @PatchMapping(value = "/store-news/{newsId}", consumes = MULTIPART_FORM_DATA_VALUE)
+    @PatchMapping("/store-news/{newsId}")
     public ResponseEntity<CommonResponse<Void>> updateStoreNews(
             @Parameter(description = "소식 ID") @PathVariable Long newsId,
             @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,
-            @Parameter(description = "변경할 소식 이미지 목록") @RequestPart(required = false) List<MultipartFile> images,
-            @RequestPart("request") String requestJson) throws IOException, MethodArgumentNotValidException {
-        UpdateStoreNewsRequest request = objectMapper.readValue(requestJson, UpdateStoreNewsRequest.class);
-        validateRequest(request);
-
-        storeNewsService.updateStoreNews(newsId, principalDetails.getUser(), request, images);
+            @RequestBody @Valid UpdateStoreNewsRequest request) {
+        storeNewsService.updateStoreNews(newsId, principalDetails.getUser(), request);
         return ResponseEntity.ok(CommonResponse.success(null));
     }
 
@@ -146,30 +121,5 @@ public class StoreNewsController {
             @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails) {
         storeNewsService.deleteComment(commentId, principalDetails.getUser());
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body(CommonResponse.success(null));
-    }
-
-    private <T> void validateRequest(T request) throws MethodArgumentNotValidException {
-        Set<ConstraintViolation<T>> violations = validator.validate(request);
-        if (!violations.isEmpty()) {
-            BindingResult bindingResult = new BeanPropertyBindingResult(request, request.getClass().getName());
-            for (ConstraintViolation<T> violation : violations) {
-                bindingResult.addError(new FieldError(
-                        request.getClass().getName(),
-                        violation.getPropertyPath().toString(),
-                        violation.getInvalidValue(),
-                        false,
-                        null,
-                        null,
-                        violation.getMessage()
-                ));
-            }
-            try {
-                MethodParameter parameter = new MethodParameter(
-                        this.getClass().getDeclaredMethod("validateRequest", Object.class), 0);
-                throw new MethodArgumentNotValidException(parameter, bindingResult);
-            } catch (NoSuchMethodException e) {
-                throw new RuntimeException(e);
-            }
-        }
     }
 }

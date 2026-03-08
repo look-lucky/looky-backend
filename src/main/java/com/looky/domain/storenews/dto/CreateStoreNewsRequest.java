@@ -5,6 +5,8 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Getter
 @NoArgsConstructor
 @Schema(description = "가게 소식 생성 요청")
@@ -17,5 +19,8 @@ public class CreateStoreNewsRequest {
     @NotBlank(message = "내용은 필수입니다.")
     @Schema(description = "소식 내용", example = "오늘 하루만 전 메뉴 10% 할인합니다.")
     private String content;
+
+    @Schema(description = "이미지 URL 목록 (최대 5장)")
+    private List<String> imageUrls;
 
 }

@@ -22,7 +22,6 @@ public class StoreCreateRequest {
     @NotBlank(message = "가게 이름은 필수입니다.")
     private String name;
 
-    @NotBlank(message = "사업자등록번호는 필수입니다.")
     private String bizRegNo;
 
     @NotBlank(message = "도로명 주소는 필수입니다.")
@@ -48,11 +47,15 @@ public class StoreCreateRequest {
 
     private List<Long> universityIds;
 
+    private String profileImageUrl;
+
+    private List<String> imageUrls;
+
     public Store toEntity(User user) {
         return Store.builder()
                 .user(user)
                 .name(name)
-                .bizRegNo(bizRegNo)
+                .bizRegNo(bizRegNo != null && bizRegNo.trim().isEmpty() ? null : bizRegNo)
                 .roadAddress(roadAddress)
                 .jibunAddress(jibunAddress)
                 .latitude(latitude)

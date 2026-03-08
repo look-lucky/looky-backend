@@ -86,7 +86,7 @@ public class PartnershipService {
          return matchingPartnerships.stream()
                  .collect(Collectors.groupingBy(
                          p -> p.getStore().getId(),
-                         Collectors.mapping(p -> PartnershipInfo.of(p.getOrganization().getCategory(), p.getOrganization().getName()), Collectors.toList())
+                         Collectors.mapping(p -> PartnershipInfo.of(p.getOrganization().getId(), p.getOrganization().getCategory(), p.getOrganization().getName()), Collectors.toList())
                  ));
     }
 }

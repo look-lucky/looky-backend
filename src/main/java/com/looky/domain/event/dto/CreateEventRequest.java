@@ -47,7 +47,12 @@ public class CreateEventRequest {
     @Schema(description = "장소", example = "학생회관 1층")
     private String place;
 
-    @NotNull(message = "대학교 ID는 필수입니다.")
-    @Schema(description = "대학교 ID", example = "1")
-    private Long universityId; // 0은 모든 학교 대상
+    @Schema(description = "대학교 ID (null이면 모든 학교 대상)", example = "null", nullable = true)
+    private Long universityId;
+
+    @Schema(description = "배너 이미지 URL")
+    private String bannerImageUrl;
+
+    @Schema(description = "일반 이미지 URL 목록")
+    private List<String> imageUrls;
 }

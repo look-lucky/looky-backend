@@ -23,8 +23,8 @@ public class StoreMapResponse {
     private Integer reviewCount;
     private List<StoreCategory> storeCategories;
     private String operatingHours;
-    private List<PartnershipInfo> myPartnerships;
-    private Boolean hasCoupon;
+    private List<PartnershipInfo> myPartnerships; // 내가 속한 조직 중 제휴 맺은 조직 정보 목록
+    private Boolean hasCoupon; // 학생이 다운로드 가능한 쿠폰 존재 여부
     private Long favoriteCount;
 
     public static StoreMapResponse of(Store store, Double averageRating, Integer reviewCount, List<PartnershipInfo> myPartnerships, Boolean hasCoupon, Long favoriteCount) {

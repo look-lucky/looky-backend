@@ -7,10 +7,11 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class PartnershipInfo {
+    private Long organizationId;
     private OrganizationCategory category;
     private String name;
 
-    public static PartnershipInfo of(OrganizationCategory category, String name) {
-        return new PartnershipInfo(category, name);
+    public static PartnershipInfo of(Long organizationId, OrganizationCategory category, String name) {
+        return new PartnershipInfo(organizationId, category, name);
     }
 }

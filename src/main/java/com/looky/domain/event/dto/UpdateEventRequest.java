@@ -45,6 +45,12 @@ public class UpdateEventRequest {
     @Schema(description = "이벤트 상태", example = "LIVE")
     private JsonNullable<EventStatus> status = JsonNullable.undefined();
 
-    @Schema(description = "대학교 ID (0이면 모든 대학)", example = "0")
+    @Schema(description = "대학교 ID (null이면 모든 대학)", example = "null", nullable = true)
     private JsonNullable<Long> universityId = JsonNullable.undefined();
+
+    @Schema(description = "배너 이미지 URL (미전송 시 유지, null 전송 시 삭제, URL 전송 시 변경)")
+    private JsonNullable<String> bannerImageUrl = JsonNullable.undefined();
+
+    @Schema(description = "일반 이미지 URL 목록 (미전송 시 유지, null/빈배열 전송 시 전체 삭제, 배열 전송 시 해당 목록으로 교체)")
+    private JsonNullable<List<String>> imageUrls = JsonNullable.undefined();
 }

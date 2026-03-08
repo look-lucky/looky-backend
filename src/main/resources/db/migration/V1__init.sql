@@ -20,8 +20,8 @@ create table user (
     password varchar(255),
     gender tinyint check (gender between 0 and 2),
     birth_date date,
-    role enum ('ROLE_ADMIN','ROLE_COUNCIL','ROLE_GUEST','ROLE_OWNER','ROLE_STUDENT') not null,
-    social_type enum ('APPLE','GOOGLE','KAKAO','LOCAL'),
+    role varchar(50) not null,
+    social_type varchar(50),
     social_id varchar(255),
     email varchar(255),
     deleted bit not null,
@@ -67,14 +67,14 @@ create table withdrawal_feedback (
 
 create table withdrawal_reason (
     feedback_id bigint not null,
-    reason enum ('UNUSED', 'INSUFFICIENT_BENEFITS', 'INCONVENIENT', 'TOO_MANY_ADS', 'NOT_NEEDED', 'OTHER'),
+    reason varchar(50),
     foreign key (feedback_id) references withdrawal_feedback (id)
 );
 
 /* Refresh Token */
 create table refresh_token (
     user_id bigint not null primary key,
-    token varchar(255),
+    token varchar(512),
     expiry_date datetime(6)
 );
 
@@ -85,7 +85,7 @@ create table organization (
     modified_at datetime(6) not null,
     created_by varchar(255),
     last_modified_by varchar(255),
-    category enum ('COLLEGE','DEPARTMENT','UNIVERSITY_COUNCIL','CLUB_ASSOCIATION') not null,
+    category varchar(50) not null,
     name varchar(255) not null,
     expires_at datetime(6),
     university_id bigint not null,
@@ -125,22 +125,23 @@ create table store (
     check_reason varchar(255),
     introduction longtext,
     operating_hours longtext,
-    store_status enum ('ACTIVE','BANNED','UNCLAIMED') not null,
+    profile_image_url varchar(255)
+    store_status varchar(50) not null,
     is_suspended bit default 0 not null,
-    clover_grade enum ('SEED','SPROUT','THREE_LEAF') default 'SEED' not null,
+    clover_grade varchar(50) default 'SEED' not null,
     user_id bigint,
     foreign key (user_id) references user (user_id)
 );
 
 create table store_categories (
     store_id bigint not null,
-    category enum ('BAR','BEAUTY_HEALTH','CAFE','ENTERTAINMENT','ETC','RESTAURANT'),
+    category varchar(50),
     foreign key (store_id) references store (store_id)
 );
 
 create table store_moods (
     store_id bigint not null,
-    mood enum ('GROUP_GATHERING','LATE_NIGHT','ROMANTIC','SOLO_DINING'),
+    mood varchar(50),
     foreign key (store_id) references store (store_id)
 );
 
@@ -179,7 +180,7 @@ create table store_claim (
     store_name varchar(255) not null,
     store_phone varchar(255),
     license_image_url varchar(255) not null,
-    status enum ('APPROVED','CANCELED','PENDING','REJECTED') not null,
+    status varchar(50) not null,
     reject_reason varchar(255),
     admin_memo longtext
 );
@@ -199,7 +200,7 @@ create table store_report (
 
 create table store_report_reason (
     store_report_id bigint not null,
-    reason enum ('BENEFIT_MISMATCH','BENEFIT_REFUSAL','CLOSED_OR_MOVED','ETC','EVENT_NOT_HELD','INFO_ERROR','LOCATION_MISMATCH'),
+    reason varchar(50),
     foreign key (store_report_id) references store_report (store_report_id)
 );
 
@@ -229,7 +230,7 @@ create table item (
     item_order int,
     is_representative bit not null,
     is_hidden bit not null,
-    badge enum ('BEST','HOT','NEW'),
+    badge varchar(50),
     store_id bigint not null,
     item_category_id bigint,
     foreign key (store_id) references store (store_id),
@@ -249,8 +250,8 @@ create table coupon (
     valid_days int not null,
     total_quantity int,
     limit_per_user int not null,
-    status enum ('ACTIVE','EXPIRED','WITHDRAWN_BY_OWNER') not null,
-    benefit_type enum ('FIXED_DISCOUNT','PERCENTAGE_DISCOUNT','SERVICE_GIFT') not null,
+    status varchar(50) not null,
+    benefit_type varchar(50) not null,
     benefit_value varchar(255),
     min_order_amount int,
     download_count int default 0 not null,
@@ -267,7 +268,7 @@ create table student_coupon (
     created_by varchar(255),
     last_modified_by varchar(255),
     verification_code varchar(4),
-    status enum ('ACTIVATED','EXPIRED','UNUSED','USED') not null,
+    status varchar(50) not null,
     issued_at datetime(6),
     activated_at datetime(6),
     used_at datetime(6),
@@ -293,14 +294,14 @@ create table events (
     place varchar(255) not null,
     start_date_time datetime(6) not null,
     end_date_time datetime(6) not null,
-    status enum ('ENDED','LIVE','UPCOMING') not null,
+    status varchar(50) not null,
     university_id bigint,
     foreign key (university_id) references university (university_id)
 );
 
 create table event_types (
     event_id bigint not null,
-    event_type enum ('COMMUNITY','FLEA_MARKET','FOOD_EVENT','PERFORMANCE','POPUP_STORE','SCHOOL_EVENT'),
+    event_type varchar(50),
     foreign key (event_id) references events (event_id)
 );
 
@@ -313,6 +314,7 @@ create table event_image (
     event_id bigint not null,
     image_url varchar(255) not null,
     order_index int,
+    image_type varchar(20) not null default 'GENERAL',
     foreign key (event_id) references events (event_id)
 );
 
@@ -358,7 +360,7 @@ create table review (
     is_verified bit not null,
     rating int,
     content longtext,
-    status enum ('BANNED','PUBLISHED','REPORTED','VERIFIED') not null,
+    status varchar(50) not null,
     report_count int not null,
     is_private bit not null,
     like_count int not null,
@@ -395,7 +397,7 @@ create table review_report (
     last_modified_by varchar(255),
     review_id bigint not null,
     reporter_id bigint not null,
-    reason enum ('MALICIOUS_SLANDER','INAPPROPRIATE_CONTENT','RIGHTS_VIOLATION','PRIVACY_INFRINGEMENT','COMMERCIAL_PROMOTION','FRAUDULENT_REVIEW','IRRELEVANT','OTHER') not null,
+    reason varchar(50) not null,
     detail varchar(500),
     foreign key (review_id) references review (review_id),
     foreign key (reporter_id) references user (user_id)
@@ -461,7 +463,7 @@ create table inquiry (
     created_by varchar(255),
     last_modified_by varchar(255),
     user_id bigint not null,
-    type enum ('COUPON_BENEFIT','MAP_LOCATION','STORE_INFO_ERROR','EVENT_PARTICIPATION','ALERT_ACCOUNT','PROPOSAL_OTHER') not null,
+    type varchar(50) not null,
     title varchar(14) not null,
     content varchar(500) not null,
     foreign key (user_id) references user (user_id)

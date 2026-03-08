@@ -7,7 +7,9 @@ import com.looky.domain.item.dto.ItemCategoryResponse;
 import com.looky.domain.item.repository.ItemCategoryRepository;
 import com.looky.domain.item.repository.ItemRepository;
 import com.looky.domain.store.entity.Store;
+import com.looky.domain.store.entity.StoreStatus;
 import com.looky.domain.store.repository.StoreRepository;
+import com.looky.domain.user.entity.Role;
 import com.looky.domain.user.entity.User;
 import com.looky.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -30,12 +32,7 @@ public class ItemCategoryService {
 
     @Transactional
     public Long createItemCategory(Long storeId, User user, String name) {
-        Store store = storeRepository.findById(storeId)
-                .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "해당 상점을 찾을 수 없습니다."));
-
-        if (!store.getUser().getId().equals(user.getId())) {
-            throw new CustomException(ErrorCode.FORBIDDEN);
-        }
+        Store store = getStoreAndValidateOwner(storeId, user);
         
         ItemCategory itemCategory = ItemCategory.builder()
                 .store(store)
@@ -94,6 +91,11 @@ public class ItemCategoryService {
 
         User owner = userRepository.findByUsername(user.getUsername())
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        // UNCLAIMED 상태면 관리자 허용
+        if (store.getStoreStatus() == StoreStatus.UNCLAIMED && owner.getRole() == Role.ROLE_ADMIN) {
+            return store;
+        }
 
         if (!Objects.equals(store.getUser().getId(), owner.getId())) {
              throw new CustomException(ErrorCode.FORBIDDEN, "본인 소유의 매장이 아닙니다.");

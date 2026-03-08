@@ -31,6 +31,7 @@ public class StoreNews extends BaseEntity {
     private String content;
 
     @OneToMany(mappedBy = "storeNews", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("orderIndex ASC")
     private List<StoreNewsImage> images = new ArrayList<>();
 
     @OneToMany(mappedBy = "storeNews", cascade = CascadeType.ALL, orphanRemoval = true)

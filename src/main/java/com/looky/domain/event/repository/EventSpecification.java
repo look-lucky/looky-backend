@@ -44,9 +44,6 @@ public class EventSpecification {
             if (universityId == null) {
                 return null;
             }
-            if (universityId == 0L) {
-                return cb.isNull(root.get("university"));
-            }
             return cb.equal(root.get("university").get("id"), universityId);
         };
     }

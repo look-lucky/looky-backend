@@ -195,13 +195,13 @@ public class CouponService {
 
             // 학생인 경우에만 발급 여부 확인
             if (user.getRole() == Role.ROLE_STUDENT) {
-                List<StudentCoupon> issuedCoupons = studentCouponRepository.findByUserAndCouponIn(user, coupons);
-                List<Long> issuedCouponIds = issuedCoupons.stream()
+                List<StudentCoupon> downloadedCoupons = studentCouponRepository.findByUserAndCouponIn(user, coupons);
+                List<Long> downloadedCouponIds = downloadedCoupons.stream()
                         .map(sc -> sc.getCoupon().getId())
                         .collect(Collectors.toList());
 
                 responses.forEach(response -> {
-                    if (issuedCouponIds.contains(response.getId())) {
+                    if (downloadedCouponIds.contains(response.getId())) {
                         response.setIsDownloaded(true);
                     }
                 });
@@ -235,13 +235,13 @@ public class CouponService {
 
         // 발급 여부 확인
         if (!coupons.isEmpty()) {
-            List<StudentCoupon> issuedCoupons = studentCouponRepository.findByUserAndCouponIn(user, coupons);
-            List<Long> issuedCouponIds = issuedCoupons.stream()
+            List<StudentCoupon> downloadedCoupons = studentCouponRepository.findByUserAndCouponIn(user, coupons);
+            List<Long> downloadedCouponIds = downloadedCoupons.stream()
                     .map(sc -> sc.getCoupon().getId())
                     .collect(Collectors.toList());
 
             responses.forEach(response -> {
-                if (issuedCouponIds.contains(response.getId())) {
+                if (downloadedCouponIds.contains(response.getId())) {
                     response.setIsDownloaded(true);
                 }
             });
@@ -252,7 +252,7 @@ public class CouponService {
     
     // 학생 쿠폰 발급 (다운로드)
     @Transactional
-    public IssueCouponResponse downloadCoupon(Long couponId, User user) {
+    public DownloadCouponResponse downloadCoupon(Long couponId, User user) {
         // 비관적 락을 사용하여 동시성 이슈 해결
         Coupon coupon = couponRepository.findByIdWithLock(couponId)
                 .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "쿠폰을 찾을 수 없습니다."));
@@ -303,11 +303,11 @@ public class CouponService {
 
         studentCouponRepository.save(studentCoupon);
 
-        return IssueCouponResponse.from(studentCoupon, coupon.getStore().getName());
+        return DownloadCouponResponse.from(studentCoupon, coupon.getStore().getName());
     }
 
     @Transactional
-    public String activateCoupon(Long studentCouponId, User user) {
+    public ActivateCouponResponse activateCoupon(Long studentCouponId, User user) {
         StudentCoupon studentCoupon = studentCouponRepository.findByIdAndUser(studentCouponId, user)
                 .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "쿠폰을 찾을 수 없습니다."));
 
@@ -329,7 +329,7 @@ public class CouponService {
         String verificationCode = generateUniqueVerificationCode(studentCoupon.getCoupon().getStore().getId());
         
         studentCoupon.activate(verificationCode);
-        return verificationCode;
+        return new ActivateCouponResponse(verificationCode, studentCoupon.getActivatedAt().plusMinutes(5));
     }
 
     private String generateUniqueVerificationCode(Long storeId) {
@@ -342,17 +342,17 @@ public class CouponService {
         throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR, "인증 코드 생성에 실패했습니다. 다시 시도해주세요.");
     }
 
-    public List<IssueCouponResponse> getMyCoupons(User user) {
+    public List<DownloadCouponResponse> getMyCoupons(User user) {
         return studentCouponRepository.findByUser(user).stream()
-                .map(IssueCouponResponse::from)
+                .map(DownloadCouponResponse::from)
                 .collect(Collectors.toList());
     }
 
     // 활성화 쿠폰 되돌리기 스케줄러 (1분마다 실행)
     @Transactional
     public int resetExpiredCoupons() {
-        // 현재 시간보다 30분 이전 ( = 활성화된 지 30분이 지남)
-        LocalDateTime threshold = LocalDateTime.now().minusMinutes(30);
+        // 현재 시간보다 5분 이전 ( = 활성화된 지 5분이 지남)
+        LocalDateTime threshold = LocalDateTime.now().minusMinutes(5);
 
         return studentCouponRepository.resetExpiredCoupons(threshold);
     }

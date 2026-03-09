@@ -81,8 +81,8 @@ public class StoreService {
             throw new CustomException(ErrorCode.FORBIDDEN, "점주 회원 또는 관리자만 가게를 등록할 수 있습니다.");
         }
 
-        if (storeRepository.existsByNameAndRoadAddress(request.getName(), request.getRoadAddress())) {
-            throw new CustomException(ErrorCode.DUPLICATE_RESOURCE, "이미 등록된 상점입니다.");
+        if (storeRepository.existsByNameAndNormalizedBranch(request.getName(), normalizeBranch(request.getBranch()))) {
+            throw new CustomException(ErrorCode.DUPLICATE_RESOURCE, "이미 존재하는 상점 이름/지점명 조합입니다.");
         }
 
         if (StringUtils.hasText(request.getBizRegNo()) && storeRepository.existsByBizRegNo(request.getBizRegNo())) {
@@ -233,8 +233,13 @@ public class StoreService {
             }
         }
 
-        if (request.getName().isPresent() && request.getName().get() != null && !store.getName().equals(request.getName().get()) && storeRepository.existsByName(request.getName().get())) {
-            throw new CustomException(ErrorCode.DUPLICATE_RESOURCE, "이미 존재하는 상점 이름입니다.");
+        // 이미 존재하는 상점인지 판단 (상점명 + 지점명 기준)
+        String updatedName = request.getName().orElse(store.getName());
+        String updatedBranch = request.getBranch().orElse(store.getBranch());
+        boolean storeIdentityChanged = !Objects.equals(store.getName(), updatedName) || !Objects.equals(normalizeBranch(store.getBranch()), normalizeBranch(updatedBranch));
+
+        if (storeIdentityChanged && storeRepository.existsByNameAndNormalizedBranchAndIdNot(updatedName, normalizeBranch(updatedBranch), storeId)) {
+            throw new CustomException(ErrorCode.DUPLICATE_RESOURCE, "이미 존재하는 상점 이름/지점명 조합입니다.");
         }
 
         // 프로필 이미지 처리
@@ -251,7 +256,7 @@ public class StoreService {
 
         store.updateStore(
                 request.getName().orElse(store.getName()),
-                request.getBranch().orElse(store.getBranch()),
+                sanitizeBranch(updatedBranch),
                 request.getRoadAddress().orElse(store.getRoadAddress()),
                 request.getJibunAddress().orElse(store.getJibunAddress()),
                 request.getLatitude().orElse(store.getLatitude()),
@@ -593,4 +598,14 @@ public class StoreService {
             return StoreMapResponse.of(store, averageRating, reviewCount != null ? reviewCount.intValue() : 0, myPartnerships, hasCoupon, favoriteCount);
         }).toList();
     }
+
+    private String normalizeBranch(String branch) {
+        return branch == null ? "" : branch.trim();
+    }
+
+    private String sanitizeBranch(String branch) {
+        String normalizedBranch = normalizeBranch(branch);
+        return normalizedBranch.isEmpty() ? null : normalizedBranch;
+    }
+
 }

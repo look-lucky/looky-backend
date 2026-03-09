@@ -15,7 +15,22 @@ import java.util.Optional;
 public interface StoreRepository extends JpaRepository<Store, Long>, JpaSpecificationExecutor<Store> {
     Page<Store> findAll(Pageable pageable);
 
-    boolean existsByName(String name);
+    @Query("""
+            SELECT CASE WHEN COUNT(s) > 0 THEN true ELSE false END
+            FROM Store s
+            WHERE s.name = :name
+              AND COALESCE(TRIM(s.branch), '') = :branch
+            """)
+    boolean existsByNameAndNormalizedBranch(@Param("name") String name, @Param("branch") String branch);
+
+    @Query("""
+            SELECT CASE WHEN COUNT(s) > 0 THEN true ELSE false END
+            FROM Store s
+            WHERE s.id <> :storeId
+              AND s.name = :name
+              AND COALESCE(TRIM(s.branch), '') = :branch
+            """)
+    boolean existsByNameAndNormalizedBranchAndIdNot(@Param("name") String name, @Param("branch") String branch, @Param("storeId") Long storeId);
 
     boolean existsByBizRegNo(String bizRegNo);
 

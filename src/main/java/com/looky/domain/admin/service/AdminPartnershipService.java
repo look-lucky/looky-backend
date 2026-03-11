@@ -190,7 +190,9 @@ public class AdminPartnershipService {
             // 2. Row별 검증
             for (int i = 1; i <= sheet.getLastRowNum(); i++) {
                 Row row = sheet.getRow(i);
-                if (row == null)
+
+                // 빈 행은 스킵
+                if (isRowEmpty(row))
                     continue;
 
                 try {
@@ -213,6 +215,18 @@ public class AdminPartnershipService {
         } catch (IOException e) {
             throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR, "엑셀 처리 중 오류가 발생했습니다.");
         }
+    }
+
+    private boolean isRowEmpty(Row row) {
+        if (row == null) {
+            return true;
+        }
+        for (int i = 0; i < HEADERS.length; i++) {
+            if (!getCellValue(row.getCell(i)).isEmpty()) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private Organization resolveOrganization(User user, Long targetOrganizationId) {

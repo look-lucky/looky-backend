@@ -5,6 +5,7 @@ import com.looky.domain.partnership.entity.Partnership;
 import lombok.Getter;
 
 import java.time.LocalDate;
+import java.util.Objects;
 
 @Getter
 public class PartnershipResponse {
@@ -30,6 +31,9 @@ public class PartnershipResponse {
         this.startsAt = partnership.getStartsAt();
         this.endsAt = partnership.getEndsAt();
         this.storeId = partnership.getStore().getId();
-        this.storeName = partnership.getStore().getName() + partnership.getStore().getBranch();
+        String branch = partnership.getStore().getBranch();
+        this.storeName = Objects.isNull(branch) || branch.isBlank()
+                ? partnership.getStore().getName()
+                : partnership.getStore().getName() + "(" + branch + ")";
     }
 }

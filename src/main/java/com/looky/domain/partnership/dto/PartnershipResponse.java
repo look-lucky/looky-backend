@@ -30,6 +30,6 @@ public class PartnershipResponse {
         this.startsAt = partnership.getStartsAt();
         this.endsAt = partnership.getEndsAt();
         this.storeId = partnership.getStore().getId();
-        this.storeName = partnership.getStore().getName();
+        this.storeName = partnership.getStore().getName() + partnership.getStore().getBranch();
     }
 }

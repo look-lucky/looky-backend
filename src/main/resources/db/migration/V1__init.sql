@@ -159,6 +159,14 @@ create table store_image (
     foreign key (store_id) references store (store_id)
 );
 
+create table menu_board_image (
+    id bigint auto_increment primary key,
+    store_id bigint not null,
+    image_url varchar(255) not null,
+    order_index int not null,
+    foreign key (store_id) references store (store_id)
+);
+
 create table store_university (
     id bigint auto_increment primary key,
     store_id bigint not null,

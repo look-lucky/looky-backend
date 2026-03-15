@@ -50,9 +50,9 @@ public class MenuBoardImageController {
     })
     @PutMapping
     public ResponseEntity<CommonResponse<Void>> updateMenuBoardImages(
+            @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,
             @Parameter(description = "상점 ID") @PathVariable Long storeId,
-            @RequestBody @Valid UpdateMenuBoardImagesRequest request,
-            @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails
+            @RequestBody @Valid UpdateMenuBoardImagesRequest request
     ) {
         menuBoardImageService.updateMenuBoardImages(storeId, principalDetails.getUser(), request);
         return ResponseEntity.ok(CommonResponse.success(null));

@@ -288,38 +288,13 @@ public class StoreService {
                 throw new CustomException(ErrorCode.BAD_REQUEST, "일반 이미지는 최대 3장까지 등록할 수 있습니다.");
             }
 
-            Set<String> desiredSet = new HashSet<>(desiredUrls);
-
-            // desired에 없는 기존 이미지 삭제
-            store.getImages().stream()
-                    .filter(img -> !desiredSet.contains(img.getImageUrl()))
-                    .toList()
-                    .forEach(img -> {
-                        s3Service.deleteFile(img.getImageUrl());
-                        store.removeImage(img);
-                    });
-
-            // DB에 없는 새 URL 추가
-            Set<String> existingUrls = store.getImages().stream()
-                    .map(StoreImage::getImageUrl)
-                    .collect(Collectors.toSet());
-            for (String url : desiredUrls) {
-                if (!existingUrls.contains(url)) {
-                    store.addImage(StoreImage.builder()
-                            .store(store)
-                            .imageUrl(url)
-                            .orderIndex(0)
-                            .build());
-                }
-            }
-
-            // desiredUrls 순서대로 인덱스 재정렬
-            Map<String, StoreImage> urlToImage = store.getImages().stream()
-                    .collect(Collectors.toMap(StoreImage::getImageUrl, img -> img));
-            for (int i = 0; i < desiredUrls.size(); i++) {
-                StoreImage img = urlToImage.get(desiredUrls.get(i));
-                if (img != null) img.updateOrderIndex(i);
-            }
+            s3Service.syncImages(
+                    store::getImages,
+                    desiredUrls,
+                    store::removeImage,
+                    url -> StoreImage.builder().store(store).imageUrl(url).orderIndex(0).build(),
+                    store::addImage
+            );
         }
 
         recalculateCloverGrade(store);
@@ -597,6 +572,19 @@ public class StoreService {
             boolean hasCoupon = finalCouponStoreIds.contains(store.getId());
             return StoreMapResponse.of(store, averageRating, reviewCount != null ? reviewCount.intValue() : 0, myPartnerships, hasCoupon, favoriteCount);
         }).toList();
+    }
+
+    public void validateStoreOwner(Store store, User user) {
+        User owner = userRepository.findByUsername(user.getUsername())
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        if (store.getStoreStatus() == StoreStatus.UNCLAIMED && owner.getRole() == Role.ROLE_ADMIN) {
+            return;
+        }
+
+        if (!Objects.equals(store.getUser().getId(), owner.getId())) {
+            throw new CustomException(ErrorCode.FORBIDDEN, "가게 주인이 아닙니다.");
+        }
     }
 
     private String normalizeBranch(String branch) {

@@ -1,9 +1,9 @@
-package com.looky.domain.item.controller;
+package com.looky.domain.store.controller;
 
 import com.looky.common.response.CommonResponse;
 import com.looky.common.response.SwaggerErrorResponse;
-import com.looky.domain.item.dto.UpdateMenuBoardImagesRequest;
-import com.looky.domain.item.service.MenuBoardImageService;
+import com.looky.domain.store.dto.UpdateMenuBoardImagesRequest;
+import com.looky.domain.store.service.MenuBoardImageService;
 import com.looky.security.details.PrincipalDetails;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;

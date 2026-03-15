@@ -1,5 +1,6 @@
 package com.looky.domain.store.entity;
 
+import com.looky.common.entity.OrderedImage;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -10,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "menu_board_image")
-public class MenuBoardImage {
+public class MenuBoardImage implements OrderedImage {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

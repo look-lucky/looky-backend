@@ -1,5 +1,6 @@
 package com.looky.domain.store.entity;
 
+import com.looky.common.entity.OrderedImage;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -7,7 +8,7 @@ import lombok.*;
 @Getter
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class StoreImage {
+public class StoreImage implements OrderedImage {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

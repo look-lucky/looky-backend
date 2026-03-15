@@ -11,10 +11,8 @@ import com.looky.domain.item.entity.ItemCategory;
 import com.looky.domain.item.repository.ItemCategoryRepository;
 import com.looky.domain.item.repository.ItemRepository;
 import com.looky.domain.store.entity.Store;
-import com.looky.domain.store.entity.StoreStatus;
 import com.looky.domain.store.repository.StoreRepository;
 import com.looky.domain.store.service.StoreService;
-import com.looky.domain.user.entity.Role;
 import com.looky.domain.user.entity.User;
 import com.looky.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -149,15 +147,6 @@ public class ItemService {
     }
 
     private void validateStoreOwner(Store store, User user) {
-        User owner = userRepository.findByUsername(user.getUsername())
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-
-        if (store.getStoreStatus() == StoreStatus.UNCLAIMED && owner.getRole() == Role.ROLE_ADMIN) {
-            return;
-        }
-
-        if (!Objects.equals(store.getUser().getId(), owner.getId())) {
-            throw new CustomException(ErrorCode.FORBIDDEN, "가게 주인이 아닙니다.");
-        }
+        storeService.validateStoreOwner(store, user);
     }
 }

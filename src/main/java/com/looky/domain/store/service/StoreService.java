@@ -90,9 +90,10 @@ public class StoreService {
         }
 
         List<String> imageUrls = request.getImageUrls();
-        if (imageUrls != null && imageUrls.size() > 3) {
-            throw new CustomException(ErrorCode.BAD_REQUEST, "일반 이미지는 최대 3장까지 등록할 수 있습니다.");
-        }
+        validateImageLimit(imageUrls, 3, "일반 이미지는 최대 3장까지 등록할 수 있습니다.");
+
+        List<String> menuBoardImageUrls = request.getMenuBoardImageUrls();
+        validateImageLimit(menuBoardImageUrls, 10, "메뉴판 이미지는 최대 10장까지 등록할 수 있습니다.");
 
         Store store = request.toEntity(owner);
 
@@ -106,15 +107,8 @@ public class StoreService {
             );
         }
 
-        if (imageUrls != null) {
-            for (int i = 0; i < imageUrls.size(); i++) {
-                store.addImage(StoreImage.builder()
-                        .store(store)
-                        .imageUrl(imageUrls.get(i))
-                        .orderIndex(i)
-                        .build());
-            }
-        }
+        addStoreImages(store, imageUrls);
+        addMenuBoardImages(store, menuBoardImageUrls);
 
         Store savedStore = storeRepository.save(store);
 
@@ -284,9 +278,7 @@ public class StoreService {
             List<String> desiredUrls = request.getImageUrls().get() != null
                     ? request.getImageUrls().get() : Collections.emptyList();
 
-            if (desiredUrls.size() > 3) {
-                throw new CustomException(ErrorCode.BAD_REQUEST, "일반 이미지는 최대 3장까지 등록할 수 있습니다.");
-            }
+            validateImageLimit(desiredUrls, 3, "일반 이미지는 최대 3장까지 등록할 수 있습니다.");
 
             s3Service.syncImages(
                     store::getImages,
@@ -294,6 +286,21 @@ public class StoreService {
                     store::removeImage,
                     url -> StoreImage.builder().store(store).imageUrl(url).orderIndex(0).build(),
                     store::addImage
+            );
+        }
+
+        if (request.getMenuBoardImageUrls().isPresent()) {
+            List<String> desiredMenuBoardUrls = request.getMenuBoardImageUrls().get() != null
+                    ? request.getMenuBoardImageUrls().get() : Collections.emptyList();
+
+            validateImageLimit(desiredMenuBoardUrls, 10, "메뉴판 이미지는 최대 10장까지 등록할 수 있습니다.");
+
+            s3Service.syncImages(
+                    store::getMenuBoardImages,
+                    desiredMenuBoardUrls,
+                    store::removeMenuBoardImage,
+                    url -> MenuBoardImage.builder().imageUrl(url).orderIndex(0).build(),
+                    store::addMenuBoardImage
             );
         }
 
@@ -376,6 +383,7 @@ public class StoreService {
             }
         }
 
+        deleteStoreAssets(store);
         storeRepository.delete(store);
     }
 
@@ -594,6 +602,45 @@ public class StoreService {
     private String sanitizeBranch(String branch) {
         String normalizedBranch = normalizeBranch(branch);
         return normalizedBranch.isEmpty() ? null : normalizedBranch;
+    }
+
+    private void validateImageLimit(List<String> imageUrls, int limit, String message) {
+        if (imageUrls != null && imageUrls.size() > limit) {
+            throw new CustomException(ErrorCode.BAD_REQUEST, message);
+        }
+    }
+
+    private void addStoreImages(Store store, List<String> imageUrls) {
+        if (imageUrls == null) {
+            return;
+        }
+
+        for (int i = 0; i < imageUrls.size(); i++) {
+            store.addImage(StoreImage.builder()
+                    .store(store)
+                    .imageUrl(imageUrls.get(i))
+                    .orderIndex(i)
+                    .build());
+        }
+    }
+
+    private void addMenuBoardImages(Store store, List<String> imageUrls) {
+        if (imageUrls == null) {
+            return;
+        }
+
+        for (int i = 0; i < imageUrls.size(); i++) {
+            store.addMenuBoardImage(MenuBoardImage.builder()
+                    .imageUrl(imageUrls.get(i))
+                    .orderIndex(i)
+                    .build());
+        }
+    }
+
+    private void deleteStoreAssets(Store store) {
+        s3Service.deleteFile(store.getProfileImageUrl());
+        store.getImages().forEach(image -> s3Service.deleteFile(image.getImageUrl()));
+        store.getMenuBoardImages().forEach(image -> s3Service.deleteFile(image.getImageUrl()));
     }
 
 }

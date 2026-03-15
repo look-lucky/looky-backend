@@ -2,6 +2,7 @@ package com.looky.domain.store.dto;
 
 import com.looky.domain.store.entity.Store;
 import com.looky.domain.store.entity.StoreCategory;
+import com.looky.domain.store.entity.MenuBoardImage;
 import com.looky.domain.store.entity.StoreImage;
 import com.looky.domain.store.entity.StoreMood;
 import com.looky.domain.store.entity.CloverGrade;
@@ -35,6 +36,7 @@ public class StoreResponse {
     private List<StoreCategory> storeCategories;
     private List<StoreMood> storeMoods;
     private List<String> imageUrls; // 0번 째 값이 썸네일
+    private List<String> menuBoardImageUrls;
     private Double averageRating;
     private Integer reviewCount;
     private List<LocalDate> holidayDates;
@@ -63,6 +65,7 @@ public class StoreResponse {
                 .storeCategories(new ArrayList<>(store.getStoreCategories()))
                 .storeMoods(new ArrayList<>(store.getStoreMoods()))
                 .imageUrls(store.getImages().stream().map(StoreImage::getImageUrl).collect(Collectors.toList()))
+                .menuBoardImageUrls(store.getMenuBoardImages().stream().map(MenuBoardImage::getImageUrl).collect(Collectors.toList()))
                 .averageRating(averageRating != null ? averageRating : 0.0)
                 .reviewCount(reviewCount != null ? reviewCount : 0)
                 .holidayDates(store.getHolidayDates())

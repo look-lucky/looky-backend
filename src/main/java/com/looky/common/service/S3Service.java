@@ -1,5 +1,6 @@
 package com.looky.common.service;
 
+import com.looky.common.entity.OrderedImage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -13,7 +14,15 @@ import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignReques
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -74,6 +83,50 @@ public class S3Service {
             s3Client.deleteObject(deleteObjectRequest);
         } catch (Exception e) {
             System.err.println("S3 파일 삭제 실패: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 이미지 목록을 desired 상태로 동기화합니다 (삭제 / 추가 / 순서 재정렬).
+     * S3에서 제거된 이미지는 자동으로 삭제됩니다.
+     *
+     * @param getImages    현재 이미지 컬렉션을 반환하는 Supplier (삭제 후 재조회를 위해 Supplier 사용)
+     * @param desiredUrls  최종적으로 유지할 URL 목록 (순서 포함)
+     * @param removeAction 이미지를 엔티티에서 제거하는 동작
+     * @param createAction URL로 이미지 엔티티를 생성하는 팩토리
+     * @param addAction    생성된 이미지를 엔티티에 추가하는 동작
+     */
+    public <T extends OrderedImage> void syncImages(
+            Supplier<List<T>> getImages,
+            List<String> desiredUrls,
+            Consumer<T> removeAction,
+            Function<String, T> createAction,
+            Consumer<T> addAction) {
+
+        Set<String> desiredSet = new HashSet<>(desiredUrls);
+
+        getImages.get().stream()
+                .filter(img -> !desiredSet.contains(img.getImageUrl()))
+                .toList()
+                .forEach(img -> {
+                    deleteFile(img.getImageUrl());
+                    removeAction.accept(img);
+                });
+
+        Set<String> existingUrls = getImages.get().stream()
+                .map(OrderedImage::getImageUrl)
+                .collect(Collectors.toSet());
+        for (String url : desiredUrls) {
+            if (!existingUrls.contains(url)) {
+                addAction.accept(createAction.apply(url));
+            }
+        }
+
+        Map<String, T> urlToImage = getImages.get().stream()
+                .collect(Collectors.toMap(OrderedImage::getImageUrl, img -> img));
+        for (int i = 0; i < desiredUrls.size(); i++) {
+            T img = urlToImage.get(desiredUrls.get(i));
+            if (img != null) img.updateOrderIndex(i);
         }
     }
 

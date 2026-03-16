@@ -49,7 +49,7 @@ public class StoreNewsService {
     private final S3Service s3Service;
 
     @Transactional
-    public Long createStoreNews(User user, CreateStoreNewsRequest request, Long storeId) {
+    public Long createStoreNews(Long storeId, User user, CreateStoreNewsRequest request) {
         Store store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "해당 상점을 찾을 수 없습니다."));
 

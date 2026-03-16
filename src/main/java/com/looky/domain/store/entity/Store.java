@@ -132,6 +132,10 @@ public class Store extends BaseEntity {
     @OrderBy("orderIndex ASC")
     private List<StoreImage> images = new ArrayList<>(); // 가게 썸네일 및 일반 이미지 (0번째가 썸네일)
 
+    @OneToMany(mappedBy = "store", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("orderIndex ASC")
+    private List<MenuBoardImage> menuBoardImages = new ArrayList<>(); // 메뉴판 이미지 (최대 10장)
+
     @Column(name = "profile_image_url")
     private String profileImageUrl; // 가게 프로필 이미지 URL
 
@@ -230,6 +234,16 @@ public class Store extends BaseEntity {
         this.images.remove(image);
     }
 
+    public void addMenuBoardImage(MenuBoardImage image) {
+        this.menuBoardImages.add(image);
+        image.setStore(this);
+    }
+
+    public void removeMenuBoardImage(MenuBoardImage image) {
+        this.menuBoardImages.remove(image);
+        image.setStore(null);
+    }
+
     public void approveClaim(User owner, String bizRegNo, String storePhone, String representativeName) {
         // 승인된 가게 점유 요청 정보로 업데이트
         this.user = owner;
@@ -254,6 +268,7 @@ public class Store extends BaseEntity {
         this.storeCategories.clear();
         this.storeMoods.clear();
         this.images.clear();
+        this.menuBoardImages.clear();
         this.holidayDates.clear();
         this.isSuspended = false;
         this.cloverGrade = CloverGrade.SEED;

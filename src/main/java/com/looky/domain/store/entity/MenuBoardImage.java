@@ -2,17 +2,19 @@ package com.looky.domain.store.entity;
 
 import com.looky.common.entity.OrderedImage;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
-@AllArgsConstructor(access = AccessLevel.PROTECTED)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class StoreImage implements OrderedImage {
+@Table(name = "menu_board_image")
+public class MenuBoardImage implements OrderedImage {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "store_image_id")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -23,16 +25,19 @@ public class StoreImage implements OrderedImage {
     private String imageUrl;
 
     @Column(nullable = false)
-    private int orderIndex; // 0일 경우 썸네일
+    private int orderIndex;
 
     @Builder
-    public StoreImage(Store store, String imageUrl, int orderIndex) {
-        this.store = store;
+    public MenuBoardImage(String imageUrl, int orderIndex) {
         this.imageUrl = imageUrl;
         this.orderIndex = orderIndex;
     }
 
     public void updateOrderIndex(int orderIndex) {
         this.orderIndex = orderIndex;
+    }
+
+    public void setStore(Store store) {
+        this.store = store;
     }
 }

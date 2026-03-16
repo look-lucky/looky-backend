@@ -71,6 +71,9 @@ public class StoreCreateRequest {
     @Schema(description = "갤러리 이미지 URL 목록 (최대 3장)")
     private List<String> imageUrls;
 
+    @Schema(description = "메뉴판 이미지 URL 목록 (최대 10장)")
+    private List<String> menuBoardImageUrls;
+
     public Store toEntity(User user) {
         return Store.builder()
                 .user(user)

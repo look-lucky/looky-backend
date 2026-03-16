@@ -286,13 +286,11 @@ public class AdminPartnershipService {
 
         // 2. 무결성 검증 (상호명 일치 여부)
         if (!store.getName().trim().equals(data.storeName.trim())) {
-            throw new IllegalArgumentException("Line " + lineNum + ": 상호명 불일치 (엑셀: " + data.storeName + ", DB: "
-                    + store.getName() + ") - 위조가 의심됩니다.");
+            throw new IllegalArgumentException("Line " + lineNum + ": 상호명 불일치 (엑셀: " + data.storeName + ", DB: " + store.getName() + ")");
         }
 
         // 3. 관할 구역 검증
-        boolean isLinked = storeUniversityRepository.existsByStoreIdAndUniversityId(store.getId(),
-                organization.getUniversity().getId());
+        boolean isLinked = storeUniversityRepository.existsByStoreIdAndUniversityId(store.getId(), organization.getUniversity().getId());
         if (!isLinked) {
             throw new IllegalArgumentException("Line " + lineNum + ": 해당 상점은 본 학생회의 관할 구역(대학)이 아닙니다.");
         }
@@ -337,7 +335,6 @@ public class AdminPartnershipService {
         }
     }
 
-    private record PartnershipData(Long storeId, String storeName, String benefit, LocalDate startDate,
-            LocalDate endDate) {
+    private record PartnershipData(Long storeId, String storeName, String benefit, LocalDate startDate, LocalDate endDate) {
     }
 }

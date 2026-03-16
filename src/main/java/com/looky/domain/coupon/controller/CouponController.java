@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @Tag(name = "Coupon", description = "쿠폰 관련 API")
+@Deprecated
 @RestController
 @RequestMapping("/api")
 @RequiredArgsConstructor
@@ -67,9 +68,9 @@ public class CouponController {
 
         @Operation(summary = "[점주] 쿠폰 삭제", description = "쿠폰을 삭제합니다. (본인 상점만 가능)")
         @ApiResponses(value = {
-                        @ApiResponse(responseCode = "204", description = "쿠폰 삭제 성공"),
-                        @ApiResponse(responseCode = "403", description = "권한 없음 (본인 소유 상점 아님)", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class))),
-                        @ApiResponse(responseCode = "404", description = "쿠폰 없음", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class)))
+                @ApiResponse(responseCode = "204", description = "쿠폰 삭제 성공"),
+                @ApiResponse(responseCode = "403", description = "권한 없음 (본인 소유 상점 아님)", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class))),
+                @ApiResponse(responseCode = "404", description = "쿠폰 없음", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class)))
         })
         @DeleteMapping("/coupons/{couponId}")
         public ResponseEntity<CommonResponse<Void>> deleteCoupon(
@@ -116,8 +117,8 @@ public class CouponController {
         @Operation(summary = "[점주] 쿠폰 사용 확정", description = "조회된 쿠폰을 실제로 사용 처리합니다.")
         @ApiResponses(value = {
                 @ApiResponse(responseCode = "200", description = "쿠폰 사용 완료"),
-                @ApiResponse(responseCode = "404", description = "쿠폰 없음", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class))),
                 @ApiResponse(responseCode = "403", description = "권한 없음", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class))),
+                @ApiResponse(responseCode = "404", description = "쿠폰 없음", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class))),
                 @ApiResponse(responseCode = "422", description = "활성화되지 않은 쿠폰", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class)))
         })
         @PostMapping("/stores/{storeId}/coupons/{studentCouponId}/use")
@@ -136,8 +137,8 @@ public class CouponController {
 
         @Operation(summary = "[공통] 상점별 쿠폰 목록 조회", description = "특정 상점의 모든 쿠폰을 조회합니다.")
         @ApiResponses(value = {
-                        @ApiResponse(responseCode = "200", description = "성공"),
-                        @ApiResponse(responseCode = "404", description = "상점 없음", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class)))
+                @ApiResponse(responseCode = "200", description = "성공"),
+                @ApiResponse(responseCode = "404", description = "상점 없음", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class)))
         })
         @GetMapping("/stores/{storeId}/coupons")
         public ResponseEntity<CommonResponse<List<CouponResponse>>> getCouponsByStore(
@@ -157,10 +158,10 @@ public class CouponController {
                 @ApiResponse(responseCode = "403", description = "학생 권한 필요")
         })
         @GetMapping("/today")
-        public ResponseEntity<CommonResponse<List<CouponResponse>>> getTodayCoupons(
+        public ResponseEntity<CommonResponse<List<StudentCouponResponse>>> getTodayCoupons(
                 @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails
         ) {
-                List<CouponResponse> response = couponService.getTodayCoupons(principalDetails.getUser());
+                List<StudentCouponResponse> response = couponService.getTodayCoupons(principalDetails.getUser());
                 return ResponseEntity.ok(CommonResponse.success(response));
         }
 

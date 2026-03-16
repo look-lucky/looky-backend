@@ -9,6 +9,7 @@ src/main/resources/key/
 .claude
 db_data/
 redis_data/
+.gradle-user/
 
 HELP.md
 .gradle

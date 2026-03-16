@@ -93,13 +93,21 @@ public class SecurityConfig {
                 http
                         .authorizeHttpRequests((auth) -> auth
                                 .requestMatchers(HttpMethod.DELETE, "/api/auth/withdraw").authenticated()
+
+                                // 공통 API
                                 .requestMatchers("/api/auth/**", "/reissue", "/docs", "/swagger-ui/**", "/v3/api-docs/**", "/health")
                                 .permitAll()
+                                // 학생 및 점주 회원 가입 API
                                 .requestMatchers(HttpMethod.GET, "/api/universities/**", "/api/organizations/**", "/api/store-claims/search")
                                 .permitAll()
+                                // 점주 사업자 인증 API
                                 .requestMatchers(HttpMethod.POST, "/api/biz-reg-no/verify", "/api/store-claims/**")
                                 .permitAll()
+
+                                .requestMatchers("/api/student/**").hasRole("STUDENT")
+                                .requestMatchers("/api/owner/**").hasRole("OWNER")
                                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
+
                                 .anyRequest().authenticated());
 
                 http.oauth2Login(oauth2 -> oauth2

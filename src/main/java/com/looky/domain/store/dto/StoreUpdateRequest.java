@@ -63,5 +63,7 @@ public class StoreUpdateRequest {
 
     @Schema(description = "갤러리 이미지 URL 목록 (미전송 시 유지, null/빈배열 전송 시 전체 삭제, 배열 전송 시 해당 목록으로 교체. 기존 유지할 URL과 새 URL을 모두 포함해야 합니다.)")
     private JsonNullable<List<String>> imageUrls = JsonNullable.undefined();
-}
 
+    @Schema(description = "메뉴판 이미지 URL 목록 (미전송 시 유지, null/빈배열 전송 시 전체 삭제, 배열 전송 시 해당 목록으로 교체. 기존 유지할 URL과 새 URL을 모두 포함해야 합니다.)")
+    private JsonNullable<List<String>> menuBoardImageUrls = JsonNullable.undefined();
+}

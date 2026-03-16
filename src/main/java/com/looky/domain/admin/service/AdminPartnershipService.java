@@ -190,7 +190,9 @@ public class AdminPartnershipService {
             // 2. Row별 검증
             for (int i = 1; i <= sheet.getLastRowNum(); i++) {
                 Row row = sheet.getRow(i);
-                if (row == null)
+
+                // 빈 행은 스킵
+                if (isRowEmpty(row))
                     continue;
 
                 try {
@@ -213,6 +215,18 @@ public class AdminPartnershipService {
         } catch (IOException e) {
             throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR, "엑셀 처리 중 오류가 발생했습니다.");
         }
+    }
+
+    private boolean isRowEmpty(Row row) {
+        if (row == null) {
+            return true;
+        }
+        for (int i = 0; i < HEADERS.length; i++) {
+            if (!getCellValue(row.getCell(i)).isEmpty()) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private Organization resolveOrganization(User user, Long targetOrganizationId) {
@@ -272,13 +286,11 @@ public class AdminPartnershipService {
 
         // 2. 무결성 검증 (상호명 일치 여부)
         if (!store.getName().trim().equals(data.storeName.trim())) {
-            throw new IllegalArgumentException("Line " + lineNum + ": 상호명 불일치 (엑셀: " + data.storeName + ", DB: "
-                    + store.getName() + ") - 위조가 의심됩니다.");
+            throw new IllegalArgumentException("Line " + lineNum + ": 상호명 불일치 (엑셀: " + data.storeName + ", DB: " + store.getName() + ")");
         }
 
         // 3. 관할 구역 검증
-        boolean isLinked = storeUniversityRepository.existsByStoreIdAndUniversityId(store.getId(),
-                organization.getUniversity().getId());
+        boolean isLinked = storeUniversityRepository.existsByStoreIdAndUniversityId(store.getId(), organization.getUniversity().getId());
         if (!isLinked) {
             throw new IllegalArgumentException("Line " + lineNum + ": 해당 상점은 본 학생회의 관할 구역(대학)이 아닙니다.");
         }
@@ -323,7 +335,6 @@ public class AdminPartnershipService {
         }
     }
 
-    private record PartnershipData(Long storeId, String storeName, String benefit, LocalDate startDate,
-            LocalDate endDate) {
+    private record PartnershipData(Long storeId, String storeName, String benefit, LocalDate startDate, LocalDate endDate) {
     }
 }

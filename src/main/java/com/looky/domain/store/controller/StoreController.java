@@ -45,7 +45,7 @@ public class StoreController {
                 @ApiResponse(responseCode = "201", description = "상점 등록 성공"),
                 @ApiResponse(responseCode = "400", description = "잘못된 요청 데이터", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class))),
                 @ApiResponse(responseCode = "403", description = "권한 없음", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class))),
-                @ApiResponse(responseCode = "409", description = "이미 존재하는 상점 이름", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class)))
+                @ApiResponse(responseCode = "409", description = "이미 존재하는 상점 (상점명 + 지점명 기준)", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class)))
         })
         @PostMapping
         public ResponseEntity<CommonResponse<Long>> createStore(
@@ -61,7 +61,7 @@ public class StoreController {
                 @ApiResponse(responseCode = "200", description = "상점 수정 성공"),
                 @ApiResponse(responseCode = "403", description = "권한 없음 (본인 소유 상점 아님)", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class))),
                 @ApiResponse(responseCode = "404", description = "상점 없음", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class))),
-                @ApiResponse(responseCode = "409", description = "이미 존재하는 상점 이름", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class)))
+                @ApiResponse(responseCode = "409", description = "이미 존재하는 상점 (상점명 + 지점명 기준)", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class)))
         })
         @PatchMapping("/{storeId}")
         public ResponseEntity<CommonResponse<Void>> updateStore(

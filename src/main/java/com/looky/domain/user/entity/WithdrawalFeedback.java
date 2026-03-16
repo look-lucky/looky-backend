@@ -16,6 +16,7 @@ public class WithdrawalFeedback extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "withdrawal_feedback_id")
     private Long id;
 
     @OneToOne(fetch = FetchType.LAZY)

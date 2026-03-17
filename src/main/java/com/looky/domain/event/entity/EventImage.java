@@ -41,4 +41,8 @@ public class EventImage extends BaseEntity {
     public void setEvent(Event event) {
         this.event = event;
     }
+
+    public void updateOrderIndex(int orderIndex) {
+        this.orderIndex = orderIndex;
+    }
 }

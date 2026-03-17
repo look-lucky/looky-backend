@@ -30,7 +30,9 @@ public class StoreClaimRequest {
 
     private String storePhone;
 
-    public StoreClaim toEntity(String uploadedImageUrl) {
+    private String licenseImageUrl;
+
+    public StoreClaim toEntity() {
         return StoreClaim.builder()
                 .storeId(storeId)
                 .userId(userId)
@@ -38,7 +40,7 @@ public class StoreClaimRequest {
                 .representativeName(representativeName)
                 .storeName(storeName)
                 .storePhone(storePhone)
-                .licenseImageUrl(uploadedImageUrl)
+                .licenseImageUrl(licenseImageUrl)
                 .build();
     }
 }

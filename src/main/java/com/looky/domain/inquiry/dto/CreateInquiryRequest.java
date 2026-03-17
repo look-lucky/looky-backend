@@ -10,6 +10,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
@@ -25,6 +27,8 @@ public class CreateInquiryRequest {
     @NotBlank(message = "내용은 필수입니다.")
     @Size(max = 500, message = "내용은 500자 이하로 입력해주세요.")
     private String content;
+
+    private List<String> imageUrls;
 
     public Inquiry toEntity(User user) {
         return Inquiry.builder()

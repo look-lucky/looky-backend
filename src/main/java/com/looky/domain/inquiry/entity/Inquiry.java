@@ -37,6 +37,7 @@ public class Inquiry extends BaseEntity {
     private String content;
 
     @OneToMany(mappedBy = "inquiry", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("orderIndex ASC")
     private List<InquiryImage> images = new ArrayList<>();
 
     @Builder

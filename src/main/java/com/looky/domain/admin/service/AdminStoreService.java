@@ -113,7 +113,8 @@ public class AdminStoreService {
                             store.getStoreMoods(),
                             store.getHolidayDates(),
                             store.getIsSuspended(),
-                            store.getRepresentativeName()
+                            store.getRepresentativeName(),
+                            store.getProfileImageUrl()
                     );
                 } else {
                     // 신규 가게 생성 후 Map에 즉시 등록 → 배치 내 중복 방지

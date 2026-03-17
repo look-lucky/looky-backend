@@ -14,18 +14,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
-
-import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.core.MethodParameter;
-import org.springframework.validation.BeanPropertyBindingResult;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
-
-import java.util.Set;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -33,11 +22,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-import java.io.IOException;
-import java.util.List;
-
-import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
 
 @Tag(name = "Review", description = "리뷰 관련 API")
 @RestController
@@ -46,8 +30,6 @@ import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
 public class ReviewController {
 
     private final ReviewService reviewService;
-    private final ObjectMapper objectMapper;
-    private final Validator validator;
 
     @Operation(summary = "[공통] 리뷰 및 답글 작성", description = "상점에 대한 리뷰(학생) 또는 답글(점주, 학생)을 작성합니다.")
     @ApiResponses(value = {
@@ -57,17 +39,13 @@ public class ReviewController {
             @ApiResponse(responseCode = "404", description = "상점 또는 원본 리뷰 없음", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class))),
             @ApiResponse(responseCode = "409", description = "이미 작성된 리뷰 존재", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class)))
     })
-    @PostMapping(value = "/stores/{storeId}/reviews", consumes = MULTIPART_FORM_DATA_VALUE)
+    @PostMapping("/stores/{storeId}/reviews")
     public ResponseEntity<CommonResponse<Long>> createReview(
             @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,
             @Parameter(description = "상점 ID") @PathVariable Long storeId,
-            @RequestPart("request") String requestJson,
-            @Parameter(description = "리뷰 이미지 목록") @RequestPart(required = false) List<MultipartFile> images
-    ) throws IOException, MethodArgumentNotValidException {
-            CreateReviewRequest request = objectMapper.readValue(requestJson, CreateReviewRequest.class);
-            validateRequest(request);
-
-            Long reviewId = reviewService.createReview(principalDetails.getUser(), storeId, request, images);
+            @RequestBody @Valid CreateReviewRequest request
+    ) {
+            Long reviewId = reviewService.createReview(principalDetails.getUser(), storeId, request);
             return ResponseEntity.status(HttpStatus.CREATED).body(CommonResponse.success(reviewId));
     }
 
@@ -77,17 +55,13 @@ public class ReviewController {
             @ApiResponse(responseCode = "403", description = "권한 없음 (본인 리뷰 아님)", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class))),
             @ApiResponse(responseCode = "404", description = "리뷰 없음", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class)))
     })
-    @PatchMapping(value = "/reviews/{reviewId}", consumes = MULTIPART_FORM_DATA_VALUE)
+    @PatchMapping("/reviews/{reviewId}")
     public ResponseEntity<CommonResponse<Void>> updateReview(
             @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,
             @Parameter(description = "리뷰 ID") @PathVariable Long reviewId,
-            @RequestPart("request") String requestJson,
-            @Parameter(description = "리뷰 이미지 목록") @RequestPart(required = false) List<MultipartFile> images
-    ) throws IOException, MethodArgumentNotValidException {
-            UpdateReviewRequest request = objectMapper.readValue(requestJson, UpdateReviewRequest.class);
-            validateRequest(request);
-
-            reviewService.updateReview(reviewId, principalDetails.getUser(), request, images);
+            @RequestBody @Valid UpdateReviewRequest request
+    ) {
+            reviewService.updateReview(reviewId, principalDetails.getUser(), request);
             return ResponseEntity.ok(CommonResponse.success(null));
     }
 
@@ -101,8 +75,7 @@ public class ReviewController {
     public ResponseEntity<CommonResponse<Void>> deleteReview(
             @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,
             @Parameter(description = "리뷰 ID") @PathVariable Long reviewId
-    )
-    {
+    ) {
             reviewService.deleteReview(reviewId, principalDetails.getUser());
             return ResponseEntity.status(HttpStatus.NO_CONTENT).body(CommonResponse.success(null));
     }
@@ -143,8 +116,7 @@ public class ReviewController {
     @GetMapping("/stores/{storeId}/reviews/stats")
     public ResponseEntity<CommonResponse<ReviewStatsResponse>> getReviewStats(
                     @Parameter(description = "상점 ID") @PathVariable Long storeId
-    )
-    {
+    ) {
             ReviewStatsResponse response = reviewService.getReviewStats(storeId);
             return ResponseEntity.ok(CommonResponse.success(response));
     }
@@ -159,8 +131,7 @@ public class ReviewController {
                     @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,
                     @Parameter(description = "리뷰 ID") @PathVariable Long reviewId,
                     @RequestBody @Valid ReportRequest request
-    )
-    {
+    ) {
             reviewService.reportReview(reviewId, principalDetails.getUser().getId(), request);
             return ResponseEntity.ok(CommonResponse.success(null));
     }
@@ -193,30 +164,5 @@ public class ReviewController {
     {
             reviewService.removeLike(principalDetails.getUser(), reviewId);
             return ResponseEntity.ok(CommonResponse.success(null));
-    }
-
-    private <T> void validateRequest(T request) throws MethodArgumentNotValidException {
-        Set<ConstraintViolation<T>> violations = validator.validate(request);
-        if (!violations.isEmpty()) {
-            BindingResult bindingResult = new BeanPropertyBindingResult(request, request.getClass().getName());
-            for (ConstraintViolation<T> violation : violations) {
-                bindingResult.addError(new FieldError(
-                        request.getClass().getName(),
-                        violation.getPropertyPath().toString(),
-                        violation.getInvalidValue(),
-                        false,
-                        null,
-                        null,
-                        violation.getMessage()
-                ));
-            }
-            try {
-                MethodParameter parameter = new MethodParameter(
-                        this.getClass().getDeclaredMethod("validateRequest", Object.class), 0);
-                throw new MethodArgumentNotValidException(parameter, bindingResult);
-            } catch (NoSuchMethodException e) {
-                throw new RuntimeException(e);
-            }
-        }
     }
 }

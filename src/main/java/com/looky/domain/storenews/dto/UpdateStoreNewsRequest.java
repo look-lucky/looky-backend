@@ -17,8 +17,8 @@ public class UpdateStoreNewsRequest {
     @Schema(description = "소식 내용", example = "오늘 하루만 전 메뉴 20% 할인합니다.")
     private JsonNullable<String> content = JsonNullable.undefined();
 
-    @Schema(description = "유지할 이미지 ID 목록 (누락된 ID는 삭제됨)")
-    private JsonNullable<List<Long>> preserveImageIds = JsonNullable.undefined();
+    @Schema(description = "이미지 URL 목록 (미전송 시 유지, null/빈배열 전송 시 전체 삭제, 배열 전송 시 해당 목록으로 교체)")
+    private JsonNullable<List<String>> imageUrls = JsonNullable.undefined();
 }
 
 

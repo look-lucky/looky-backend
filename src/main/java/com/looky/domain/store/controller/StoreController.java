@@ -19,18 +19,10 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.core.MethodParameter;
-import org.springframework.validation.BeanPropertyBindingResult;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
 
-import java.util.Set;
+import java.util.List;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -38,12 +30,6 @@ import com.looky.domain.user.entity.User;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.io.IOException;
-import java.util.List;
-
-import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
 
 @Tag(name = "Store", description = "상점 관련 API")
 @RestController
@@ -53,26 +39,20 @@ import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
 public class StoreController {
 
         private final StoreService storeService;
-        private final ObjectMapper objectMapper;
-        private final Validator validator;
 
         @Operation(summary = "[점주] 상점 등록", description = "새로운 상점을 등록합니다.")
         @ApiResponses(value = {
                 @ApiResponse(responseCode = "201", description = "상점 등록 성공"),
                 @ApiResponse(responseCode = "400", description = "잘못된 요청 데이터", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class))),
                 @ApiResponse(responseCode = "403", description = "권한 없음", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class))),
-                @ApiResponse(responseCode = "409", description = "이미 존재하는 상점 이름", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class)))
+                @ApiResponse(responseCode = "409", description = "이미 존재하는 상점 (상점명 + 지점명 기준)", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class)))
         })
-        @PostMapping(consumes = MULTIPART_FORM_DATA_VALUE)
+        @PostMapping
         public ResponseEntity<CommonResponse<Long>> createStore(
                 @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,
-                @Parameter(description = "상품 이미지 목록") @RequestPart(required = false) List<MultipartFile> images,
-                @RequestPart("request") String requestJson
-        ) throws IOException, MethodArgumentNotValidException {
-                StoreCreateRequest request = objectMapper.readValue(requestJson, StoreCreateRequest.class);
-                validateRequest(request);
-
-                Long storeId = storeService.createStore(principalDetails.getUser(), request, images);
+                @RequestBody @Valid StoreCreateRequest request
+        ) {
+                Long storeId = storeService.createStore(principalDetails.getUser(), request);
                 return ResponseEntity.status(HttpStatus.CREATED).body(CommonResponse.success(storeId));
         }
 
@@ -81,40 +61,16 @@ public class StoreController {
                 @ApiResponse(responseCode = "200", description = "상점 수정 성공"),
                 @ApiResponse(responseCode = "403", description = "권한 없음 (본인 소유 상점 아님)", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class))),
                 @ApiResponse(responseCode = "404", description = "상점 없음", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class))),
-                @ApiResponse(responseCode = "409", description = "이미 존재하는 상점 이름", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class)))
+                @ApiResponse(responseCode = "409", description = "이미 존재하는 상점 (상점명 + 지점명 기준)", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class)))
         })
-        @PatchMapping(value = "/{storeId}", consumes = MULTIPART_FORM_DATA_VALUE)
+        @PatchMapping("/{storeId}")
         public ResponseEntity<CommonResponse<Void>> updateStore(
                 @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,
                 @Parameter(description = "상점 ID") @PathVariable Long storeId,
-                @RequestPart("request") String requestJson,
-                @RequestPart(required = false) List<MultipartFile> images
-        ) throws IOException, MethodArgumentNotValidException {
-                StoreUpdateRequest request = objectMapper.readValue(requestJson, StoreUpdateRequest.class);
-                validateRequest(request);
-
-                if (images != null) {
-                    log.info("Update Store Request: storeId={}, images count={}", storeId, images.size());
-                    for (MultipartFile img : images) {
-                        log.info("Received Image: name={}, originalFilename={}, size={}, contentType={}", 
-                                img.getName(), img.getOriginalFilename(), img.getSize(), img.getContentType());
-                    }
-                } else {
-                    log.info("Update Store Request: storeId={}, images=null", storeId);
-                }
-                storeService.updateStore(storeId, principalDetails.getUser(), request, images);
-                return ResponseEntity.ok(CommonResponse.success(null));
-        }
-
-        @Operation(summary = "[점주] 상점 이미지 개별 삭제", description = "상점의 특정 이미지를 삭제합니다.")
-        @DeleteMapping("/{storeId}/images/{imageId}")
-        public ResponseEntity<CommonResponse<Void>> deleteStoreImage(
-                @PathVariable Long storeId,
-                @PathVariable Long imageId,
-                @AuthenticationPrincipal PrincipalDetails principalDetails
+                @RequestBody @Valid StoreUpdateRequest request
         ) {
-                storeService.deleteStoreImage(storeId, imageId, principalDetails.getUser());
-                return ResponseEntity.status(HttpStatus.NO_CONTENT).body(CommonResponse.success(null));
+                storeService.updateStore(storeId, principalDetails.getUser(), request);
+                return ResponseEntity.ok(CommonResponse.success(null));
         }
 
         @Operation(summary = "[점주] 상점 삭제", description = "상점을 삭제합니다. (본인 상점만 가능)")
@@ -278,31 +234,6 @@ public class StoreController {
                 User user = principalDetails != null ? principalDetails.getUser() : null;
                 List<StoreMapResponse> response = storeService.getStoreMap(universityId, user);
                 return ResponseEntity.ok(CommonResponse.success(response));
-        }
-
-        private <T> void validateRequest(T request) throws MethodArgumentNotValidException {
-                Set<ConstraintViolation<T>> violations = validator.validate(request);
-                if (!violations.isEmpty()) {
-                        BindingResult bindingResult = new BeanPropertyBindingResult(request, request.getClass().getName());
-                        for (ConstraintViolation<T> violation : violations) {
-                                bindingResult.addError(new FieldError(
-                                        request.getClass().getName(),
-                                        violation.getPropertyPath().toString(),
-                                        violation.getInvalidValue(),
-                                        false,
-                                        null,
-                                        null,
-                                        violation.getMessage()
-                                ));
-                        }
-                        try {
-                                MethodParameter parameter = new MethodParameter(
-                                        this.getClass().getDeclaredMethod("validateRequest", Object.class), 0);
-                                throw new MethodArgumentNotValidException(parameter, bindingResult);
-                        } catch (NoSuchMethodException e) {
-                                throw new RuntimeException(e);
-                        }
-                }
         }
 
 }

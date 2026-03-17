@@ -125,6 +125,7 @@ create table store (
     check_reason varchar(255),
     introduction longtext,
     operating_hours longtext,
+    profile_image_url varchar(255)
     store_status varchar(50) not null,
     is_suspended bit default 0 not null,
     clover_grade varchar(50) default 'SEED' not null,
@@ -152,6 +153,14 @@ create table store_holidays (
 
 create table store_image (
     store_image_id bigint auto_increment primary key,
+    store_id bigint not null,
+    image_url varchar(255) not null,
+    order_index int not null,
+    foreign key (store_id) references store (store_id)
+);
+
+create table menu_board_image (
+    id bigint auto_increment primary key,
     store_id bigint not null,
     image_url varchar(255) not null,
     order_index int not null,

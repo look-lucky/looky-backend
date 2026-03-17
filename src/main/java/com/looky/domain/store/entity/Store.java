@@ -129,7 +129,15 @@ public class Store extends BaseEntity {
     private User user; // 사장님 (미등록 가게일 경우 null)
 
     @OneToMany(mappedBy = "store", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<StoreImage> images = new ArrayList<>();
+    @OrderBy("orderIndex ASC")
+    private List<StoreImage> images = new ArrayList<>(); // 가게 썸네일 및 일반 이미지 (0번째가 썸네일)
+
+    @OneToMany(mappedBy = "store", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("orderIndex ASC")
+    private List<MenuBoardImage> menuBoardImages = new ArrayList<>(); // 메뉴판 이미지 (최대 10장)
+
+    @Column(name = "profile_image_url")
+    private String profileImageUrl; // 가게 프로필 이미지 URL
 
     @ElementCollection
     @CollectionTable(name = "store_holidays", joinColumns = @JoinColumn(name = "store_id"))
@@ -143,8 +151,10 @@ public class Store extends BaseEntity {
     @Column(nullable = false)
     private CloverGrade cloverGrade = CloverGrade.SEED; // 클로버 등급 (Default: SEED)
 
+
+
     @Builder
-    public Store(User user, String name, String branch, String roadAddress, String jibunAddress, String bizRegNo, Double latitude, Double longitude, String storePhone, String introduction, String operatingHours, Set<StoreCategory> storeCategories, Set<StoreMood> storeMoods, StoreStatus storeStatus, Boolean needToCheck, String checkReason, List<LocalDate> holidayDates, Boolean isSuspended, String representativeName) {
+    public Store(User user, String name, String branch, String roadAddress, String jibunAddress, String bizRegNo, Double latitude, Double longitude, String storePhone, String introduction, String operatingHours, Set<StoreCategory> storeCategories, Set<StoreMood> storeMoods, StoreStatus storeStatus, Boolean needToCheck, String checkReason, List<LocalDate> holidayDates, Boolean isSuspended, String representativeName, String profileImageUrl) {
         this.user = user;
         this.name = name;
         this.branch = branch;
@@ -164,9 +174,10 @@ public class Store extends BaseEntity {
         this.holidayDates = holidayDates != null ? holidayDates : new ArrayList<>();
         this.isSuspended = isSuspended != null ? isSuspended : false;
         this.representativeName = representativeName;
+        this.profileImageUrl = profileImageUrl;
     }
 
-    public void updateStore(String name, String branch, String roadAddress, String jibunAddress, Double latitude, Double longitude, String phone, String introduction, String operatingHours, Set<StoreCategory> storeCategories, Set<StoreMood> storeMoods, List<LocalDate> holidayDates, Boolean isSuspended, String representativeName) {
+    public void updateStore(String name, String branch, String roadAddress, String jibunAddress, Double latitude, Double longitude, String phone, String introduction, String operatingHours, Set<StoreCategory> storeCategories, Set<StoreMood> storeMoods, List<LocalDate> holidayDates, Boolean isSuspended, String representativeName, String profileImageUrl) {
         this.name = name;
         this.branch = branch;
         this.roadAddress = roadAddress;
@@ -178,6 +189,7 @@ public class Store extends BaseEntity {
         this.operatingHours = operatingHours;
         this.isSuspended = isSuspended;
         this.representativeName = representativeName;
+        this.profileImageUrl = profileImageUrl;
 
         if (storeCategories != null) {
             this.storeCategories.clear(); // JPA 영속성 컨텍스트 유지를 위해 컬렉션 전체 교체 대신 내용물 교체
@@ -222,6 +234,16 @@ public class Store extends BaseEntity {
         this.images.remove(image);
     }
 
+    public void addMenuBoardImage(MenuBoardImage image) {
+        this.menuBoardImages.add(image);
+        image.setStore(this);
+    }
+
+    public void removeMenuBoardImage(MenuBoardImage image) {
+        this.menuBoardImages.remove(image);
+        image.setStore(null);
+    }
+
     public void approveClaim(User owner, String bizRegNo, String storePhone, String representativeName) {
         // 승인된 가게 점유 요청 정보로 업데이트
         this.user = owner;
@@ -246,6 +268,7 @@ public class Store extends BaseEntity {
         this.storeCategories.clear();
         this.storeMoods.clear();
         this.images.clear();
+        this.menuBoardImages.clear();
         this.holidayDates.clear();
         this.isSuspended = false;
         this.cloverGrade = CloverGrade.SEED;

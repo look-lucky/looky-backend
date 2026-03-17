@@ -53,6 +53,7 @@ public class Review extends BaseEntity {
     private int likeCount;
 
     @OneToMany(mappedBy = "review", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("orderIndex ASC")
     private List<ReviewImage> images = new ArrayList<>();
 
     @OneToMany(mappedBy = "parentReview", cascade = CascadeType.ALL, orphanRemoval = true)

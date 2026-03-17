@@ -3,7 +3,6 @@ package com.looky.domain.storenews.service;
 import com.looky.common.exception.CustomException;
 import com.looky.common.exception.ErrorCode;
 import com.looky.common.service.S3Service;
-import com.looky.common.util.FileValidator;
 import com.looky.domain.store.entity.Store;
 import com.looky.domain.store.repository.StoreRepository;
 import com.looky.domain.storenews.dto.CreateStoreNewsCommentRequest;
@@ -11,7 +10,6 @@ import com.looky.domain.storenews.dto.CreateStoreNewsRequest;
 import com.looky.domain.storenews.dto.StoreNewsCommentResponse;
 import com.looky.domain.storenews.dto.StoreNewsResponse;
 import com.looky.domain.storenews.dto.UpdateStoreNewsRequest;
-import java.util.Collections;
 import com.looky.domain.storenews.entity.StoreNews;
 import com.looky.domain.storenews.entity.StoreNewsComment;
 import com.looky.domain.storenews.entity.StoreNewsImage;
@@ -28,10 +26,14 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
-import java.io.IOException;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -47,8 +49,7 @@ public class StoreNewsService {
     private final S3Service s3Service;
 
     @Transactional
-    public Long createStoreNews(User user, CreateStoreNewsRequest request, Long storeId, List<MultipartFile> images)
-            throws IOException {
+    public Long createStoreNews(Long storeId, User user, CreateStoreNewsRequest request) {
         Store store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "해당 상점을 찾을 수 없습니다."));
 
@@ -56,8 +57,10 @@ public class StoreNewsService {
             throw new CustomException(ErrorCode.FORBIDDEN);
         }
 
-        // 이미지 유효성 검사 (최대 5장, 10MB)
-        FileValidator.validateImageFiles(images, 5, 10 * 1024 * 1024);
+        List<String> imageUrls = request.getImageUrls();
+        if (imageUrls != null && imageUrls.size() > 5) {
+            throw new CustomException(ErrorCode.BAD_REQUEST, "이미지는 최대 5장까지 등록할 수 있습니다.");
+        }
 
         StoreNews storeNews = StoreNews.builder()
                 .store(store)
@@ -65,16 +68,12 @@ public class StoreNewsService {
                 .content(request.getContent())
                 .build();
 
-        if (images != null && !images.isEmpty()) {
-            int currentOrderIndex = 0;
-            for (MultipartFile file : images) {
-                if (file != null && !file.isEmpty()) {
-                    String imageUrl = s3Service.uploadFile(file);
-                    storeNews.addImage(StoreNewsImage.builder()
-                            .imageUrl(imageUrl)
-                            .orderIndex(currentOrderIndex++)
-                            .build());
-                }
+        if (imageUrls != null) {
+            for (int i = 0; i < imageUrls.size(); i++) {
+                storeNews.addImage(StoreNewsImage.builder()
+                        .imageUrl(imageUrls.get(i))
+                        .orderIndex(i)
+                        .build());
             }
         }
 
@@ -100,7 +99,6 @@ public class StoreNewsService {
                 .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "가게 소식을 찾을 수 없습니다."));
 
         boolean isLiked = false;
-
         if (currentUser != null) {
             isLiked = storeNewsLikeRepository.existsByStoreNewsIdAndUserId(newsId, currentUser.getId());
         }
@@ -108,8 +106,7 @@ public class StoreNewsService {
     }
 
     @Transactional
-    public void updateStoreNews(Long newsId, User user, UpdateStoreNewsRequest request, List<MultipartFile> images)
-            throws IOException {
+    public void updateStoreNews(Long newsId, User user, UpdateStoreNewsRequest request) {
         StoreNews news = storeNewsRepository.findById(newsId)
                 .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "가게 소식을 찾을 수 없습니다."));
 
@@ -117,15 +114,11 @@ public class StoreNewsService {
             throw new CustomException(ErrorCode.FORBIDDEN);
         }
 
-        if (images != null && !images.isEmpty()) {
-            FileValidator.validateImageFiles(images, 5, 10 * 1024 * 1024);
-        }
-
         String title = news.getTitle();
         if (request.getTitle().isPresent()) {
             title = request.getTitle().get();
-            if (title == null || title.isBlank()) { // Explicit null or empty string check
-                 throw new CustomException(ErrorCode.BAD_REQUEST, "제목은 필수입니다.");
+            if (title == null || title.isBlank()) {
+                throw new CustomException(ErrorCode.BAD_REQUEST, "제목은 필수입니다.");
             }
         }
 
@@ -133,55 +126,52 @@ public class StoreNewsService {
         if (request.getContent().isPresent()) {
             content = request.getContent().get();
             if (content == null || content.isBlank()) {
-                 throw new CustomException(ErrorCode.BAD_REQUEST, "내용은 필수입니다.");
+                throw new CustomException(ErrorCode.BAD_REQUEST, "내용은 필수입니다.");
             }
         }
 
         news.update(title, content);
 
-        // 1. 이미지 삭제 처리 (preserveImageIds 기준)
-        if (request.getPreserveImageIds().isPresent()) {
-            List<Long> preserveIds = request.getPreserveImageIds().get();
-            List<Long> finalPreserveIds = preserveIds != null ? preserveIds : Collections.emptyList();
+        // 이미지 처리
+        if (request.getImageUrls().isPresent()) {
+            List<String> desiredUrls = request.getImageUrls().get() != null
+                    ? request.getImageUrls().get() : Collections.emptyList();
 
-            List<StoreNewsImage> imagesToDelete = news.getImages().stream()
-                    .filter(img -> !finalPreserveIds.contains(img.getId()))
-                    .toList();
-
-            for (StoreNewsImage img : imagesToDelete) {
-                s3Service.deleteFile(img.getImageUrl());
-                news.removeImage(img);
+            if (desiredUrls.size() > 5) {
+                throw new CustomException(ErrorCode.BAD_REQUEST, "이미지는 최대 5장까지 등록할 수 있습니다.");
             }
-        }
 
-        // 2. 새 이미지 추가 및 전체 개수 검증
-        int currentImageCount = news.getImages().size();
-        int newImageCount = 0;
-        if (images != null) {
-            newImageCount = (int) images.stream().filter(img -> img != null && !img.isEmpty()).count();
-        }
+            Set<String> desiredSet = new HashSet<>(desiredUrls);
 
-        if (currentImageCount + newImageCount > 5) {
-             throw new CustomException(ErrorCode.BAD_REQUEST, "이미지는 최대 5장까지 등록할 수 있습니다.");
-        }
+            // desired에 없는 기존 이미지 삭제
+            news.getImages().stream()
+                    .filter(img -> !desiredSet.contains(img.getImageUrl()))
+                    .toList()
+                    .forEach(img -> {
+                        s3Service.deleteFile(img.getImageUrl());
+                        news.removeImage(img);
+                    });
 
-        // 새 이미지 업로드 및 저장
-        if (images != null && !images.isEmpty()) {
-            int currentOrderIndex = news.getImages().size();
-            for (MultipartFile file : images) {
-                if (file != null && !file.isEmpty()) {
-                    String imageUrl = s3Service.uploadFile(file);
+            // DB에 없는 새 URL 추가
+            Set<String> existingUrls = news.getImages().stream()
+                    .map(StoreNewsImage::getImageUrl)
+                    .collect(Collectors.toSet());
+            for (String url : desiredUrls) {
+                if (!existingUrls.contains(url)) {
                     news.addImage(StoreNewsImage.builder()
-                            .imageUrl(imageUrl)
-                            .orderIndex(currentOrderIndex++)
+                            .imageUrl(url)
+                            .orderIndex(0)
                             .build());
                 }
             }
-        }
 
-        // 3. 인덱스 재정렬
-        for (int i = 0; i < news.getImages().size(); i++) {
-             news.getImages().get(i).updateOrderIndex(i);
+            // desiredUrls 순서대로 인덱스 재정렬
+            Map<String, StoreNewsImage> urlToImage = news.getImages().stream()
+                    .collect(Collectors.toMap(StoreNewsImage::getImageUrl, img -> img));
+            for (int i = 0; i < desiredUrls.size(); i++) {
+                StoreNewsImage img = urlToImage.get(desiredUrls.get(i));
+                if (img != null) img.updateOrderIndex(i);
+            }
         }
     }
 
@@ -236,19 +226,17 @@ public class StoreNewsService {
     public PageResponse<StoreNewsCommentResponse> getComments(Long newsId, Pageable pageable, User currentUser) {
         Page<StoreNewsComment> page = storeNewsCommentRepository.findByStoreNewsId(newsId, pageable);
 
-        // 댓글 작성자 ID 목록 추출
         List<Long> userIds = page.getContent().stream()
                 .map(comment -> comment.getUser().getId())
                 .distinct()
                 .toList();
-        
-        // 닉네임 조회 (학생 프로필 & 점주 프로필)
-        Map<Long, String> nicknameMap = new java.util.HashMap<>();
-        
+
+        Map<Long, String> nicknameMap = new HashMap<>();
+
         if (!userIds.isEmpty()) {
             List<com.looky.domain.user.entity.StudentProfile> students = studentProfileRepository.findAllById(userIds);
             students.forEach(p -> nicknameMap.put(p.getUserId(), p.getNickname()));
-            
+
             List<com.looky.domain.user.entity.OwnerProfile> owners = ownerProfileRepository.findAllById(userIds);
             owners.forEach(p -> nicknameMap.put(p.getUserId(), p.getName()));
         }
@@ -257,7 +245,7 @@ public class StoreNewsService {
             String nickname = nicknameMap.getOrDefault(comment.getUser().getId(), "알 수 없음");
             return StoreNewsCommentResponse.from(comment, currentUser, nickname);
         });
-        
+
         return PageResponse.from(responsePage);
     }
 

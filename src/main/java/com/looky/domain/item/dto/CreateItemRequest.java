@@ -37,6 +37,8 @@ public class CreateItemRequest {
 
     private Long itemCategoryId;
 
+    private String imageUrl;
+
     public Item toEntity(Store store, ItemCategory itemCategory, String uploadedImageUrl) {
         return Item.builder()
                 .store(store)

@@ -38,4 +38,7 @@ public class UpdateItemRequest {
 
     @Schema(description = "카테고리 ID (null 전달 시 카테고리 해제)", example = "1")
     private JsonNullable<Long> itemCategoryId = JsonNullable.undefined();
+
+    @Schema(description = "메뉴 이미지 URL (미전송 시 유지, null 전송 시 삭제, URL 전송 시 변경)")
+    private JsonNullable<String> imageUrl = JsonNullable.undefined();
 }

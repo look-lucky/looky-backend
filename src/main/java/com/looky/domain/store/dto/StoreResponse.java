@@ -2,6 +2,7 @@ package com.looky.domain.store.dto;
 
 import com.looky.domain.store.entity.Store;
 import com.looky.domain.store.entity.StoreCategory;
+import com.looky.domain.store.entity.MenuBoardImage;
 import com.looky.domain.store.entity.StoreImage;
 import com.looky.domain.store.entity.StoreMood;
 import com.looky.domain.store.entity.CloverGrade;
@@ -35,16 +36,17 @@ public class StoreResponse {
     private List<StoreCategory> storeCategories;
     private List<StoreMood> storeMoods;
     private List<String> imageUrls; // 0번 째 값이 썸네일
+    private List<String> menuBoardImageUrls;
     private Double averageRating;
     private Integer reviewCount;
     private List<LocalDate> holidayDates;
     private Boolean isSuspended;
     private StoreStatus storeStatus;
     private List<PartnershipInfo> myPartnerships; // 내가 속한 조직 중 제휴 맺은 조직 정보 목록
-    private Boolean hasCoupon; // 쿠폰 보유 여부
     private CloverGrade cloverGrade; // 클로버 등급
+    private String profileImageUrl; // 가게 프로필 이미지 URL
 
-    public static StoreResponse of(Store store, Double averageRating, Integer reviewCount, List<PartnershipInfo> myPartnerships, Boolean hasCoupon, CloverGrade cloverGrade) {
+    public static StoreResponse of(Store store, Double averageRating, Integer reviewCount, List<PartnershipInfo> myPartnerships, CloverGrade cloverGrade) {
         return StoreResponse.builder()
                 .id(store.getId())
                 .userId(store.getUser() != null ? store.getUser().getId() : null)
@@ -63,18 +65,19 @@ public class StoreResponse {
                 .storeCategories(new ArrayList<>(store.getStoreCategories()))
                 .storeMoods(new ArrayList<>(store.getStoreMoods()))
                 .imageUrls(store.getImages().stream().map(StoreImage::getImageUrl).collect(Collectors.toList()))
+                .menuBoardImageUrls(store.getMenuBoardImages().stream().map(MenuBoardImage::getImageUrl).collect(Collectors.toList()))
                 .averageRating(averageRating != null ? averageRating : 0.0)
                 .reviewCount(reviewCount != null ? reviewCount : 0)
                 .holidayDates(store.getHolidayDates())
                 .isSuspended(store.getIsSuspended())
                 .storeStatus(store.getStoreStatus())
                 .myPartnerships(myPartnerships)
-                .hasCoupon(hasCoupon)
                 .cloverGrade(cloverGrade)
+                .profileImageUrl(store.getProfileImageUrl())
                 .build();
     }
 
     public static StoreResponse from(Store store) {
-        return of(store, 0.0, 0, null, false, store.getCloverGrade());
+        return of(store, 0.0, 0, null, store.getCloverGrade());
     }
 }

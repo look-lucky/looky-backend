@@ -33,12 +33,12 @@ public interface CouponRepository extends JpaRepository<Coupon, Long> {
            "JOIN Partnership p ON p.store = s " +
            "JOIN p.organization o " +
            "WHERE o.university.id = :universityId " +
-           "AND c.issueStartsAt <= :now AND c.issueStartsAt >= :startOfDay " +
+           "AND c.issueStartsAt <= :now AND c.issueStartsAt >= :since " +
            "AND p.startsAt <= :today AND p.endsAt >= :today " +
            "ORDER BY c.issueStartsAt DESC")
     List<Coupon> findTodayCouponsByUniversity(
             @Param("universityId") Long universityId,
-            @Param("startOfDay") LocalDateTime startOfDay,
+            @Param("since") LocalDateTime since,
             @Param("now") LocalDateTime now,
             @Param("today") LocalDate today
     );

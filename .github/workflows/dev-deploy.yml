@@ -43,27 +43,46 @@ jobs:
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USERNAME }}
-          password: ${{ secrets.EC2_PASSWORD }}
+          key: ${{ secrets.EC2_SSH_KEY }}
           port: 22
           envs: ENV_FILE
           script: |
             echo "$ENV_FILE" | base64 -d > .env.dev
-            
-            docker network create looky-net || true
-            
-            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/looky-backend:dev
-            
-            docker stop looky-dev || true
-            docker rm looky-dev || true
-            
-            docker run -d --name looky-dev \
+
+            sudo docker network create looky-net || true
+            sudo docker volume create looky-dev-db-data || true
+
+            if ! sudo docker ps -a --format '{{.Names}}' | grep -q '^looky-db$'; then
+              sudo docker run -d --name looky-db \
+                --network looky-net \
+                -e MYSQL_ROOT_PASSWORD=0000 \
+                -e MYSQL_DATABASE=looky_dev \
+                -v looky-dev-db-data:/var/lib/mysql \
+                --restart unless-stopped \
+                mysql:8.0
+            else
+              sudo docker start looky-db || true
+            fi
+
+            until sudo docker exec looky-db sh -c 'mysqladmin ping -h 127.0.0.1 -uroot -p"$MYSQL_ROOT_PASSWORD" --silent'; do
+              echo "Waiting for looky-db to be ready..."
+              sleep 5
+            done
+
+            sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/looky-backend:dev
+
+            sudo docker stop looky-dev || true
+            sudo docker rm looky-dev || true
+
+            sudo docker run -d --name looky-dev \
               --network looky-net \
-              -p 8080:8080 \
+              -p 127.0.0.1:8081:8080 \
               --env-file .env.dev \
+              --restart unless-stopped \
               ${{ secrets.DOCKERHUB_USERNAME }}/looky-backend:dev
-            
+
             rm -f .env.dev
-            
-            docker image prune -f
+
+            sudo docker image prune -f
         env:
           ENV_FILE: ${{ secrets.ENV_FILE }}

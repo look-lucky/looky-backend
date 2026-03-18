@@ -18,12 +18,24 @@ spring:
         format_sql: true # 쿼리 가독성 향상
 
   flyway:
-    enabled: false # 로컬에선 JPA UPDATE 사용
+    enabled: true
+    baseline-on-migrate: true # JPA가 먼저 생성한 스키마를 Flyway가 baseline으로 인식
+    locations:
+      - classpath:db/seed # 시드 데이터만 실행 (DDL 마이그레이션 제외)
 
-#  flyway:
-#    enabled: true
-#    baseline-on-migrate: true
-#    validate-on-migrate: true
+  # [dev 배포 전 Flyway 마이그레이션 로컬 검증 방법]
+  # 새 마이그레이션 스크립트(db/migration/V?.sql)를 작성한 뒤, dev 서버 배포 전에 아래 설정으로 임시 교체하여 로컬에서 먼저 검증한다.
+  # 검증 후에는 반드시 원래 설정으로 되돌릴 것.
+  #
+  # flyway:
+  #   enabled: true
+  #   baseline-on-migrate: true
+  #   locations:
+  #     - classpath:db/migration # DDL 마이그레이션 포함하여 검증
+  #     - classpath:db/seed
+  # jpa:
+  #   hibernate:
+  #     ddl-auto: validate # Flyway가 스키마를 관리하므로 validate로 전환
 
   security:
     oauth2:

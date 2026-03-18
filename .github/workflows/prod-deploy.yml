@@ -54,12 +54,12 @@ jobs:
             # 이미지 Pull
             sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/looky-backend:prod
             
-            # 기존 Dev 컨테이너 중지/삭제
+            # 기존 Prod 컨테이너 중지/삭제
             sudo docker stop looky-prod || true
             sudo docker rm looky-prod || true
             
-            # looky-prod 컨테이너 실행 
-            sudo docker run -d --name looky-prod -p 8080:8080 \
+            # looky-prod 컨테이너 실행  (8080 포트)
+            sudo docker run -d --name looky-prod -p 127.0.0.1:8080:8080 \
               --env-file .env.prod \
               ${{ secrets.DOCKERHUB_USERNAME }}/looky-backend:prod
             

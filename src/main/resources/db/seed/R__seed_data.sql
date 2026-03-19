@@ -1,0 +1,3 @@
+-- [시드 데이터] local, dev 환경에서만 실행됨 (prod 제외)
+-- R__ prefix(Repeatable): 버전 번호 없이 파일 내용이 변경될 때마다 자동 재실행
+-- 주의: 중복 삽입 방지를 위해 INSERT IGNORE 또는 ON DUPLICATE KEY UPDATE 사용

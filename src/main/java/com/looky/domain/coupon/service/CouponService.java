@@ -24,7 +24,6 @@ import java.util.stream.Collectors;
 
 import com.looky.domain.user.entity.StudentProfile;
 import com.looky.domain.user.repository.StudentProfileRepository;
-import java.time.LocalDate;
 
 @Service
 @RequiredArgsConstructor
@@ -223,11 +222,10 @@ public class CouponService {
                 .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "학생 프로필을 찾을 수 없습니다."));
 
         Long universityId = studentProfile.getUniversity().getId();
-        LocalDate today = LocalDate.now();
-        LocalDateTime startOfDay = today.atStartOfDay();
         LocalDateTime now = LocalDateTime.now();
+        LocalDateTime since = now.minusHours(24);
 
-        List<Coupon> coupons = couponRepository.findTodayCouponsByUniversity(universityId, startOfDay, now, today);
+        List<Coupon> coupons = couponRepository.findTodayCouponsByUniversity(universityId, since, now);
 
         List<CouponResponse> responses = coupons.stream()
                 .map(CouponResponse::from)

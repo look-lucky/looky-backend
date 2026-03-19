@@ -2,7 +2,6 @@ package com.looky.domain.coupon.repository;
 
 import com.looky.domain.coupon.entity.Coupon;
 import org.springframework.data.jpa.repository.JpaRepository;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -27,20 +26,17 @@ public interface CouponRepository extends JpaRepository<Coupon, Long> {
     // 특정 상점이 발행한 쿠폰의 총 개수 조회
     long countByStoreId(Long storeId);
 
-    // 사용자의 학교와 제휴된 상점에서 오늘 발급 시작된 쿠폰 목록 조회 (제휴 기간 내, 오늘 날짜 기준)
+    // 사용자의 학교에 속한 상점에서 오늘 발급 시작된 쿠폰 목록 조회
     @Query("SELECT DISTINCT c FROM Coupon c " +
            "JOIN c.store s " +
-           "JOIN Partnership p ON p.store = s " +
-           "JOIN p.organization o " +
-           "WHERE o.university.id = :universityId " +
-           "AND c.issueStartsAt <= :now AND c.issueStartsAt >= :startOfDay " +
-           "AND p.startsAt <= :today AND p.endsAt >= :today " +
+           "JOIN StoreUniversity su ON su.store = s " +
+           "WHERE su.university.id = :universityId " +
+           "AND c.issueStartsAt <= :now AND c.issueStartsAt >= :since " +
            "ORDER BY c.issueStartsAt DESC")
     List<Coupon> findTodayCouponsByUniversity(
             @Param("universityId") Long universityId,
-            @Param("startOfDay") LocalDateTime startOfDay,
-            @Param("now") LocalDateTime now,
-            @Param("today") LocalDate today
+            @Param("since") LocalDateTime since,
+            @Param("now") LocalDateTime now
     );
 
     // 여러 상점의 현재 유효한(활성 상태, 기간 내) 쿠폰 목록 조회

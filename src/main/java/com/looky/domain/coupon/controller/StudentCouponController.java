@@ -44,7 +44,7 @@ public class StudentCouponController {
         return ResponseEntity.ok(CommonResponse.success(response));
     }
 
-    @Operation(summary = "[학생] 오늘의 신규 쿠폰 조회", description = "학생의 소속 대학과 제휴된 매장에서 오늘 발급 시작한 쿠폰 목록을 조회합니다.")
+    @Operation(summary = "[학생] 오늘의 신규 쿠폰 조회", description = "학생의 소속 대학과 제휴된 매장에서 24시간 내에 발급된 쿠폰 목록을 조회합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "성공"),
             @ApiResponse(responseCode = "403", description = "학생 권한 필요", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class))),

@@ -463,32 +463,6 @@ create table store_news_like (
     foreign key (user_id) references user (user_id)
 );
 
-/* Inquiry */
-create table inquiry (
-    inquiry_id bigint auto_increment primary key,
-    created_at datetime(6) not null,
-    modified_at datetime(6) not null,
-    created_by varchar(255),
-    last_modified_by varchar(255),
-    user_id bigint not null,
-    type varchar(50) not null,
-    title varchar(14) not null,
-    content varchar(500) not null,
-    foreign key (user_id) references user (user_id)
-);
-
-create table inquiry_image (
-    inquiry_image_id bigint auto_increment primary key,
-    created_at datetime(6) not null,
-    modified_at datetime(6) not null,
-    created_by varchar(255),
-    last_modified_by varchar(255),
-    inquiry_id bigint not null,
-    image_url varchar(255) not null,
-    order_index int not null,
-    foreign key (inquiry_id) references inquiry (inquiry_id)
-);
-
 create table email_verifications (
     id bigint auto_increment primary key,
     email varchar(320) not null,

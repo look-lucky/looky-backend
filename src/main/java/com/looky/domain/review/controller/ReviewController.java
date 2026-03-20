@@ -24,6 +24,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "Review", description = "리뷰 관련 API")
+@Deprecated
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api")
@@ -61,7 +62,7 @@ public class ReviewController {
             @Parameter(description = "리뷰 ID") @PathVariable Long reviewId,
             @RequestBody @Valid UpdateReviewRequest request
     ) {
-            reviewService.updateReview(reviewId, principalDetails.getUser(), request);
+            reviewService.updateReviewForStudent(reviewId, principalDetails.getUser(), request);
             return ResponseEntity.ok(CommonResponse.success(null));
     }
 
@@ -76,7 +77,7 @@ public class ReviewController {
             @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,
             @Parameter(description = "리뷰 ID") @PathVariable Long reviewId
     ) {
-            reviewService.deleteReview(reviewId, principalDetails.getUser());
+            reviewService.deleteReviewForStudent(reviewId, principalDetails.getUser());
             return ResponseEntity.status(HttpStatus.NO_CONTENT).body(CommonResponse.success(null));
     }
 
@@ -86,12 +87,12 @@ public class ReviewController {
                     @ApiResponse(responseCode = "404", description = "상점 없음", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class)))
     })
     @GetMapping("/stores/{storeId}/reviews")
-    public ResponseEntity<CommonResponse<PageResponse<ReviewResponse>>> getReviews(
+    public ResponseEntity<CommonResponse<PageResponse<StudentReviewResponse>>> getReviews(
                     @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,
                     @Parameter(description = "상점 ID") @PathVariable Long storeId,
                     @Parameter(description = "페이징 정보") @PageableDefault(size = 10) Pageable pageable)
     {
-            Page<ReviewResponse> reviews = reviewService.getReviews(storeId, pageable, principalDetails.getUser());
+            Page<StudentReviewResponse> reviews = reviewService.getReviewsForStudent(storeId, pageable, principalDetails.getUser());
             return ResponseEntity.ok(CommonResponse.success(PageResponse.from(reviews)));
     }
 
@@ -100,11 +101,11 @@ public class ReviewController {
                     @ApiResponse(responseCode = "200", description = "성공"),
     })
     @GetMapping("/reviews/my")
-    public ResponseEntity<CommonResponse<PageResponse<ReviewResponse>>> getMyReviews(
+    public ResponseEntity<CommonResponse<PageResponse<StudentReviewResponse>>> getMyReviews(
                     @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,
                     @Parameter(description = "페이징 정보") @PageableDefault(size = 10) Pageable pageable)
     {
-            Page<ReviewResponse> reviews = reviewService.getMyReviews(principalDetails.getUser(), pageable);
+            Page<StudentReviewResponse> reviews = reviewService.getMyReviewsForStudent(principalDetails.getUser(), pageable);
             return ResponseEntity.ok(CommonResponse.success(PageResponse.from(reviews)));
     }
 
@@ -117,7 +118,7 @@ public class ReviewController {
     public ResponseEntity<CommonResponse<ReviewStatsResponse>> getReviewStats(
                     @Parameter(description = "상점 ID") @PathVariable Long storeId
     ) {
-            ReviewStatsResponse response = reviewService.getReviewStats(storeId);
+            ReviewStatsResponse response = reviewService.getReviewStatsForStudent(storeId);
             return ResponseEntity.ok(CommonResponse.success(response));
     }
 
@@ -132,7 +133,7 @@ public class ReviewController {
                     @Parameter(description = "리뷰 ID") @PathVariable Long reviewId,
                     @RequestBody @Valid ReportRequest request
     ) {
-            reviewService.reportReview(reviewId, principalDetails.getUser().getId(), request);
+            reviewService.reportReviewForStudent(reviewId, principalDetails.getUser().getId(), request);
             return ResponseEntity.ok(CommonResponse.success(null));
     }
 
@@ -148,7 +149,7 @@ public class ReviewController {
                     @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,
                     @Parameter(description = "리뷰 ID") @PathVariable Long reviewId)
     {
-            reviewService.addLike(principalDetails.getUser(), reviewId);
+            reviewService.addLikeForStudent(principalDetails.getUser(), reviewId);
             return ResponseEntity.ok(CommonResponse.success(null));
     }
 
@@ -162,7 +163,7 @@ public class ReviewController {
                     @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,
                     @Parameter(description = "리뷰 ID") @PathVariable Long reviewId)
     {
-            reviewService.removeLike(principalDetails.getUser(), reviewId);
+            reviewService.removeLikeForStudent(principalDetails.getUser(), reviewId);
             return ResponseEntity.ok(CommonResponse.success(null));
     }
 }

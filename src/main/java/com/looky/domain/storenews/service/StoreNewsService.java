@@ -48,8 +48,10 @@ public class StoreNewsService {
     private final OwnerProfileRepository ownerProfileRepository;
     private final S3Service s3Service;
 
+    // --- 점주용 ---
+
     @Transactional
-    public Long createStoreNews(Long storeId, User user, CreateStoreNewsRequest request) {
+    public Long createStoreNewsForOwner(Long storeId, User user, CreateStoreNewsRequest request) {
         Store store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "해당 상점을 찾을 수 없습니다."));
 
@@ -80,33 +82,8 @@ public class StoreNewsService {
         return storeNewsRepository.save(storeNews).getId();
     }
 
-    public PageResponse<StoreNewsResponse> getStoreNewsList(Long storeId, Pageable pageable, User currentUser) {
-        Page<StoreNews> page = storeNewsRepository.findByStoreId(storeId, pageable);
-
-        Page<StoreNewsResponse> responsePage = page.map(news -> {
-            boolean isLiked = false;
-            if (currentUser != null) {
-                isLiked = storeNewsLikeRepository.existsByStoreNewsIdAndUserId(news.getId(), currentUser.getId());
-            }
-            return StoreNewsResponse.from(news, isLiked);
-        });
-
-        return PageResponse.from(responsePage);
-    }
-
-    public StoreNewsResponse getStoreNews(Long newsId, User currentUser) {
-        StoreNews news = storeNewsRepository.findById(newsId)
-                .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "가게 소식을 찾을 수 없습니다."));
-
-        boolean isLiked = false;
-        if (currentUser != null) {
-            isLiked = storeNewsLikeRepository.existsByStoreNewsIdAndUserId(newsId, currentUser.getId());
-        }
-        return StoreNewsResponse.from(news, isLiked);
-    }
-
     @Transactional
-    public void updateStoreNews(Long newsId, User user, UpdateStoreNewsRequest request) {
+    public void updateStoreNewsForOwner(Long newsId, User user, UpdateStoreNewsRequest request) {
         StoreNews news = storeNewsRepository.findById(newsId)
                 .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "가게 소식을 찾을 수 없습니다."));
 
@@ -176,7 +153,7 @@ public class StoreNewsService {
     }
 
     @Transactional
-    public void deleteStoreNews(Long newsId, User user) {
+    public void deleteStoreNewsForOwner(Long newsId, User user) {
         StoreNews news = storeNewsRepository.findById(newsId)
                 .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "가게 소식을 찾을 수 없습니다."));
 
@@ -187,8 +164,90 @@ public class StoreNewsService {
         storeNewsRepository.delete(news);
     }
 
+    public PageResponse<StoreNewsResponse> getStoreNewsListForOwner(Long storeId, Pageable pageable, User user) {
+        return getStoreNewsListInternal(storeId, pageable, user);
+    }
+
+    public StoreNewsResponse getStoreNewsForOwner(Long newsId, User user) {
+        return getStoreNewsInternal(newsId, user);
+    }
+
     @Transactional
-    public void toggleLike(Long newsId, User user) {
+    public void toggleLikeForOwner(Long newsId, User user) {
+        toggleLikeInternal(newsId, user);
+    }
+
+    @Transactional
+    public Long createCommentForOwner(Long newsId, User user, CreateStoreNewsCommentRequest request) {
+        return createCommentInternal(newsId, user, request);
+    }
+
+    public PageResponse<StoreNewsCommentResponse> getCommentsForOwner(Long newsId, Pageable pageable, User user) {
+        return getCommentsInternal(newsId, pageable, user);
+    }
+
+    @Transactional
+    public void deleteCommentForOwner(Long commentId, User user) {
+        deleteCommentInternal(commentId, user);
+    }
+
+    // --- 학생용 ---
+
+    public PageResponse<StoreNewsResponse> getStoreNewsListForStudent(Long storeId, Pageable pageable, User user) {
+        return getStoreNewsListInternal(storeId, pageable, user);
+    }
+
+    public StoreNewsResponse getStoreNewsForStudent(Long newsId, User user) {
+        return getStoreNewsInternal(newsId, user);
+    }
+
+    @Transactional
+    public void toggleLikeForStudent(Long newsId, User user) {
+        toggleLikeInternal(newsId, user);
+    }
+
+    @Transactional
+    public Long createCommentForStudent(Long newsId, User user, CreateStoreNewsCommentRequest request) {
+        return createCommentInternal(newsId, user, request);
+    }
+
+    public PageResponse<StoreNewsCommentResponse> getCommentsForStudent(Long newsId, Pageable pageable, User user) {
+        return getCommentsInternal(newsId, pageable, user);
+    }
+
+    @Transactional
+    public void deleteCommentForStudent(Long commentId, User user) {
+        deleteCommentInternal(commentId, user);
+    }
+
+    // -- 내부 메서드 --
+
+    private PageResponse<StoreNewsResponse> getStoreNewsListInternal(Long storeId, Pageable pageable, User currentUser) {
+        Page<StoreNews> page = storeNewsRepository.findByStoreId(storeId, pageable);
+
+        Page<StoreNewsResponse> responsePage = page.map(news -> {
+            boolean isLiked = false;
+            if (currentUser != null) {
+                isLiked = storeNewsLikeRepository.existsByStoreNewsIdAndUserId(news.getId(), currentUser.getId());
+            }
+            return StoreNewsResponse.from(news, isLiked);
+        });
+
+        return PageResponse.from(responsePage);
+    }
+
+    private StoreNewsResponse getStoreNewsInternal(Long newsId, User currentUser) {
+        StoreNews news = storeNewsRepository.findById(newsId)
+                .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "가게 소식을 찾을 수 없습니다."));
+
+        boolean isLiked = false;
+        if (currentUser != null) {
+            isLiked = storeNewsLikeRepository.existsByStoreNewsIdAndUserId(newsId, currentUser.getId());
+        }
+        return StoreNewsResponse.from(news, isLiked);
+    }
+
+    private void toggleLikeInternal(Long newsId, User user) {
         StoreNews news = storeNewsRepository.findById(newsId)
                 .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "가게 소식을 찾을 수 없습니다."));
 
@@ -207,8 +266,7 @@ public class StoreNewsService {
                         });
     }
 
-    @Transactional
-    public Long createComment(Long newsId, User user, CreateStoreNewsCommentRequest request) {
+    private Long createCommentInternal(Long newsId, User user, CreateStoreNewsCommentRequest request) {
         StoreNews news = storeNewsRepository.findById(newsId)
                 .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "가게 소식을 찾을 수 없습니다."));
 
@@ -223,7 +281,7 @@ public class StoreNewsService {
         return commentId;
     }
 
-    public PageResponse<StoreNewsCommentResponse> getComments(Long newsId, Pageable pageable, User currentUser) {
+    private PageResponse<StoreNewsCommentResponse> getCommentsInternal(Long newsId, Pageable pageable, User currentUser) {
         Page<StoreNewsComment> page = storeNewsCommentRepository.findByStoreNewsId(newsId, pageable);
 
         List<Long> userIds = page.getContent().stream()
@@ -249,8 +307,7 @@ public class StoreNewsService {
         return PageResponse.from(responsePage);
     }
 
-    @Transactional
-    public void deleteComment(Long commentId, User user) {
+    private void deleteCommentInternal(Long commentId, User user) {
         StoreNewsComment comment = storeNewsCommentRepository.findById(commentId)
                 .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "댓글을 찾을 수 없습니다."));
 
@@ -260,5 +317,76 @@ public class StoreNewsService {
 
         comment.getStoreNews().decreaseCommentCount();
         storeNewsCommentRepository.delete(comment);
+    }
+
+    // todo: 삭제 예정
+
+    @Transactional
+    public Long createStoreNews(Long storeId, User user, CreateStoreNewsRequest request) {
+        Store store = storeRepository.findById(storeId)
+                .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "해당 상점을 찾을 수 없습니다."));
+
+        if (!store.getUser().getId().equals(user.getId())) {
+            throw new CustomException(ErrorCode.FORBIDDEN);
+        }
+
+        List<String> imageUrls = request.getImageUrls();
+        if (imageUrls != null && imageUrls.size() > 5) {
+            throw new CustomException(ErrorCode.BAD_REQUEST, "이미지는 최대 5장까지 등록할 수 있습니다.");
+        }
+
+        StoreNews storeNews = StoreNews.builder()
+                .store(store)
+                .title(request.getTitle())
+                .content(request.getContent())
+                .build();
+
+        if (imageUrls != null) {
+            for (int i = 0; i < imageUrls.size(); i++) {
+                storeNews.addImage(StoreNewsImage.builder()
+                        .imageUrl(imageUrls.get(i))
+                        .orderIndex(i)
+                        .build());
+            }
+        }
+
+        return storeNewsRepository.save(storeNews).getId();
+    }
+
+    public PageResponse<StoreNewsResponse> getStoreNewsList(Long storeId, Pageable pageable, User currentUser) {
+        return getStoreNewsListInternal(storeId, pageable, currentUser);
+    }
+
+    public StoreNewsResponse getStoreNews(Long newsId, User currentUser) {
+        return getStoreNewsInternal(newsId, currentUser);
+    }
+
+    @Transactional
+    public void updateStoreNews(Long newsId, User user, UpdateStoreNewsRequest request) {
+        updateStoreNewsForOwner(newsId, user, request);
+    }
+
+    @Transactional
+    public void deleteStoreNews(Long newsId, User user) {
+        deleteStoreNewsForOwner(newsId, user);
+    }
+
+    @Transactional
+    public void toggleLike(Long newsId, User user) {
+        toggleLikeInternal(newsId, user);
+    }
+
+    @Transactional
+    public Long createComment(Long newsId, User user, CreateStoreNewsCommentRequest request) {
+        return createCommentInternal(newsId, user, request);
+    }
+
+    public PageResponse<StoreNewsCommentResponse> getComments(Long newsId, Pageable pageable, User currentUser) {
+        return getCommentsInternal(newsId, pageable, currentUser);
+    }
+
+    @Transactional
+    public void deleteComment(Long commentId, User user) {
+        deleteCommentInternal(commentId, user);
     }
 }

@@ -14,6 +14,7 @@ public class FavoriteStore extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "favorite_store_id")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)

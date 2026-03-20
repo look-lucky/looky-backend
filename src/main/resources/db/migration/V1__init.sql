@@ -1,3 +1,7 @@
+drop database looky;
+create database looky;
+use looky;
+
 /* 외래 키 제약 조건 검사를 일시적으로 끕니다 */
 SET FOREIGN_KEY_CHECKS = 0;
 
@@ -55,7 +59,7 @@ create table student_profile (
 
 /* Withdrawal Feedback */
 create table withdrawal_feedback (
-    id bigint auto_increment primary key,
+    withdrawal_feedback_id bigint auto_increment primary key,
     created_at datetime(6) not null,
     modified_at datetime(6) not null,
     created_by varchar(255),
@@ -68,7 +72,7 @@ create table withdrawal_feedback (
 create table withdrawal_reason (
     feedback_id bigint not null,
     reason varchar(50),
-    foreign key (feedback_id) references withdrawal_feedback (id)
+    foreign key (feedback_id) references withdrawal_feedback (withdrawal_feedback_id)
 );
 
 /* Refresh Token */
@@ -98,7 +102,7 @@ create table organization (
 );
 
 create table user_organization (
-    id bigint auto_increment primary key,
+    user_organization_id bigint auto_increment primary key,
     user_id bigint not null,
     organization_id bigint not null,
     foreign key (user_id) references user (user_id),
@@ -125,7 +129,7 @@ create table store (
     check_reason varchar(255),
     introduction longtext,
     operating_hours longtext,
-    profile_image_url varchar(255)
+    profile_image_url varchar(255),
     store_status varchar(50) not null,
     is_suspended bit default 0 not null,
     clover_grade varchar(50) default 'SEED' not null,
@@ -133,19 +137,19 @@ create table store (
     foreign key (user_id) references user (user_id)
 );
 
-create table store_categories (
+create table store_category (
     store_id bigint not null,
     category varchar(50),
     foreign key (store_id) references store (store_id)
 );
 
-create table store_moods (
+create table store_mood (
     store_id bigint not null,
     mood varchar(50),
     foreign key (store_id) references store (store_id)
 );
 
-create table store_holidays (
+create table store_holiday (
     store_id bigint not null,
     holiday_date date,
     foreign key (store_id) references store (store_id)
@@ -160,7 +164,7 @@ create table store_image (
 );
 
 create table menu_board_image (
-    id bigint auto_increment primary key,
+    menu_board_image_id bigint auto_increment primary key,
     store_id bigint not null,
     image_url varchar(255) not null,
     order_index int not null,
@@ -168,7 +172,7 @@ create table menu_board_image (
 );
 
 create table store_university (
-    id bigint auto_increment primary key,
+    store_university_id bigint auto_increment primary key,
     store_id bigint not null,
     university_id bigint not null,
     foreign key (store_id) references store (store_id),
@@ -277,7 +281,7 @@ create table student_coupon (
     last_modified_by varchar(255),
     verification_code varchar(4),
     status varchar(50) not null,
-    issued_at datetime(6),
+    downloaded_at datetime(6),
     activated_at datetime(6),
     used_at datetime(6),
     expires_at datetime(6) not null,
@@ -288,7 +292,7 @@ create table student_coupon (
 );
 
 /* Events */
-create table events (
+create table event (
     event_id bigint auto_increment primary key,
     created_at datetime(6) not null,
     modified_at datetime(6) not null,
@@ -307,14 +311,14 @@ create table events (
     foreign key (university_id) references university (university_id)
 );
 
-create table event_types (
+create table event_type (
     event_id bigint not null,
     event_type varchar(50),
-    foreign key (event_id) references events (event_id)
+    foreign key (event_id) references event (event_id)
 );
 
 create table event_image (
-    id bigint auto_increment primary key,
+    event_image_id bigint auto_increment primary key,
     created_at datetime(6) not null,
     modified_at datetime(6) not null,
     created_by varchar(255),
@@ -323,12 +327,12 @@ create table event_image (
     image_url varchar(255) not null,
     order_index int,
     image_type varchar(20) not null default 'GENERAL',
-    foreign key (event_id) references events (event_id)
+    foreign key (event_id) references event (event_id)
 );
 
 /* Partnership */
 create table partnership (
-    id bigint auto_increment primary key,
+    partnership_id bigint auto_increment primary key,
     created_at datetime(6) not null,
     modified_at datetime(6) not null,
     created_by varchar(255),
@@ -344,7 +348,7 @@ create table partnership (
 
 /* Favorite Store */
 create table favorite_store (
-    id bigint auto_increment primary key,
+    favorite_store_id bigint auto_increment primary key,
     created_at datetime(6) not null,
     modified_at datetime(6) not null,
     created_by varchar(255),
@@ -386,7 +390,7 @@ create table review_image (
 );
 
 create table review_like (
-    id bigint auto_increment primary key,
+    review_like_id bigint auto_increment primary key,
     created_at datetime(6) not null,
     modified_at datetime(6) not null,
     created_by varchar(255),
@@ -413,7 +417,7 @@ create table review_report (
 
 /* Store News */
 create table store_news (
-    id bigint auto_increment primary key,
+    store_news_id bigint auto_increment primary key,
     created_at datetime(6) not null,
     modified_at datetime(6) not null,
     created_by varchar(255),
@@ -427,7 +431,7 @@ create table store_news (
 );
 
 create table store_news_comment (
-    id bigint auto_increment primary key,
+    store_news_comment_id bigint auto_increment primary key,
     created_at datetime(6) not null,
     modified_at datetime(6) not null,
     created_by varchar(255),
@@ -435,12 +439,12 @@ create table store_news_comment (
     store_news_id bigint not null,
     user_id bigint not null,
     content varchar(500) not null,
-    foreign key (store_news_id) references store_news (id),
+    foreign key (store_news_id) references store_news (store_news_id),
     foreign key (user_id) references user (user_id)
 );
 
 create table store_news_image (
-    id bigint auto_increment primary key,
+    store_news_image_id bigint auto_increment primary key,
     created_at datetime(6) not null,
     modified_at datetime(6) not null,
     created_by varchar(255),
@@ -448,29 +452,29 @@ create table store_news_image (
     store_news_id bigint not null,
     image_url varchar(255) not null,
     order_index int not null,
-    foreign key (store_news_id) references store_news (id)
+    foreign key (store_news_id) references store_news (store_news_id)
 );
 
 create table store_news_like (
-    id bigint auto_increment primary key,
+    store_news_like_id bigint auto_increment primary key,
     created_at datetime(6) not null,
     modified_at datetime(6) not null,
     created_by varchar(255),
     last_modified_by varchar(255),
     store_news_id bigint not null,
     user_id bigint not null,
-    foreign key (store_news_id) references store_news (id),
+    foreign key (store_news_id) references store_news (store_news_id),
     foreign key (user_id) references user (user_id)
 );
 
-create table email_verifications (
-    id bigint auto_increment primary key,
+create table email_verification (
+    email_verification_id bigint auto_increment primary key,
     email varchar(320) not null,
     code varchar(10) not null,
     expires_at datetime(6) not null,
     verified bit not null,
     verified_expires_at datetime(6),
-    constraint uk_email_verifications_email unique (email)
+    constraint uk_email_verification_email unique (email)
 );
 
 /* 외래 키 제약 조건 검사를 다시 켭니다 */

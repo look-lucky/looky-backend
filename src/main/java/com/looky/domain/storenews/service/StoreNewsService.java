@@ -21,6 +21,7 @@ import com.looky.domain.user.entity.User;
 import com.looky.common.response.PageResponse;
 import com.looky.domain.user.repository.OwnerProfileRepository;
 import com.looky.domain.user.repository.StudentProfileRepository;
+import com.looky.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -32,6 +33,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -44,18 +46,19 @@ public class StoreNewsService {
     private final StoreNewsCommentRepository storeNewsCommentRepository;
     private final StoreNewsLikeRepository storeNewsLikeRepository;
     private final StoreRepository storeRepository;
+    private final UserRepository userRepository;
     private final StudentProfileRepository studentProfileRepository;
     private final OwnerProfileRepository ownerProfileRepository;
     private final S3Service s3Service;
 
+    // --- 점주용 ---
+
     @Transactional
-    public Long createStoreNews(Long storeId, User user, CreateStoreNewsRequest request) {
+    public Long createStoreNewsForOwner(Long storeId, User user, CreateStoreNewsRequest request) {
         Store store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "해당 상점을 찾을 수 없습니다."));
 
-        if (!store.getUser().getId().equals(user.getId())) {
-            throw new CustomException(ErrorCode.FORBIDDEN);
-        }
+        validateOwnerStore(store, user);
 
         List<String> imageUrls = request.getImageUrls();
         if (imageUrls != null && imageUrls.size() > 5) {
@@ -80,39 +83,12 @@ public class StoreNewsService {
         return storeNewsRepository.save(storeNews).getId();
     }
 
-    public PageResponse<StoreNewsResponse> getStoreNewsList(Long storeId, Pageable pageable, User currentUser) {
-        Page<StoreNews> page = storeNewsRepository.findByStoreId(storeId, pageable);
-
-        Page<StoreNewsResponse> responsePage = page.map(news -> {
-            boolean isLiked = false;
-            if (currentUser != null) {
-                isLiked = storeNewsLikeRepository.existsByStoreNewsIdAndUserId(news.getId(), currentUser.getId());
-            }
-            return StoreNewsResponse.from(news, isLiked);
-        });
-
-        return PageResponse.from(responsePage);
-    }
-
-    public StoreNewsResponse getStoreNews(Long newsId, User currentUser) {
-        StoreNews news = storeNewsRepository.findById(newsId)
-                .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "가게 소식을 찾을 수 없습니다."));
-
-        boolean isLiked = false;
-        if (currentUser != null) {
-            isLiked = storeNewsLikeRepository.existsByStoreNewsIdAndUserId(newsId, currentUser.getId());
-        }
-        return StoreNewsResponse.from(news, isLiked);
-    }
-
     @Transactional
-    public void updateStoreNews(Long newsId, User user, UpdateStoreNewsRequest request) {
+    public void updateStoreNewsForOwner(Long newsId, User user, UpdateStoreNewsRequest request) {
         StoreNews news = storeNewsRepository.findById(newsId)
                 .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "가게 소식을 찾을 수 없습니다."));
 
-        if (!news.getStore().getUser().getId().equals(user.getId())) {
-            throw new CustomException(ErrorCode.FORBIDDEN);
-        }
+        validateOwnerStore(news.getStore(), user);
 
         String title = news.getTitle();
         if (request.getTitle().isPresent()) {
@@ -176,19 +152,99 @@ public class StoreNewsService {
     }
 
     @Transactional
-    public void deleteStoreNews(Long newsId, User user) {
+    public void deleteStoreNewsForOwner(Long newsId, User user) {
         StoreNews news = storeNewsRepository.findById(newsId)
                 .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "가게 소식을 찾을 수 없습니다."));
 
-        if (!news.getStore().getUser().getId().equals(user.getId())) {
-            throw new CustomException(ErrorCode.FORBIDDEN);
-        }
+        validateOwnerStore(news.getStore(), user);
 
         storeNewsRepository.delete(news);
     }
 
+    public PageResponse<StoreNewsResponse> getStoreNewsListForOwner(Long storeId, Pageable pageable, User user) {
+        return getStoreNewsListInternal(storeId, pageable, user);
+    }
+
+    public StoreNewsResponse getStoreNewsForOwner(Long newsId, User user) {
+        return getStoreNewsInternal(newsId, user);
+    }
+
     @Transactional
-    public void toggleLike(Long newsId, User user) {
+    public void toggleLikeForOwner(Long newsId, User user) {
+        toggleLikeInternal(newsId, user);
+    }
+
+    @Transactional
+    public Long createCommentForOwner(Long newsId, User user, CreateStoreNewsCommentRequest request) {
+        return createCommentInternal(newsId, user, request);
+    }
+
+    public PageResponse<StoreNewsCommentResponse> getCommentsForOwner(Long newsId, Pageable pageable, User user) {
+        return getCommentsInternal(newsId, pageable, user);
+    }
+
+    @Transactional
+    public void deleteCommentForOwner(Long commentId, User user) {
+        deleteCommentInternal(commentId, user);
+    }
+
+    // --- 학생용 ---
+
+    public PageResponse<StoreNewsResponse> getStoreNewsListForStudent(Long storeId, Pageable pageable, User user) {
+        return getStoreNewsListInternal(storeId, pageable, user);
+    }
+
+    public StoreNewsResponse getStoreNewsForStudent(Long newsId, User user) {
+        return getStoreNewsInternal(newsId, user);
+    }
+
+    @Transactional
+    public void toggleLikeForStudent(Long newsId, User user) {
+        toggleLikeInternal(newsId, user);
+    }
+
+    @Transactional
+    public Long createCommentForStudent(Long newsId, User user, CreateStoreNewsCommentRequest request) {
+        return createCommentInternal(newsId, user, request);
+    }
+
+    public PageResponse<StoreNewsCommentResponse> getCommentsForStudent(Long newsId, Pageable pageable, User user) {
+        return getCommentsInternal(newsId, pageable, user);
+    }
+
+    @Transactional
+    public void deleteCommentForStudent(Long commentId, User user) {
+        deleteCommentInternal(commentId, user);
+    }
+
+    // -- 내부 메서드 --
+
+    private PageResponse<StoreNewsResponse> getStoreNewsListInternal(Long storeId, Pageable pageable, User currentUser) {
+        Page<StoreNews> page = storeNewsRepository.findByStoreId(storeId, pageable);
+
+        Page<StoreNewsResponse> responsePage = page.map(news -> {
+            boolean isLiked = false;
+            if (currentUser != null) {
+                isLiked = storeNewsLikeRepository.existsByStoreNewsIdAndUserId(news.getId(), currentUser.getId());
+            }
+            return StoreNewsResponse.from(news, isLiked);
+        });
+
+        return PageResponse.from(responsePage);
+    }
+
+    private StoreNewsResponse getStoreNewsInternal(Long newsId, User currentUser) {
+        StoreNews news = storeNewsRepository.findById(newsId)
+                .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "가게 소식을 찾을 수 없습니다."));
+
+        boolean isLiked = false;
+        if (currentUser != null) {
+            isLiked = storeNewsLikeRepository.existsByStoreNewsIdAndUserId(newsId, currentUser.getId());
+        }
+        return StoreNewsResponse.from(news, isLiked);
+    }
+
+    private void toggleLikeInternal(Long newsId, User user) {
         StoreNews news = storeNewsRepository.findById(newsId)
                 .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "가게 소식을 찾을 수 없습니다."));
 
@@ -207,8 +263,7 @@ public class StoreNewsService {
                         });
     }
 
-    @Transactional
-    public Long createComment(Long newsId, User user, CreateStoreNewsCommentRequest request) {
+    private Long createCommentInternal(Long newsId, User user, CreateStoreNewsCommentRequest request) {
         StoreNews news = storeNewsRepository.findById(newsId)
                 .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "가게 소식을 찾을 수 없습니다."));
 
@@ -223,7 +278,7 @@ public class StoreNewsService {
         return commentId;
     }
 
-    public PageResponse<StoreNewsCommentResponse> getComments(Long newsId, Pageable pageable, User currentUser) {
+    private PageResponse<StoreNewsCommentResponse> getCommentsInternal(Long newsId, Pageable pageable, User currentUser) {
         Page<StoreNewsComment> page = storeNewsCommentRepository.findByStoreNewsId(newsId, pageable);
 
         List<Long> userIds = page.getContent().stream()
@@ -249,8 +304,16 @@ public class StoreNewsService {
         return PageResponse.from(responsePage);
     }
 
-    @Transactional
-    public void deleteComment(Long commentId, User user) {
+    private void validateOwnerStore(Store store, User user) {
+        User owner = userRepository.findByUsername(user.getUsername())
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        if (!Objects.equals(store.getUser().getId(), owner.getId())) {
+            throw new CustomException(ErrorCode.FORBIDDEN);
+        }
+    }
+
+    private void deleteCommentInternal(Long commentId, User user) {
         StoreNewsComment comment = storeNewsCommentRepository.findById(commentId)
                 .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "댓글을 찾을 수 없습니다."));
 

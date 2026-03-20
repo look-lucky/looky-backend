@@ -1,5 +1,6 @@
 package com.looky.domain.store.service;
 
+import com.looky.common.service.GeocodingService;
 import com.looky.common.service.S3Service;
 import com.looky.domain.coupon.entity.CouponUsageStatus;
 import com.looky.domain.store.entity.*;
@@ -30,6 +31,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -70,190 +78,191 @@ public class StoreService {
     private final CouponRepository couponRepository;
     private final StudentCouponRepository studentCouponRepository;
     private final UniversityRepository universityRepository;
+    private final GeocodingService geocodingService;
+
+    // --- 관리자용 ---
+
+    // 상점 등록
+    @Transactional
+    public Long createStoreForAdmin(User user, StoreCreateRequest request) {
+        User admin = userRepository.findByUsername(user.getUsername())
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        if (admin.getRole() != Role.ROLE_ADMIN) {
+            throw new CustomException(ErrorCode.FORBIDDEN, "관리자만 가게를 등록할 수 있습니다.");
+        }
+
+        return createStoreInternal(admin, request);
+    }
+
+    // 상점 정보 수정 (UNCLAIMED 한정)
+    @Transactional
+    public void updateStoreForAdmin(Long storeId, User user, StoreUpdateRequest request) {
+        Store store = storeRepository.findById(storeId)
+                .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "가게를 찾을 수 없습니다."));
+        validateUnclaimedStore(store, user);
+        updateStoreInternal(store, request);
+    }
+
+    // 상점 데이터 엑셀 업로드
+    @Transactional
+    public void uploadStoreDataForAdmin(MultipartFile file) {
+        if (file.isEmpty()) {
+            throw new CustomException(ErrorCode.BAD_REQUEST, "파일이 비어있습니다.");
+        }
+
+        try (InputStream inputStream = file.getInputStream()) {
+            Workbook workbook = new XSSFWorkbook(inputStream);
+            Sheet sheet = workbook.getSheetAt(0);
+
+            // 헤더 검증
+            validateHeader(sheet.getRow(0));
+
+            // 헤더 순서
+            // 0: UniversityID
+            // 1: Name
+            // 2: Branch
+            // 3: RoadAddress
+            // 4: JibunAddress
+            // 5: Latitude
+            // 6: Longitude
+
+            // 1단계: 엑셀 전체 파싱 (유효한 행만)
+            record StoreRow(Long universityId, String name, String branch, String roadAddress, String jibunAddress, Double latitude, Double longitude) {}
+
+            List<StoreRow> storeRows = new ArrayList<>();
+            Set<String> allNames = new HashSet<>();
+
+            for (int i = 1; i <= sheet.getLastRowNum(); i++) {
+                Row row = sheet.getRow(i);
+                if (row == null) continue;
+
+                String name = getCellValueAsString(row.getCell(1));
+                if (name.isBlank()) continue;
+
+                storeRows.add(new StoreRow(
+                        getCellValueAsLong(row.getCell(0)),
+                        name,
+                        getCellValueAsString(row.getCell(2)),
+                        getCellValueAsString(row.getCell(3)),
+                        getCellValueAsString(row.getCell(4)),
+                        getCellValueAsDouble(row.getCell(5)),
+                        getCellValueAsDouble(row.getCell(6))
+                ));
+                allNames.add(name);
+            }
+
+            // 2단계: DB에서 관련 가게 한 번에 조회 → Map<"name||roadAddress", Store>로 인덱싱
+            Map<String, Store> storeMap = storeRepository.findAllByNameIn(allNames)
+                    .stream()
+                    .collect(Collectors.toMap(
+                            s -> s.getName() + "||" + s.getRoadAddress(),
+                            s -> s,
+                            (a, b) -> a // DB에 중복이 있어도 첫 번째 유지
+                    ));
+
+            // 3단계: 행별 처리 - Map 기준으로 신규/업데이트 분기
+            List<Store> newStores = new ArrayList<>();
+
+            for (StoreRow storeRow : storeRows) {
+                String key = storeRow.name() + "||" + storeRow.roadAddress();
+                Store store = storeMap.get(key);
+
+                if (store != null) {
+                    // 기존 가게 → 엑셀 데이터로 덮어쓰기
+                    store.updateStore(
+                            storeRow.name(),
+                            storeRow.branch(),
+                            storeRow.roadAddress(),
+                            storeRow.jibunAddress(),
+                            storeRow.latitude() != null ? storeRow.latitude() : store.getLatitude(),
+                            storeRow.longitude() != null ? storeRow.longitude() : store.getLongitude(),
+                            store.getStorePhone(),
+                            store.getIntroduction(),
+                            store.getOperatingHours(),
+                            store.getStoreCategories(),
+                            store.getStoreMoods(),
+                            store.getHolidayDates(),
+                            store.getIsSuspended(),
+                            store.getRepresentativeName(),
+                            store.getProfileImageUrl()
+                    );
+                } else {
+                    // 신규 가게 생성 후 Map에 즉시 등록 → 배치 내 중복 방지
+                    store = Store.builder()
+                            .name(storeRow.name())
+                            .branch(storeRow.branch())
+                            .roadAddress(storeRow.roadAddress())
+                            .jibunAddress(storeRow.jibunAddress())
+                            .latitude(storeRow.latitude())
+                            .longitude(storeRow.longitude())
+                            .storeStatus(StoreStatus.UNCLAIMED)
+                            .user(null)
+                            .build();
+                    storeMap.put(key, store);
+                    newStores.add(store);
+                }
+
+                // 학교 연결 (기존 데이터에 계속 추가)
+                if (storeRow.universityId() != null) {
+                    universityRepository.findById(storeRow.universityId()).ifPresent(store::addUniversity);
+                }
+            }
+
+            // 신규 가게만 INSERT (기존 가게는 JPA dirty checking으로 자동 UPDATE)
+            storeRepository.saveAll(newStores);
+
+            // 비동기 지오코딩 트리거 (신규 가게 중 좌표 없는 것)
+            newStores.stream()
+                    .filter(s -> s.getLatitude() == null || s.getLongitude() == null)
+                    .forEach(s -> geocodingService.updateLocation(s.getId(), s.getRoadAddress()));
+
+        } catch (IOException e) {
+            log.error("Excel upload failed", e);
+            throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR, "엑셀 업로드 처리 중 오류가 발생했습니다.");
+        }
+    }
+
+    // 상점 삭제 (UNCLAIMED 한정)
+    @Transactional
+    public void deleteStoreForAdmin(Long storeId, User user) {
+        Store store = storeRepository.findById(storeId)
+                .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "가게를 찾을 수 없습니다."));
+        validateUnclaimedStore(store, user);
+        deleteStoreInternal(store);
+    }
 
     // --- 점주용 ---
 
     // 상점 등록
     @Transactional
     public Long createStoreForOwner(User user, StoreCreateRequest request) {
-
         User owner = userRepository.findByUsername(user.getUsername())
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
-        if (owner.getRole() != Role.ROLE_OWNER && owner.getRole() != Role.ROLE_ADMIN) {
-            throw new CustomException(ErrorCode.FORBIDDEN, "점주 회원 또는 관리자만 가게를 등록할 수 있습니다.");
+        if (owner.getRole() != Role.ROLE_OWNER) {
+            throw new CustomException(ErrorCode.FORBIDDEN, "점주 회원만 가게를 등록할 수 있습니다.");
         }
 
-        if (storeRepository.existsByNameAndNormalizedBranch(request.getName(), normalizeBranch(request.getBranch()))) {
-            throw new CustomException(ErrorCode.DUPLICATE_RESOURCE, "이미 존재하는 상점 이름/지점명 조합입니다.");
-        }
-
-        if (StringUtils.hasText(request.getBizRegNo()) && storeRepository.existsByBizRegNo(request.getBizRegNo())) {
-            throw new CustomException(ErrorCode.DUPLICATE_RESOURCE, "이미 등록된 사업자등록번호입니다.");
-        }
-
-        List<String> imageUrls = request.getImageUrls();
-        validateImageLimit(imageUrls, 3, "일반 이미지는 최대 3장까지 등록할 수 있습니다.");
-
-        List<String> menuBoardImageUrls = request.getMenuBoardImageUrls();
-        validateImageLimit(menuBoardImageUrls, 10, "메뉴판 이미지는 최대 10장까지 등록할 수 있습니다.");
-
-        Store store = request.toEntity(owner);
-
-        if (request.getProfileImageUrl() != null) {
-            store.updateStore(
-                    store.getName(), store.getBranch(), store.getRoadAddress(), store.getJibunAddress(),
-                    store.getLatitude(), store.getLongitude(), store.getStorePhone(), store.getIntroduction(),
-                    store.getOperatingHours(), store.getStoreCategories(), store.getStoreMoods(),
-                    store.getHolidayDates(), store.getIsSuspended(), store.getRepresentativeName(),
-                    request.getProfileImageUrl()
-            );
-        }
-
-        addStoreImages(store, imageUrls);
-        addMenuBoardImages(store, menuBoardImageUrls);
-
-        Store savedStore = storeRepository.save(store);
-
-        if (request.getUniversityIds() != null) {
-            for (Long universityId : request.getUniversityIds()) {
-                universityRepository.findById(universityId)
-                        .ifPresent(savedStore::addUniversity);
-            }
-        }
-
-        recalculateCloverGrade(savedStore);
-
-        return savedStore.getId();
+        return createStoreInternal(owner, request);
     }
 
     // 상점 정보 수정
     @Transactional
     public void updateStoreForOwner(Long storeId, User user, StoreUpdateRequest request) {
-        User owner = userRepository.findByUsername(user.getUsername())
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-
         Store store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "가게를 찾을 수 없습니다."));
-
-        if (store.getStoreStatus() == StoreStatus.ACTIVE) {
-            if (owner.getRole() == Role.ROLE_ADMIN) {
-                throw new CustomException(ErrorCode.FORBIDDEN, "점유된 상점은 관리자가 수정할 수 없습니다.");
-            }
-            if (!Objects.equals(store.getUser().getId(), owner.getId())) {
-                log.warn("[UpdateStore] Forbidden attempt. storeId={}, requesterUserId={}", storeId, owner.getId());
-                throw new CustomException(ErrorCode.FORBIDDEN, "본인 소유의 가게가 아닙니다.");
-            }
-        } else {
-            if (owner.getRole() != Role.ROLE_ADMIN) {
-                throw new CustomException(ErrorCode.FORBIDDEN, "해당 상점은 관리자만 수정할 수 있습니다.");
-            }
-        }
-
-        // 이미 존재하는 상점인지 판단 (상점명 + 지점명 기준)
-        String updatedName = request.getName().orElse(store.getName());
-        String updatedBranch = request.getBranch().orElse(store.getBranch());
-        boolean storeIdentityChanged = !Objects.equals(store.getName(), updatedName) || !Objects.equals(normalizeBranch(store.getBranch()), normalizeBranch(updatedBranch));
-
-        if (storeIdentityChanged && storeRepository.existsByNameAndNormalizedBranchAndIdNot(updatedName, normalizeBranch(updatedBranch), storeId)) {
-            throw new CustomException(ErrorCode.DUPLICATE_RESOURCE, "이미 존재하는 상점 이름/지점명 조합입니다.");
-        }
-
-        // 프로필 이미지 처리
-        String profileImageUrl = store.getProfileImageUrl();
-        if (request.getProfileImageUrl().isPresent()) {
-            String newProfileImageUrl = request.getProfileImageUrl().get();
-            if (!Objects.equals(profileImageUrl, newProfileImageUrl)) {
-                if (profileImageUrl != null) {
-                    s3Service.deleteFile(profileImageUrl);
-                }
-                profileImageUrl = newProfileImageUrl; // null(삭제) 또는 새 URL(교체)
-            }
-        }
-
-        store.updateStore(
-                request.getName().orElse(store.getName()),
-                sanitizeBranch(updatedBranch),
-                request.getRoadAddress().orElse(store.getRoadAddress()),
-                request.getJibunAddress().orElse(store.getJibunAddress()),
-                request.getLatitude().orElse(store.getLatitude()),
-                request.getLongitude().orElse(store.getLongitude()),
-                request.getPhone().orElse(store.getStorePhone()),
-                request.getIntroduction().orElse(store.getIntroduction()),
-                request.getOperatingHours().orElse(store.getOperatingHours()),
-
-                request.getStoreCategories().isPresent()
-                        ? (request.getStoreCategories().get() == null ? new HashSet<>() : new HashSet<>(request.getStoreCategories().get()))
-                        : null,
-
-                request.getStoreMoods().isPresent()
-                        ? (request.getStoreMoods().get() == null ? new HashSet<>() : new HashSet<>(request.getStoreMoods().get()))
-                        : null,
-
-                request.getHolidayDates().orElse(store.getHolidayDates()),
-                request.getIsSuspended().orElse(store.getIsSuspended()),
-                request.getRepresentativeName().orElse(store.getRepresentativeName()),
-                profileImageUrl
-        );
-
-        // 갤러리 이미지 처리
-        if (request.getImageUrls().isPresent()) {
-            List<String> desiredUrls = request.getImageUrls().get() != null
-                    ? request.getImageUrls().get() : Collections.emptyList();
-
-            validateImageLimit(desiredUrls, 3, "일반 이미지는 최대 3장까지 등록할 수 있습니다.");
-
-            s3Service.syncImages(
-                    store::getImages,
-                    desiredUrls,
-                    store::removeImage,
-                    url -> StoreImage.builder().store(store).imageUrl(url).orderIndex(0).build(),
-                    store::addImage
-            );
-        }
-
-        if (request.getMenuBoardImageUrls().isPresent()) {
-            List<String> desiredMenuBoardUrls = request.getMenuBoardImageUrls().get() != null
-                    ? request.getMenuBoardImageUrls().get() : Collections.emptyList();
-
-            validateImageLimit(desiredMenuBoardUrls, 10, "메뉴판 이미지는 최대 10장까지 등록할 수 있습니다.");
-
-            s3Service.syncImages(
-                    store::getMenuBoardImages,
-                    desiredMenuBoardUrls,
-                    store::removeMenuBoardImage,
-                    url -> MenuBoardImage.builder().imageUrl(url).orderIndex(0).build(),
-                    store::addMenuBoardImage
-            );
-        }
-
-        recalculateCloverGrade(store);
+        validateOwnerStore(store, user);
+        updateStoreInternal(store, request);
     }
 
     // 상점 삭제
     @Transactional
     public void deleteStoreForOwner(Long storeId, User user) {
-        User owner = userRepository.findByUsername(user.getUsername())
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-
         Store store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "가게를 찾을 수 없습니다."));
-
-        if (store.getStoreStatus() == StoreStatus.ACTIVE) {
-            if (owner.getRole() == Role.ROLE_ADMIN) {
-                throw new CustomException(ErrorCode.FORBIDDEN, "점유된 상점은 관리자가 삭제할 수 없습니다.");
-            }
-            if (!Objects.equals(store.getUser().getId(), owner.getId())) {
-                throw new CustomException(ErrorCode.FORBIDDEN, "본인 소유의 가게가 아닙니다.");
-            }
-        } else {
-            if (owner.getRole() != Role.ROLE_ADMIN) {
-                throw new CustomException(ErrorCode.FORBIDDEN, "해당 상점은 관리자만 삭제할 수 있습니다.");
-            }
-        }
-
-        deleteStoreAssets(store);
-        storeRepository.delete(store);
+        validateOwnerStore(store, user);
+        deleteStoreInternal(store);
     }
 
     // 상점 통계 조회
@@ -525,6 +534,137 @@ public class StoreService {
 
     // -- 내부 메서드 --
 
+    private Long createStoreInternal(User userEntity, StoreCreateRequest request) {
+        if (storeRepository.existsByNameAndNormalizedBranch(request.getName(), normalizeBranch(request.getBranch()))) {
+            throw new CustomException(ErrorCode.DUPLICATE_RESOURCE, "이미 존재하는 상점 이름/지점명 조합입니다.");
+        }
+
+        if (StringUtils.hasText(request.getBizRegNo()) && storeRepository.existsByBizRegNo(request.getBizRegNo())) {
+            throw new CustomException(ErrorCode.DUPLICATE_RESOURCE, "이미 등록된 사업자등록번호입니다.");
+        }
+
+        List<String> imageUrls = request.getImageUrls();
+        validateImageLimit(imageUrls, 3, "일반 이미지는 최대 3장까지 등록할 수 있습니다.");
+
+        List<String> menuBoardImageUrls = request.getMenuBoardImageUrls();
+        validateImageLimit(menuBoardImageUrls, 10, "메뉴판 이미지는 최대 10장까지 등록할 수 있습니다.");
+
+        Store store = request.toEntity(userEntity);
+
+        if (request.getProfileImageUrl() != null) {
+            store.updateStore(
+                    store.getName(), store.getBranch(), store.getRoadAddress(), store.getJibunAddress(),
+                    store.getLatitude(), store.getLongitude(), store.getStorePhone(), store.getIntroduction(),
+                    store.getOperatingHours(), store.getStoreCategories(), store.getStoreMoods(),
+                    store.getHolidayDates(), store.getIsSuspended(), store.getRepresentativeName(),
+                    request.getProfileImageUrl()
+            );
+        }
+
+        addStoreImages(store, imageUrls);
+        addMenuBoardImages(store, menuBoardImageUrls);
+
+        Store savedStore = storeRepository.save(store);
+
+        if (request.getUniversityIds() != null) {
+            for (Long universityId : request.getUniversityIds()) {
+                universityRepository.findById(universityId)
+                        .ifPresent(savedStore::addUniversity);
+            }
+        }
+
+        recalculateCloverGrade(savedStore);
+
+        return savedStore.getId();
+    }
+
+    private void updateStoreInternal(Store store, StoreUpdateRequest request) {
+        // 이미 존재하는 상점인지 판단 (상점명 + 지점명 기준)
+        String updatedName = request.getName().orElse(store.getName());
+        String updatedBranch = request.getBranch().orElse(store.getBranch());
+        boolean storeIdentityChanged = !Objects.equals(store.getName(), updatedName) || !Objects.equals(normalizeBranch(store.getBranch()), normalizeBranch(updatedBranch));
+
+        if (storeIdentityChanged && storeRepository.existsByNameAndNormalizedBranchAndIdNot(updatedName, normalizeBranch(updatedBranch), store.getId())) {
+            throw new CustomException(ErrorCode.DUPLICATE_RESOURCE, "이미 존재하는 상점 이름/지점명 조합입니다.");
+        }
+
+        // 프로필 이미지 처리
+        String profileImageUrl = store.getProfileImageUrl();
+        if (request.getProfileImageUrl().isPresent()) {
+            String newProfileImageUrl = request.getProfileImageUrl().get();
+            if (!Objects.equals(profileImageUrl, newProfileImageUrl)) {
+                if (profileImageUrl != null) {
+                    s3Service.deleteFile(profileImageUrl);
+                }
+                profileImageUrl = newProfileImageUrl; // null(삭제) 또는 새 URL(교체)
+            }
+        }
+
+        store.updateStore(
+                request.getName().orElse(store.getName()),
+                sanitizeBranch(updatedBranch),
+                request.getRoadAddress().orElse(store.getRoadAddress()),
+                request.getJibunAddress().orElse(store.getJibunAddress()),
+                request.getLatitude().orElse(store.getLatitude()),
+                request.getLongitude().orElse(store.getLongitude()),
+                request.getPhone().orElse(store.getStorePhone()),
+                request.getIntroduction().orElse(store.getIntroduction()),
+                request.getOperatingHours().orElse(store.getOperatingHours()),
+
+                request.getStoreCategories().isPresent()
+                        ? (request.getStoreCategories().get() == null ? new HashSet<>() : new HashSet<>(request.getStoreCategories().get()))
+                        : null,
+
+                request.getStoreMoods().isPresent()
+                        ? (request.getStoreMoods().get() == null ? new HashSet<>() : new HashSet<>(request.getStoreMoods().get()))
+                        : null,
+
+                request.getHolidayDates().orElse(store.getHolidayDates()),
+                request.getIsSuspended().orElse(store.getIsSuspended()),
+                request.getRepresentativeName().orElse(store.getRepresentativeName()),
+                profileImageUrl
+        );
+
+        // 갤러리 이미지 처리
+        if (request.getImageUrls().isPresent()) {
+            List<String> desiredUrls = request.getImageUrls().get() != null
+                    ? request.getImageUrls().get() : Collections.emptyList();
+
+            validateImageLimit(desiredUrls, 3, "일반 이미지는 최대 3장까지 등록할 수 있습니다.");
+
+            s3Service.syncImages(
+                    store::getImages,
+                    desiredUrls,
+                    store::removeImage,
+                    url -> StoreImage.builder().store(store).imageUrl(url).orderIndex(0).build(),
+                    store::addImage
+            );
+        }
+
+        if (request.getMenuBoardImageUrls().isPresent()) {
+            List<String> desiredMenuBoardUrls = request.getMenuBoardImageUrls().get() != null
+                    ? request.getMenuBoardImageUrls().get() : Collections.emptyList();
+
+            validateImageLimit(desiredMenuBoardUrls, 10, "메뉴판 이미지는 최대 10장까지 등록할 수 있습니다.");
+
+            s3Service.syncImages(
+                    store::getMenuBoardImages,
+                    desiredMenuBoardUrls,
+                    store::removeMenuBoardImage,
+                    url -> MenuBoardImage.builder().imageUrl(url).orderIndex(0).build(),
+                    store::addMenuBoardImage
+            );
+        }
+
+        recalculateCloverGrade(store);
+    }
+
+    private void deleteStoreInternal(Store store) {
+        deleteStoreAssets(store);
+        storeRepository.delete(store);
+    }
+
+    // 클로버 등급 갱신
     @Transactional
     public void recalculateCloverGrade(Store store) {
         if (store.getUser() == null) {
@@ -545,17 +685,25 @@ public class StoreService {
             store.updateCloverGrade(CloverGrade.SPROUT);
         }
     }
-
-    public void validateStoreOwner(Store store, User user) {
+    
+    // 가게 주인인지 검증
+    private void validateOwnerStore(Store store, User user) {
         User owner = userRepository.findByUsername(user.getUsername())
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
-        if (store.getStoreStatus() == StoreStatus.UNCLAIMED && owner.getRole() == Role.ROLE_ADMIN) {
-            return;
-        }
-
         if (!Objects.equals(store.getUser().getId(), owner.getId())) {
-            throw new CustomException(ErrorCode.FORBIDDEN, "가게 주인이 아닙니다.");
+            log.warn("[validateOwnerStore] Forbidden attempt. storeId={}, requesterUserId={}", store.getId(), owner.getId());
+            throw new CustomException(ErrorCode.FORBIDDEN, "본인 소유의 가게가 아닙니다.");
+        }
+    }
+
+    // UNCLAIMED 매장인지 검증
+    private void validateUnclaimedStore(Store store, User user) {
+        User admin = userRepository.findByUsername(user.getUsername())
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        if (store.getStoreStatus() != StoreStatus.UNCLAIMED || admin.getRole() != Role.ROLE_ADMIN) {
+            throw new CustomException(ErrorCode.FORBIDDEN, "UNCLAIMED 상태의 매장에만 접근 가능합니다.");
         }
     }
 
@@ -605,6 +753,69 @@ public class StoreService {
         s3Service.deleteFile(store.getProfileImageUrl());
         store.getImages().forEach(image -> s3Service.deleteFile(image.getImageUrl()));
         store.getMenuBoardImages().forEach(image -> s3Service.deleteFile(image.getImageUrl()));
+    }
+
+    private static final String[] EXPECTED_HEADERS = { "universityId", "name", "branch", "roadAddress", "jibunAddress",
+            "latitude", "longitude" };
+
+    private void validateHeader(Row headerRow) {
+        if (headerRow == null) {
+            throw new CustomException(ErrorCode.BAD_REQUEST, "엑셀 파일에 헤더가 없습니다.");
+        }
+
+        for (int i = 0; i < EXPECTED_HEADERS.length; i++) {
+            Cell cell = headerRow.getCell(i);
+            String cellValue = getCellValueAsString(cell);
+            if (!EXPECTED_HEADERS[i].equals(cellValue)) {
+                throw new CustomException(ErrorCode.BAD_REQUEST,
+                        String.format(
+                                "잘못된 헤더 형식입니다. 기대값: '%s', 실제값: '%s' (열: %d). 헤더 순서를 확인해주세요: [universityId, name, branch, roadAddress, jibunAddress, latitude, longitude]",
+                                EXPECTED_HEADERS[i], cellValue, i + 1));
+            }
+        }
+    }
+
+    private Long getCellValueAsLong(Cell cell) {
+        if (cell == null)
+            return null;
+        if (cell.getCellType() == CellType.NUMERIC) {
+            return (long) cell.getNumericCellValue();
+        } else if (cell.getCellType() == CellType.STRING) {
+            try {
+                return Long.parseLong(cell.getStringCellValue());
+            } catch (NumberFormatException e) {
+                return null;
+            }
+        }
+        return null;
+    }
+
+    private String getCellValueAsString(Cell cell) {
+        if (cell == null)
+            return "";
+        switch (cell.getCellType()) {
+            case STRING:
+                return cell.getStringCellValue().trim();
+            case NUMERIC:
+                return String.valueOf((long) cell.getNumericCellValue());
+            default:
+                return "";
+        }
+    }
+
+    private Double getCellValueAsDouble(Cell cell) {
+        if (cell == null)
+            return null;
+        if (cell.getCellType() == CellType.NUMERIC) {
+            return cell.getNumericCellValue();
+        } else if (cell.getCellType() == CellType.STRING) {
+            try {
+                return Double.parseDouble(cell.getStringCellValue());
+            } catch (NumberFormatException e) {
+                return null;
+            }
+        }
+        return null;
     }
 
 }

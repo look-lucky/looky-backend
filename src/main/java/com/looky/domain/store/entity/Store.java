@@ -113,13 +113,13 @@ public class Store extends BaseEntity {
     private StoreStatus storeStatus;
 
     @ElementCollection(targetClass = StoreCategory.class)
-    @CollectionTable(name = "store_categories", joinColumns = @JoinColumn(name = "store_id"))
+    @CollectionTable(name = "store_category", joinColumns = @JoinColumn(name = "store_id"))
     @Enumerated(EnumType.STRING)
     @Column(name = "category")
     private Set<StoreCategory> storeCategories = new HashSet<>();
 
     @ElementCollection(targetClass = StoreMood.class)
-    @CollectionTable(name = "store_moods", joinColumns = @JoinColumn(name = "store_id"))
+    @CollectionTable(name = "store_mood", joinColumns = @JoinColumn(name = "store_id"))
     @Enumerated(EnumType.STRING)
     @Column(name = "mood")
     private Set<StoreMood> storeMoods = new HashSet<>();
@@ -140,7 +140,7 @@ public class Store extends BaseEntity {
     private String profileImageUrl; // 가게 프로필 이미지 URL
 
     @ElementCollection
-    @CollectionTable(name = "store_holidays", joinColumns = @JoinColumn(name = "store_id"))
+    @CollectionTable(name = "store_holiday", joinColumns = @JoinColumn(name = "store_id"))
     @Column(name = "holiday_date")
     private List<LocalDate> holidayDates = new ArrayList<>(); // 휴무일 리스트
 

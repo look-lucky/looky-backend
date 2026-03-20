@@ -15,6 +15,7 @@ public class EventImage extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "event_image_id")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)

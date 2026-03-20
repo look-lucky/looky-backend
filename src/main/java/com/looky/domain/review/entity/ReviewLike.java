@@ -15,6 +15,7 @@ public class ReviewLike extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "review_like_id")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)

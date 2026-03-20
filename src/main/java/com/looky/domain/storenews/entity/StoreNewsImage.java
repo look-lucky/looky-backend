@@ -15,6 +15,7 @@ public class StoreNewsImage extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "store_news_image_id")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)

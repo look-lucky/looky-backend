@@ -16,14 +16,15 @@ import java.time.LocalDateTime;
 @Entity
 @Getter
 @Table(
-        name = "email_verifications",
-        uniqueConstraints = @UniqueConstraint(name = "uk_email_verifications_email", columnNames = "email")
+        name = "email_verification",
+        uniqueConstraints = @UniqueConstraint(name = "uk_email_verification_email", columnNames = "email")
 )
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class EmailVerification {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "email_verification_id")
     private Long id;
 
     @Column(nullable = false, length = 320)

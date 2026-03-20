@@ -15,6 +15,7 @@ public class StoreUniversity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "store_university_id")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)

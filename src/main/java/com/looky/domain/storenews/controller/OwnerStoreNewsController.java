@@ -23,12 +23,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-@Tag(name = "StoreNews", description = "가게 소식 관련 API")
-@Deprecated
+@Tag(name = "Owner StoreNews", description = "점주 가게 소식 관리 API")
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/owner")
 @RequiredArgsConstructor
-public class StoreNewsController {
+public class OwnerStoreNewsController {
 
     private final StoreNewsService storeNewsService;
 
@@ -45,27 +44,6 @@ public class StoreNewsController {
             @RequestBody @Valid CreateStoreNewsRequest request) {
         Long newsId = storeNewsService.createStoreNewsForOwner(storeId, principalDetails.getUser(), request);
         return ResponseEntity.status(HttpStatus.CREATED).body(CommonResponse.success(newsId));
-    }
-
-    @Operation(summary = "[공통] 소식 목록 조회", description = "가게의 소식 목록을 조회합니다.")
-    @GetMapping("/stores/{storeId}/news")
-    public ResponseEntity<CommonResponse<PageResponse<StoreNewsResponse>>> getStoreNewsList(
-            @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,
-            @Parameter(description = "가게 ID") @PathVariable Long storeId,
-            @Parameter(description = "페이징 정보 (page, size, sort)") @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
-        PageResponse<StoreNewsResponse> response = storeNewsService.getStoreNewsListForStudent(storeId, pageable,
-                principalDetails != null ? principalDetails.getUser() : null);
-        return ResponseEntity.ok(CommonResponse.success(response));
-    }
-
-    @Operation(summary = "[공통] 소식 상세 조회", description = "소식 상세 정보를 조회합니다.")
-    @GetMapping("/store-news/{newsId}")
-    public ResponseEntity<CommonResponse<StoreNewsResponse>> getStoreNews(
-            @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,
-            @Parameter(description = "소식 ID") @PathVariable Long newsId) {
-        StoreNewsResponse response = storeNewsService.getStoreNewsForStudent(newsId,
-                principalDetails != null ? principalDetails.getUser() : null);
-        return ResponseEntity.ok(CommonResponse.success(response));
     }
 
     @Operation(summary = "[점주] 소식 수정", description = "소식을 수정합니다.")
@@ -97,7 +75,26 @@ public class StoreNewsController {
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body(CommonResponse.success(null));
     }
 
-    @Operation(summary = "[공통] 소식 좋아요 토글", description = "소식에 좋아요를 누르거나 취소합니다.")
+    @Operation(summary = "[점주] 소식 목록 조회", description = "가게의 소식 목록을 조회합니다.")
+    @GetMapping("/stores/{storeId}/news")
+    public ResponseEntity<CommonResponse<PageResponse<StoreNewsResponse>>> getStoreNewsList(
+            @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,
+            @Parameter(description = "가게 ID") @PathVariable Long storeId,
+            @Parameter(description = "페이징 정보") @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        PageResponse<StoreNewsResponse> response = storeNewsService.getStoreNewsListForOwner(storeId, pageable, principalDetails.getUser());
+        return ResponseEntity.ok(CommonResponse.success(response));
+    }
+
+    @Operation(summary = "[점주] 소식 상세 조회", description = "소식 상세 정보를 조회합니다.")
+    @GetMapping("/store-news/{newsId}")
+    public ResponseEntity<CommonResponse<StoreNewsResponse>> getStoreNews(
+            @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,
+            @Parameter(description = "소식 ID") @PathVariable Long newsId) {
+        StoreNewsResponse response = storeNewsService.getStoreNewsForOwner(newsId, principalDetails.getUser());
+        return ResponseEntity.ok(CommonResponse.success(response));
+    }
+
+    @Operation(summary = "[점주] 소식 좋아요 토글", description = "소식에 좋아요를 누르거나 취소합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "성공"),
             @ApiResponse(responseCode = "404", description = "소식 찾을 수 없음", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class)))
@@ -106,11 +103,11 @@ public class StoreNewsController {
     public ResponseEntity<CommonResponse<Void>> toggleLike(
             @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,
             @Parameter(description = "소식 ID") @PathVariable Long newsId) {
-        storeNewsService.toggleLikeForStudent(newsId, principalDetails.getUser());
+        storeNewsService.toggleLikeForOwner(newsId, principalDetails.getUser());
         return ResponseEntity.ok(CommonResponse.success(null));
     }
 
-    @Operation(summary = "[공통] 댓글 작성", description = "소식에 댓글을 작성합니다.")
+    @Operation(summary = "[점주] 댓글 작성", description = "소식에 댓글을 작성합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "댓글 작성 성공"),
             @ApiResponse(responseCode = "404", description = "소식 찾을 수 없음", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class)))
@@ -120,22 +117,21 @@ public class StoreNewsController {
             @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,
             @Parameter(description = "소식 ID") @PathVariable Long newsId,
             @RequestBody @Valid CreateStoreNewsCommentRequest request) {
-        Long commentId = storeNewsService.createCommentForStudent(newsId, principalDetails.getUser(), request);
+        Long commentId = storeNewsService.createCommentForOwner(newsId, principalDetails.getUser(), request);
         return ResponseEntity.status(HttpStatus.CREATED).body(CommonResponse.success(commentId));
     }
 
-    @Operation(summary = "[공통] 댓글 목록 조회", description = "소식의 댓글 목록을 조회합니다.")
+    @Operation(summary = "[점주] 댓글 목록 조회", description = "소식의 댓글 목록을 조회합니다.")
     @GetMapping("/store-news/{newsId}/comments")
     public ResponseEntity<CommonResponse<PageResponse<StoreNewsCommentResponse>>> getComments(
             @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,
             @Parameter(description = "소식 ID") @PathVariable Long newsId,
             @Parameter(description = "페이징 정보") @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
-        PageResponse<StoreNewsCommentResponse> response = storeNewsService.getCommentsForStudent(newsId, pageable,
-                principalDetails != null ? principalDetails.getUser() : null);
+        PageResponse<StoreNewsCommentResponse> response = storeNewsService.getCommentsForOwner(newsId, pageable, principalDetails.getUser());
         return ResponseEntity.ok(CommonResponse.success(response));
     }
 
-    @Operation(summary = "[공통] 댓글 삭제", description = "자신의 댓글을 삭제합니다.")
+    @Operation(summary = "[점주] 댓글 삭제", description = "자신의 댓글을 삭제합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "댓글 삭제 성공"),
             @ApiResponse(responseCode = "403", description = "권한 없음 (본인 댓글 아님)", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class))),
@@ -146,7 +142,7 @@ public class StoreNewsController {
             @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,
             @Parameter(description = "소식 ID") @PathVariable Long newsId,
             @Parameter(description = "댓글 ID") @PathVariable Long commentId) {
-        storeNewsService.deleteCommentForStudent(commentId, principalDetails.getUser());
+        storeNewsService.deleteCommentForOwner(commentId, principalDetails.getUser());
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body(CommonResponse.success(null));
     }
 }

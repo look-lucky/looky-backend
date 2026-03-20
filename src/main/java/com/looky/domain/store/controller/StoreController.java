@@ -32,6 +32,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "Store", description = "상점 관련 API")
+@Deprecated
 @RestController
 @RequestMapping("/api/stores")
 @RequiredArgsConstructor
@@ -52,7 +53,7 @@ public class StoreController {
                 @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,
                 @RequestBody @Valid StoreCreateRequest request
         ) {
-                Long storeId = storeService.createStore(principalDetails.getUser(), request);
+                Long storeId = storeService.createStoreForOwner(principalDetails.getUser(), request);
                 return ResponseEntity.status(HttpStatus.CREATED).body(CommonResponse.success(storeId));
         }
 
@@ -69,7 +70,7 @@ public class StoreController {
                 @Parameter(description = "상점 ID") @PathVariable Long storeId,
                 @RequestBody @Valid StoreUpdateRequest request
         ) {
-                storeService.updateStore(storeId, principalDetails.getUser(), request);
+                storeService.updateStoreForOwner(storeId, principalDetails.getUser(), request);
                 return ResponseEntity.ok(CommonResponse.success(null));
         }
 
@@ -84,7 +85,7 @@ public class StoreController {
                 @Parameter(description = "상점 ID") @PathVariable Long storeId,
                 @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails
         ) {
-                storeService.deleteStore(storeId, principalDetails.getUser());
+                storeService.deleteStoreForOwner(storeId, principalDetails.getUser());
                 return ResponseEntity.status(HttpStatus.NO_CONTENT).body(CommonResponse.success(null));
         }
 
@@ -93,10 +94,10 @@ public class StoreController {
                 @ApiResponse(responseCode = "200", description = "조회 성공")
         })
         @GetMapping("/my-stores")
-        public ResponseEntity<CommonResponse<List<StoreResponse>>> getMyStores(
+        public ResponseEntity<CommonResponse<List<OwnerStoreResponse>>> getMyStores(
                 @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails
         ) {
-                List<StoreResponse> response = storeService.getMyStores(principalDetails.getUser());
+                List<OwnerStoreResponse> response = storeService.getMyStoresForOwner(principalDetails.getUser());
                 return ResponseEntity.ok(CommonResponse.success(response));
         }
 
@@ -111,7 +112,7 @@ public class StoreController {
                 @Parameter(description = "상점 ID") @PathVariable Long storeId,
                 @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails
         ) {
-                StoreStatsResponse response = storeService.getStoreStats(storeId, principalDetails.getUser());
+                StoreStatsResponse response = storeService.getStoreStatsForOwner(storeId, principalDetails.getUser());
                 return ResponseEntity.ok(CommonResponse.success(response));
         }
 
@@ -124,7 +125,7 @@ public class StoreController {
         public ResponseEntity<CommonResponse<StoreRegistrationStatusResponse>> getStoreRegistrationStatus(
                 @Parameter(description = "상점 ID") @PathVariable Long storeId
         ) {
-                StoreRegistrationStatusResponse response = storeService.getStoreRegistrationStatus(storeId);
+                StoreRegistrationStatusResponse response = storeService.getStoreRegistrationStatusForOwner(storeId);
                 return ResponseEntity.ok(CommonResponse.success(response));
         }
 
@@ -134,11 +135,11 @@ public class StoreController {
                 @ApiResponse(responseCode = "404", description = "상점 없음", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class)))
         })
         @GetMapping("/{storeId}")
-        public ResponseEntity<CommonResponse<StoreResponse>> getStore(
+        public ResponseEntity<CommonResponse<StudentStoreResponse>> getStore(
                         @Parameter(description = "상점 ID") @PathVariable Long storeId,
                         @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails) {
                 User user = principalDetails != null ? principalDetails.getUser() : null;
-                StoreResponse response = storeService.getStore(storeId, user);
+                StudentStoreResponse response = storeService.getStoreForStudent(storeId, user);
                 return ResponseEntity.ok(CommonResponse.success(response));
         }
 
@@ -147,7 +148,7 @@ public class StoreController {
                         @ApiResponse(responseCode = "200", description = "상점 목록 조회 성공")
         })
         @GetMapping
-        public ResponseEntity<CommonResponse<PageResponse<StoreResponse>>> getStores(
+        public ResponseEntity<CommonResponse<PageResponse<StudentStoreResponse>>> getStores(
                 @Parameter(description = "검색 키워드 (상점 이름)") @RequestParam(required = false) String keyword,
                 @Parameter(description = "카테고리 필터 (복수 선택 가능)") @RequestParam(required = false) List<StoreCategory> categories,
                 @Parameter(description = "분위기 필터 (복수 선택 가능)") @RequestParam(required = false) List<StoreMood> moods,
@@ -158,7 +159,7 @@ public class StoreController {
                 @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails
         ) {
                 User user = principalDetails != null ? principalDetails.getUser() : null;
-                PageResponse<StoreResponse> response = storeService.getStores(keyword, categories, moods, universityId, hasPartnership, storeStatus, pageable, user);
+                PageResponse<StudentStoreResponse> response = storeService.getStoresForStudent(keyword, categories, moods, universityId, hasPartnership, storeStatus, pageable, user);
                 return ResponseEntity.ok(CommonResponse.success(response));
         }
 
@@ -167,14 +168,14 @@ public class StoreController {
                 @ApiResponse(responseCode = "200", description = "상점 목록 조회 성공")
         })
         @GetMapping("/nearby")
-        public ResponseEntity<CommonResponse<List<StoreResponse>>> getNearbyStores(
+        public ResponseEntity<CommonResponse<List<StudentStoreResponse>>> getNearbyStores(
                 @Parameter(description = "위도") @RequestParam Double latitude,
                 @Parameter(description = "경도") @RequestParam Double longitude,
                 @Parameter(description = "반경(km)") @RequestParam Double radius,
                 @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails
         ) {
                 User user = principalDetails != null ? principalDetails.getUser() : null;
-                List<StoreResponse> response = storeService.getNearbyStores(latitude, longitude, radius, user);
+                List<StudentStoreResponse> response = storeService.getNearbyStoresForStudent(latitude, longitude, radius, user);
                 return ResponseEntity.ok(CommonResponse.success(response));
         }
 
@@ -183,13 +184,13 @@ public class StoreController {
                 @ApiResponse(responseCode = "200", description = "상점 목록 조회 성공")
         })
         @GetMapping("/location")
-        public ResponseEntity<CommonResponse<List<StoreResponse>>> getStoresByLocation(
+        public ResponseEntity<CommonResponse<List<StudentStoreResponse>>> getStoresByLocation(
                 @Parameter(description = "위도") @RequestParam Double latitude,
                 @Parameter(description = "경도") @RequestParam Double longitude,
                 @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails
         ) {
                 User user = principalDetails != null ? principalDetails.getUser() : null;
-                List<StoreResponse> response = storeService.getStoresByLocation(latitude, longitude, user);
+                List<StudentStoreResponse> response = storeService.getStoresByLocationForStudent(latitude, longitude, user);
                 return ResponseEntity.ok(CommonResponse.success(response));
         }
 
@@ -205,7 +206,7 @@ public class StoreController {
                 @Parameter(description = "상점 ID") @PathVariable Long storeId,
                 @RequestBody @Valid StoreReportRequest request)
         {
-                storeService.reportStore(storeId, principalDetails.getUser().getId(), request);
+                storeService.reportStoreForStudent(storeId, principalDetails.getUser().getId(), request);
                 return ResponseEntity.ok(CommonResponse.success(null));
         }
 
@@ -218,7 +219,7 @@ public class StoreController {
         public ResponseEntity<CommonResponse<List<HotStoreResponse>>> getHotStores(
                 @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails
         ) {
-                List<HotStoreResponse> response = storeService.getHotStores(principalDetails.getUser());
+                List<HotStoreResponse> response = storeService.getHotStoresForStudent(principalDetails.getUser());
                 return ResponseEntity.ok(CommonResponse.success(response));
         }
 
@@ -227,12 +228,12 @@ public class StoreController {
                 @ApiResponse(responseCode = "200", description = "조회 성공")
         })
         @GetMapping("/map")
-        public ResponseEntity<CommonResponse<List<StoreMapResponse>>> getStoreMap(
+        public ResponseEntity<CommonResponse<List<StudentStoreMapResponse>>> getStoreMap(
                 @Parameter(description = "대학(상권) ID 필터") @RequestParam(required = false) Long universityId,
                 @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails
         ) {
                 User user = principalDetails != null ? principalDetails.getUser() : null;
-                List<StoreMapResponse> response = storeService.getStoreMap(universityId, user);
+                List<StudentStoreMapResponse> response = storeService.getStoreMapForStudent(universityId, user);
                 return ResponseEntity.ok(CommonResponse.success(response));
         }
 

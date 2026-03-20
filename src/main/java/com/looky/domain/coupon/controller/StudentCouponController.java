@@ -54,7 +54,7 @@ public class StudentCouponController {
     public ResponseEntity<CommonResponse<List<StudentCouponResponse>>> getTodayCoupons(
             @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails
     ) {
-        List<StudentCouponResponse> response = couponService.getTodayCoupons(principalDetails.getUser());
+        List<StudentCouponResponse> response = couponService.getTodayCouponsForStudent(principalDetails.getUser());
         return ResponseEntity.ok(CommonResponse.success(response));
     }
 
@@ -69,7 +69,7 @@ public class StudentCouponController {
             @Parameter(description = "쿠폰 ID") @PathVariable Long couponId,
             @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails
     ) {
-        DownloadCouponResponse response = couponService.downloadCoupon(couponId, principalDetails.getUser());
+        DownloadCouponResponse response = couponService.downloadCouponForStudent(couponId, principalDetails.getUser());
         return ResponseEntity.ok(CommonResponse.success(response));
     }
 
@@ -85,7 +85,7 @@ public class StudentCouponController {
             @Parameter(description = "사용할 쿠폰 ID (download ID)") @PathVariable Long studentCouponId,
             @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails
     ) {
-        ActivateCouponResponse response = couponService.activateCoupon(studentCouponId, principalDetails.getUser());
+        ActivateCouponResponse response = couponService.activateCouponForStudent(studentCouponId, principalDetails.getUser());
         return ResponseEntity.ok(CommonResponse.success(response));
     }
 
@@ -98,7 +98,7 @@ public class StudentCouponController {
     public ResponseEntity<CommonResponse<List<DownloadCouponResponse>>> getMyCoupons(
             @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails
     ) {
-        List<DownloadCouponResponse> response = couponService.getMyCoupons(principalDetails.getUser());
+        List<DownloadCouponResponse> response = couponService.getMyCouponsForStudent(principalDetails.getUser());
         return ResponseEntity.ok(CommonResponse.success(response));
     }
 }

@@ -42,7 +42,7 @@ public class CouponService {
     // --- 점주용 ---
 
     @Transactional
-    public Long createCoupon(Long storeId, User user, CreateCouponRequest request) {
+    public Long createCouponForOwner(Long storeId, User user, CreateCouponRequest request) {
         
         Store store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "가게를 찾을 수 없습니다."));
@@ -76,7 +76,7 @@ public class CouponService {
     }
 
     @Transactional
-    public void updateCoupon(Long couponId, User user, UpdateCouponRequest request) {
+    public void updateCouponForOwner(Long couponId, User user, UpdateCouponRequest request) {
         Coupon coupon = couponRepository.findById(couponId)
                 .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "쿠폰을 찾을 수 없습니다."));
 
@@ -102,7 +102,7 @@ public class CouponService {
     }
 
     @Transactional
-    public void deleteCoupon(Long couponId, User user) {
+    public void deleteCouponForOwner(Long couponId, User user) {
         Coupon coupon = couponRepository.findById(couponId)
                 .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "쿠폰을 찾을 수 없습니다."));
 
@@ -113,7 +113,7 @@ public class CouponService {
 
     // 코드로 우리 가게 활성화 쿠폰 조회
     @Transactional(readOnly = true)
-    public VerifyCouponResponse verifyCouponCode(Long storeId, User owner, String verificationCode) {
+    public VerifyCouponResponse verifyCouponCodeForOwner(Long storeId, User owner, String verificationCode) {
         Store store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "가게를 찾을 수 없습니다."));
 
@@ -138,7 +138,7 @@ public class CouponService {
 
     // 쿠폰 사용 처리
     @Transactional
-    public void useCoupon(Long storeId, User owner, Long studentCouponId) {
+    public void useCouponForOwner(Long storeId, User owner, Long studentCouponId) {
         Store store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "가게를 찾을 수 없습니다."));
 
@@ -162,7 +162,7 @@ public class CouponService {
 
     // 수동 만료 처리
     @Transactional
-    public void expireCoupon(Long couponId, User user) {
+    public void expireCouponForOwner(Long couponId, User user) {
         Coupon coupon = couponRepository.findById(couponId)
                 .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "쿠폰을 찾을 수 없습니다."));
 
@@ -215,7 +215,7 @@ public class CouponService {
     }
 
     // 오늘의 신규 쿠폰 조회
-    public List<StudentCouponResponse> getTodayCoupons(User user) {
+    public List<StudentCouponResponse> getTodayCouponsForStudent(User user) {
         if (user.getRole() != Role.ROLE_STUDENT) {
             throw new CustomException(ErrorCode.FORBIDDEN, "학생만 이용 가능한 서비스입니다.");
         }
@@ -249,7 +249,7 @@ public class CouponService {
     
     // 학생 쿠폰 발급 (다운로드)
     @Transactional
-    public DownloadCouponResponse downloadCoupon(Long couponId, User user) {
+    public DownloadCouponResponse downloadCouponForStudent(Long couponId, User user) {
         // 비관적 락을 사용하여 동시성 이슈 해결
         Coupon coupon = couponRepository.findByIdWithLock(couponId)
                 .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "쿠폰을 찾을 수 없습니다."));
@@ -305,7 +305,7 @@ public class CouponService {
 
     // 쿠폰 코드 발급
     @Transactional
-    public ActivateCouponResponse activateCoupon(Long studentCouponId, User user) {
+    public ActivateCouponResponse activateCouponForStudent(Long studentCouponId, User user) {
         StudentCoupon studentCoupon = studentCouponRepository.findByIdAndUser(studentCouponId, user)
                 .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "쿠폰을 찾을 수 없습니다."));
 
@@ -331,7 +331,7 @@ public class CouponService {
     }
 
     // 내 쿠폰 조회
-    public List<DownloadCouponResponse> getMyCoupons(User user) {
+    public List<DownloadCouponResponse> getMyCouponsForStudent(User user) {
         return studentCouponRepository.findByUser(user).stream()
                 .map(DownloadCouponResponse::from)
                 .collect(Collectors.toList());

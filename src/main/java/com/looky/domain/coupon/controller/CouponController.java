@@ -45,7 +45,7 @@ public class CouponController {
                 @RequestBody @Valid CreateCouponRequest request
         )
         {
-                Long couponId = couponService.createCoupon(storeId, principalDetails.getUser(), request);
+                Long couponId = couponService.createCouponForOwner(storeId, principalDetails.getUser(), request);
                 return ResponseEntity.status(HttpStatus.CREATED).body(CommonResponse.success(couponId));
         }
 
@@ -62,7 +62,7 @@ public class CouponController {
                 @RequestBody @Valid UpdateCouponRequest request
         )
         {
-                couponService.updateCoupon(couponId, principalDetails.getUser(), request);
+                couponService.updateCouponForOwner(couponId, principalDetails.getUser(), request);
                 return ResponseEntity.ok(CommonResponse.success(null));
         }
 
@@ -78,7 +78,7 @@ public class CouponController {
                 @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails
         )
         {
-                couponService.deleteCoupon(couponId, principalDetails.getUser());
+                couponService.deleteCouponForOwner(couponId, principalDetails.getUser());
                 return ResponseEntity.status(HttpStatus.NO_CONTENT).body(CommonResponse.success(null));
         }
 
@@ -93,7 +93,7 @@ public class CouponController {
                 @Parameter(description = "쿠폰 ID") @PathVariable Long couponId,
                 @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails
         ) {
-            couponService.expireCoupon(couponId, principalDetails.getUser());
+            couponService.expireCouponForOwner(couponId, principalDetails.getUser());
             return ResponseEntity.ok(CommonResponse.success(null));
         }
 
@@ -110,7 +110,7 @@ public class CouponController {
                 @RequestBody @Valid VerifyCouponRequest request
         )
         {
-                VerifyCouponResponse response = couponService.verifyCouponCode(storeId, principalDetails.getUser(), request.getCode());
+                VerifyCouponResponse response = couponService.verifyCouponCodeForOwner(storeId, principalDetails.getUser(), request.getCode());
                 return ResponseEntity.ok(CommonResponse.success(response));
         }
 
@@ -128,7 +128,7 @@ public class CouponController {
                 @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails
         )
         {
-                couponService.useCoupon(storeId, principalDetails.getUser(), studentCouponId);
+                couponService.useCouponForOwner(storeId, principalDetails.getUser(), studentCouponId);
                 return ResponseEntity.ok(CommonResponse.success(null));
         }
 
@@ -161,7 +161,7 @@ public class CouponController {
         public ResponseEntity<CommonResponse<List<StudentCouponResponse>>> getTodayCoupons(
                 @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails
         ) {
-                List<StudentCouponResponse> response = couponService.getTodayCoupons(principalDetails.getUser());
+                List<StudentCouponResponse> response = couponService.getTodayCouponsForStudent(principalDetails.getUser());
                 return ResponseEntity.ok(CommonResponse.success(response));
         }
 
@@ -177,7 +177,7 @@ public class CouponController {
                 @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails
         )
         {
-                DownloadCouponResponse response = couponService.downloadCoupon(couponId, principalDetails.getUser());
+                DownloadCouponResponse response = couponService.downloadCouponForStudent(couponId, principalDetails.getUser());
                 return ResponseEntity.ok(CommonResponse.success(response));
         }
 
@@ -194,7 +194,7 @@ public class CouponController {
                 @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails
         )
         {
-                ActivateCouponResponse response = couponService.activateCoupon(studentCouponId, principalDetails.getUser());
+                ActivateCouponResponse response = couponService.activateCouponForStudent(studentCouponId, principalDetails.getUser());
                 return ResponseEntity.ok(CommonResponse.success(response));
         }
 
@@ -207,7 +207,7 @@ public class CouponController {
                 @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails
         )
         {
-                List<DownloadCouponResponse> response = couponService.getMyCoupons(principalDetails.getUser());
+                List<DownloadCouponResponse> response = couponService.getMyCouponsForStudent(principalDetails.getUser());
                 return ResponseEntity.ok(CommonResponse.success(response));
         }
 }

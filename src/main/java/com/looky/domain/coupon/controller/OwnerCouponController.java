@@ -46,7 +46,7 @@ public class OwnerCouponController {
             @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,
             @RequestBody @Valid CreateCouponRequest request
     ) {
-        Long couponId = couponService.createCoupon(storeId, principalDetails.getUser(), request);
+        Long couponId = couponService.createCouponForOwner(storeId, principalDetails.getUser(), request);
         return ResponseEntity.status(HttpStatus.CREATED).body(CommonResponse.success(couponId));
     }
 
@@ -62,7 +62,7 @@ public class OwnerCouponController {
             @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,
             @RequestBody @Valid UpdateCouponRequest request
     ) {
-        couponService.updateCoupon(couponId, principalDetails.getUser(), request);
+        couponService.updateCouponForOwner(couponId, principalDetails.getUser(), request);
         return ResponseEntity.ok(CommonResponse.success(null));
     }
 
@@ -77,7 +77,7 @@ public class OwnerCouponController {
             @Parameter(description = "쿠폰 ID") @PathVariable Long couponId,
             @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails
     ) {
-        couponService.deleteCoupon(couponId, principalDetails.getUser());
+        couponService.deleteCouponForOwner(couponId, principalDetails.getUser());
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body(CommonResponse.success(null));
     }
 
@@ -92,7 +92,7 @@ public class OwnerCouponController {
             @Parameter(description = "쿠폰 ID") @PathVariable Long couponId,
             @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails
     ) {
-        couponService.expireCoupon(couponId, principalDetails.getUser());
+        couponService.expireCouponForOwner(couponId, principalDetails.getUser());
         return ResponseEntity.ok(CommonResponse.success(null));
     }
 
@@ -108,7 +108,7 @@ public class OwnerCouponController {
             @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,
             @RequestBody @Valid VerifyCouponRequest request
     ) {
-        VerifyCouponResponse response = couponService.verifyCouponCode(storeId, principalDetails.getUser(), request.getCode());
+        VerifyCouponResponse response = couponService.verifyCouponCodeForOwner(storeId, principalDetails.getUser(), request.getCode());
         return ResponseEntity.ok(CommonResponse.success(response));
     }
 
@@ -125,7 +125,7 @@ public class OwnerCouponController {
             @Parameter(description = "학생 쿠폰 ID") @PathVariable Long studentCouponId,
             @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails
     ) {
-        couponService.useCoupon(storeId, principalDetails.getUser(), studentCouponId);
+        couponService.useCouponForOwner(storeId, principalDetails.getUser(), studentCouponId);
         return ResponseEntity.ok(CommonResponse.success(null));
     }
 

@@ -166,21 +166,19 @@ public class CouponService {
         Coupon coupon = couponRepository.findById(couponId)
                 .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "쿠폰을 찾을 수 없습니다."));
 
-        // 권한 체크 (본인 가게의 쿠폰인지)
-        if (!coupon.getStore().getUser().getId().equals(user.getId())) {
-            throw new CustomException(ErrorCode.FORBIDDEN, "권한이 없습니다.");
-        }
+        validateStoreOwner(coupon.getStore(), user);
 
         coupon.expire();
     }
 
     // 상점 쿠폰 조회
     public List<OwnerCouponResponse> getCouponsByStoreForOwner(Long storeId, User user) {
-        List<Coupon> coupons = couponRepository.findByStoreId(storeId);
+        Store store = storeRepository.findById(storeId)
+                .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "가게를 찾을 수 없습니다."));
 
-        if (!coupons.isEmpty()) {
-            validateStoreOwner(coupons.get(0).getStore(), user);
-        }
+        validateStoreOwner(store, user);
+
+        List<Coupon> coupons = couponRepository.findByStoreId(storeId);
 
         List<Object[]> counts = studentCouponRepository.countByCouponInAndStatus(coupons, CouponUsageStatus.USED);
         Map<Long, Long> usedCountMap = counts.stream()

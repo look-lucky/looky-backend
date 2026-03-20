@@ -21,6 +21,7 @@ import com.looky.domain.user.entity.User;
 import com.looky.common.response.PageResponse;
 import com.looky.domain.user.repository.OwnerProfileRepository;
 import com.looky.domain.user.repository.StudentProfileRepository;
+import com.looky.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -32,6 +33,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -44,6 +46,7 @@ public class StoreNewsService {
     private final StoreNewsCommentRepository storeNewsCommentRepository;
     private final StoreNewsLikeRepository storeNewsLikeRepository;
     private final StoreRepository storeRepository;
+    private final UserRepository userRepository;
     private final StudentProfileRepository studentProfileRepository;
     private final OwnerProfileRepository ownerProfileRepository;
     private final S3Service s3Service;
@@ -55,9 +58,7 @@ public class StoreNewsService {
         Store store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "해당 상점을 찾을 수 없습니다."));
 
-        if (!store.getUser().getId().equals(user.getId())) {
-            throw new CustomException(ErrorCode.FORBIDDEN);
-        }
+        validateOwnerStore(store, user);
 
         List<String> imageUrls = request.getImageUrls();
         if (imageUrls != null && imageUrls.size() > 5) {
@@ -87,9 +88,7 @@ public class StoreNewsService {
         StoreNews news = storeNewsRepository.findById(newsId)
                 .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "가게 소식을 찾을 수 없습니다."));
 
-        if (!news.getStore().getUser().getId().equals(user.getId())) {
-            throw new CustomException(ErrorCode.FORBIDDEN);
-        }
+        validateOwnerStore(news.getStore(), user);
 
         String title = news.getTitle();
         if (request.getTitle().isPresent()) {
@@ -157,9 +156,7 @@ public class StoreNewsService {
         StoreNews news = storeNewsRepository.findById(newsId)
                 .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "가게 소식을 찾을 수 없습니다."));
 
-        if (!news.getStore().getUser().getId().equals(user.getId())) {
-            throw new CustomException(ErrorCode.FORBIDDEN);
-        }
+        validateOwnerStore(news.getStore(), user);
 
         storeNewsRepository.delete(news);
     }
@@ -307,6 +304,15 @@ public class StoreNewsService {
         return PageResponse.from(responsePage);
     }
 
+    private void validateOwnerStore(Store store, User user) {
+        User owner = userRepository.findByUsername(user.getUsername())
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        if (!Objects.equals(store.getUser().getId(), owner.getId())) {
+            throw new CustomException(ErrorCode.FORBIDDEN);
+        }
+    }
+
     private void deleteCommentInternal(Long commentId, User user) {
         StoreNewsComment comment = storeNewsCommentRepository.findById(commentId)
                 .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "댓글을 찾을 수 없습니다."));
@@ -317,76 +323,5 @@ public class StoreNewsService {
 
         comment.getStoreNews().decreaseCommentCount();
         storeNewsCommentRepository.delete(comment);
-    }
-
-    // todo: 삭제 예정
-
-    @Transactional
-    public Long createStoreNews(Long storeId, User user, CreateStoreNewsRequest request) {
-        Store store = storeRepository.findById(storeId)
-                .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "해당 상점을 찾을 수 없습니다."));
-
-        if (!store.getUser().getId().equals(user.getId())) {
-            throw new CustomException(ErrorCode.FORBIDDEN);
-        }
-
-        List<String> imageUrls = request.getImageUrls();
-        if (imageUrls != null && imageUrls.size() > 5) {
-            throw new CustomException(ErrorCode.BAD_REQUEST, "이미지는 최대 5장까지 등록할 수 있습니다.");
-        }
-
-        StoreNews storeNews = StoreNews.builder()
-                .store(store)
-                .title(request.getTitle())
-                .content(request.getContent())
-                .build();
-
-        if (imageUrls != null) {
-            for (int i = 0; i < imageUrls.size(); i++) {
-                storeNews.addImage(StoreNewsImage.builder()
-                        .imageUrl(imageUrls.get(i))
-                        .orderIndex(i)
-                        .build());
-            }
-        }
-
-        return storeNewsRepository.save(storeNews).getId();
-    }
-
-    public PageResponse<StoreNewsResponse> getStoreNewsList(Long storeId, Pageable pageable, User currentUser) {
-        return getStoreNewsListInternal(storeId, pageable, currentUser);
-    }
-
-    public StoreNewsResponse getStoreNews(Long newsId, User currentUser) {
-        return getStoreNewsInternal(newsId, currentUser);
-    }
-
-    @Transactional
-    public void updateStoreNews(Long newsId, User user, UpdateStoreNewsRequest request) {
-        updateStoreNewsForOwner(newsId, user, request);
-    }
-
-    @Transactional
-    public void deleteStoreNews(Long newsId, User user) {
-        deleteStoreNewsForOwner(newsId, user);
-    }
-
-    @Transactional
-    public void toggleLike(Long newsId, User user) {
-        toggleLikeInternal(newsId, user);
-    }
-
-    @Transactional
-    public Long createComment(Long newsId, User user, CreateStoreNewsCommentRequest request) {
-        return createCommentInternal(newsId, user, request);
-    }
-
-    public PageResponse<StoreNewsCommentResponse> getComments(Long newsId, Pageable pageable, User currentUser) {
-        return getCommentsInternal(newsId, pageable, currentUser);
-    }
-
-    @Transactional
-    public void deleteComment(Long commentId, User user) {
-        deleteCommentInternal(commentId, user);
     }
 }

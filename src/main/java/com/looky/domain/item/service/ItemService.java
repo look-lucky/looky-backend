@@ -11,8 +11,10 @@ import com.looky.domain.item.entity.ItemCategory;
 import com.looky.domain.item.repository.ItemCategoryRepository;
 import com.looky.domain.item.repository.ItemRepository;
 import com.looky.domain.store.entity.Store;
+import com.looky.domain.store.entity.StoreStatus;
 import com.looky.domain.store.repository.StoreRepository;
 import com.looky.domain.store.service.StoreService;
+import com.looky.domain.user.entity.Role;
 import com.looky.domain.user.entity.User;
 import com.looky.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -35,13 +37,94 @@ public class ItemService {
     private final S3Service s3Service;
     private final StoreService storeService;
 
+    // --- 점주용 ---
+
+    // 상품 등록
     @Transactional
-    public Long createItem(Long storeId, User user, CreateItemRequest request) {
+    public Long createItemForOwner(Long storeId, User user, CreateItemRequest request) {
         Store store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "가게를 찾을 수 없습니다."));
+        validateOwnerStore(store, user);
+        return createItemInternal(store, request);
+    }
 
-        validateStoreOwner(store, user);
+    // 상품 목록 조회
+    public List<ItemResponse> getItemsForOwner(Long storeId) {
+        return getItemsInternal(storeId);
+    }
 
+    // 상품 개별 조회
+    public ItemResponse getItemForOwner(Long itemId) {
+        return getItemInternal(itemId);
+    }
+
+    // 상품 수정
+    @Transactional
+    public void updateItemForOwner(Long itemId, User user, UpdateItemRequest request) {
+        Item item = itemRepository.findById(itemId)
+                .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "상품을 찾을 수 없습니다."));
+        validateOwnerStore(item.getStore(), user);
+        updateItemInternal(item, request);
+    }
+
+    // 상품 삭제
+    @Transactional
+    public void deleteItemForOwner(Long itemId, User user) {
+        Item item = itemRepository.findById(itemId)
+                .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "상품을 찾을 수 없습니다."));
+        validateOwnerStore(item.getStore(), user);
+        deleteItemInternal(item);
+    }
+
+    // --- 학생용 ---
+
+    // 상품 목록 조회
+    public List<ItemResponse> getItemsForStudent(Long storeId) {
+        return getItemsInternal(storeId);
+    }
+
+    // 상품 삭제
+    public ItemResponse getItemForStudent(Long itemId) {
+        return getItemInternal(itemId);
+    }
+
+    // --- 관리자용 ---
+
+    @Transactional
+    public Long createItemForAdmin(Long storeId, User user, CreateItemRequest request) {
+        Store store = storeRepository.findById(storeId)
+                .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "가게를 찾을 수 없습니다."));
+        validateUnclaimedStore(store, user);
+        return createItemInternal(store, request);
+    }
+
+    public List<ItemResponse> getItemsForAdmin(Long storeId) {
+        return getItemsInternal(storeId);
+    }
+
+    public ItemResponse getItemForAdmin(Long itemId) {
+        return getItemInternal(itemId);
+    }
+
+    @Transactional
+    public void updateItemForAdmin(Long itemId, User user, UpdateItemRequest request) {
+        Item item = itemRepository.findById(itemId)
+                .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "상품을 찾을 수 없습니다."));
+        validateUnclaimedStore(item.getStore(), user);
+        updateItemInternal(item, request);
+    }
+
+    @Transactional
+    public void deleteItemForAdmin(Long itemId, User user) {
+        Item item = itemRepository.findById(itemId)
+                .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "상품을 찾을 수 없습니다."));
+        validateUnclaimedStore(item.getStore(), user);
+        deleteItemInternal(item);
+    }
+
+    // -- 내부 메서드 --
+
+    private Long createItemInternal(Store store, CreateItemRequest request) {
         ItemCategory itemCategory = null;
         if (request.getItemCategoryId() != null) {
             itemCategory = itemCategoryRepository.findById(request.getItemCategoryId())
@@ -60,7 +143,7 @@ public class ItemService {
         return savedItem.getId();
     }
 
-    public List<ItemResponse> getItems(Long storeId) {
+    private List<ItemResponse> getItemsInternal(Long storeId) {
         storeRepository.findById(storeId)
                 .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "가게를 찾을 수 없습니다."));
 
@@ -69,19 +152,13 @@ public class ItemService {
                 .collect(Collectors.toList());
     }
 
-    public ItemResponse getItem(Long itemId) {
+    private ItemResponse getItemInternal(Long itemId) {
         Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "상품을 찾을 수 없습니다."));
         return ItemResponse.from(item);
     }
 
-    @Transactional
-    public void updateItem(Long itemId, User user, UpdateItemRequest request) {
-        Item item = itemRepository.findById(itemId)
-                .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "상품을 찾을 수 없습니다."));
-
-        validateStoreOwner(item.getStore(), user);
-
+    private void updateItemInternal(Item item, UpdateItemRequest request) {
         if (request.getName().isPresent() && request.getName().get() == null) {
             throw new CustomException(ErrorCode.BAD_REQUEST, "상품명은 필수입니다.");
         }
@@ -134,19 +211,29 @@ public class ItemService {
         storeService.recalculateCloverGrade(item.getStore());
     }
 
-    @Transactional
-    public void deleteItem(Long itemId, User user) {
-        Item item = itemRepository.findById(itemId)
-                .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "상품을 찾을 수 없습니다."));
-
-        validateStoreOwner(item.getStore(), user);
-
+    private void deleteItemInternal(Item item) {
+        Store store = item.getStore();
         itemRepository.delete(item);
-
-        storeService.recalculateCloverGrade(item.getStore());
+        storeService.recalculateCloverGrade(store);
     }
 
-    private void validateStoreOwner(Store store, User user) {
-        storeService.validateStoreOwner(store, user);
+    // 가게 주인인지 검증
+    private void validateOwnerStore(Store store, User user) {
+        User owner = userRepository.findByUsername(user.getUsername())
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        if (!Objects.equals(store.getUser().getId(), owner.getId())) {
+            throw new CustomException(ErrorCode.FORBIDDEN, "가게 주인이 아닙니다.");
+        }
+    }
+
+    // UNCLAIMED 매장인지 검증
+    private void validateUnclaimedStore(Store store, User user) {
+        User admin = userRepository.findByUsername(user.getUsername())
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        if (store.getStoreStatus() != StoreStatus.UNCLAIMED || admin.getRole() != Role.ROLE_ADMIN) {
+            throw new CustomException(ErrorCode.FORBIDDEN, "UNCLAIMED 상태의 매장에만 접근 가능합니다.");
+        }
     }
 }

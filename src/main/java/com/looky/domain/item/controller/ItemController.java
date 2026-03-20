@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @Tag(name = "Item", description = "상품 관련 API")
+@Deprecated
 @RestController
 @RequestMapping("/api")
 @RequiredArgsConstructor
@@ -44,7 +45,7 @@ public class ItemController {
                 @Parameter(description = "상점 ID") @PathVariable Long storeId,
                 @RequestBody @Valid CreateItemRequest request
         ) {
-                Long itemId = itemService.createItem(storeId, principalDetails.getUser(), request);
+                Long itemId = itemService.createItemForOwner(storeId, principalDetails.getUser(), request);
                 return ResponseEntity.status(HttpStatus.CREATED).body(CommonResponse.success(itemId));
         }
 
@@ -57,7 +58,7 @@ public class ItemController {
         public ResponseEntity<CommonResponse<List<ItemResponse>>> getItems(
                 @Parameter(description = "상점 ID") @PathVariable Long storeId
         ) {
-                List<ItemResponse> response = itemService.getItems(storeId);
+                List<ItemResponse> response = itemService.getItemsForStudent(storeId);
                 return ResponseEntity.ok(CommonResponse.success(response));
         }
 
@@ -70,7 +71,7 @@ public class ItemController {
         public ResponseEntity<CommonResponse<ItemResponse>> getItem(
                 @Parameter(description = "상품 ID") @PathVariable Long itemId
         ) {
-                ItemResponse response = itemService.getItem(itemId);
+                ItemResponse response = itemService.getItemForStudent(itemId);
                 return ResponseEntity.ok(CommonResponse.success(response));
         }
 
@@ -86,7 +87,7 @@ public class ItemController {
                 @RequestBody @Valid UpdateItemRequest request,
                 @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails
         ) {
-                itemService.updateItem(itemId, principalDetails.getUser(), request);
+                itemService.updateItemForOwner(itemId, principalDetails.getUser(), request);
                 return ResponseEntity.ok(CommonResponse.success(null));
         }
 
@@ -101,7 +102,7 @@ public class ItemController {
                 @Parameter(description = "상품 ID") @PathVariable Long itemId,
                 @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails
         ) {
-                itemService.deleteItem(itemId, principalDetails.getUser());
+                itemService.deleteItemForOwner(itemId, principalDetails.getUser());
                 return ResponseEntity.status(HttpStatus.NO_CONTENT).body(CommonResponse.success(null));
         }
 }

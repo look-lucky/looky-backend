@@ -6,6 +6,7 @@ import com.looky.domain.item.dto.ItemCategoryResponse;
 import com.looky.domain.item.service.ItemCategoryService;
 import com.looky.security.details.PrincipalDetails;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -20,64 +21,63 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 
-@Tag(name = "ItemCategory", description = "상품 카테고리 관련 API")
-@Deprecated
+@Tag(name = "Admin ItemCategory", description = "관리자 상품 카테고리 관리 API (UNCLAIMED 가게 한정)")
 @RestController
-@RequestMapping("/api/stores/{storeId}/item-categories")
+@RequestMapping("/api/admin")
 @RequiredArgsConstructor
-public class ItemCategoryController {
+public class AdminItemCategoryController {
 
     private final ItemCategoryService itemCategoryService;
 
-    @Operation(summary = "[점주] 상품 카테고리 등록", description = "매장에 새로운 상품 카테고리를 등록합니다.")
+    @Operation(summary = "[관리자] 상품 카테고리 등록", description = "UNCLAIMED 상태의 매장에 상품 카테고리를 등록합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "카테고리 등록 성공"),
             @ApiResponse(responseCode = "403", description = "권한 없음", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class))),
             @ApiResponse(responseCode = "404", description = "매장 없음", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class)))
     })
-    @PostMapping
+    @PostMapping("/stores/{storeId}/item-categories")
     public ResponseEntity<CommonResponse<Long>> createItemCategory(
             @PathVariable Long storeId,
-            @AuthenticationPrincipal PrincipalDetails principalDetails,
+            @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,
             @RequestBody Map<String, String> request
     ) {
-        Long categoryId = itemCategoryService.createItemCategoryForOwner(storeId, principalDetails.getUser(), request.get("name"));
+        Long categoryId = itemCategoryService.createItemCategoryForAdmin(storeId, principalDetails.getUser(), request.get("name"));
         return ResponseEntity.status(HttpStatus.CREATED).body(CommonResponse.success(categoryId));
     }
 
-    @Operation(summary = "[공통] 상품 카테고리 목록 조회", description = "매장의 상품 카테고리 목록을 조회합니다.")
-    @GetMapping
+    @Operation(summary = "[관리자] 상품 카테고리 목록 조회", description = "매장의 상품 카테고리 목록을 조회합니다.")
+    @GetMapping("/stores/{storeId}/item-categories")
     public ResponseEntity<CommonResponse<List<ItemCategoryResponse>>> getItemCategories(
             @PathVariable Long storeId
     ) {
-        List<ItemCategoryResponse> categories = itemCategoryService.getItemCategoriesForStudent(storeId);
+        List<ItemCategoryResponse> categories = itemCategoryService.getItemCategoriesForAdmin(storeId);
         return ResponseEntity.ok(CommonResponse.success(categories));
     }
 
-    @Operation(summary = "[점주] 상품 카테고리 수정", description = "상품 카테고리 이름을 수정합니다.")
-    @PatchMapping("/{categoryId}")
+    @Operation(summary = "[관리자] 상품 카테고리 수정", description = "UNCLAIMED 상태의 매장 카테고리 이름을 수정합니다.")
+    @PatchMapping("/stores/{storeId}/item-categories/{categoryId}")
     public ResponseEntity<CommonResponse<Void>> updateItemCategory(
             @PathVariable Long storeId,
             @PathVariable Long categoryId,
-            @AuthenticationPrincipal PrincipalDetails principalDetails,
+            @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,
             @RequestBody Map<String, String> request
     ) {
-        itemCategoryService.updateItemCategoryForOwner(storeId, categoryId, principalDetails.getUser(), request.get("name"));
+        itemCategoryService.updateItemCategoryForAdmin(storeId, categoryId, principalDetails.getUser(), request.get("name"));
         return ResponseEntity.ok(CommonResponse.success(null));
     }
 
-    @Operation(summary = "[점주] 상품 카테고리 삭제", description = "상품 카테고리를 삭제합니다. (사용 중인 상품이 있으면 삭제 불가)")
+    @Operation(summary = "[관리자] 상품 카테고리 삭제", description = "UNCLAIMED 상태의 매장 카테고리를 삭제합니다. (사용 중인 상품이 있으면 삭제 불가)")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "카테고리 삭제 성공"),
             @ApiResponse(responseCode = "409", description = "상품이 연결되어 있어 삭제 불가", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class)))
     })
-    @DeleteMapping("/{categoryId}")
+    @DeleteMapping("/stores/{storeId}/item-categories/{categoryId}")
     public ResponseEntity<CommonResponse<Void>> deleteItemCategory(
             @PathVariable Long storeId,
             @PathVariable Long categoryId,
-            @AuthenticationPrincipal PrincipalDetails principalDetails
+            @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails
     ) {
-        itemCategoryService.deleteItemCategoryForOwner(storeId, categoryId, principalDetails.getUser());
+        itemCategoryService.deleteItemCategoryForAdmin(storeId, categoryId, principalDetails.getUser());
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body(CommonResponse.success(null));
     }
 }

@@ -6,6 +6,7 @@ import com.looky.domain.item.dto.ItemCategoryResponse;
 import com.looky.domain.item.service.ItemCategoryService;
 import com.looky.security.details.PrincipalDetails;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -20,12 +21,11 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 
-@Tag(name = "ItemCategory", description = "상품 카테고리 관련 API")
-@Deprecated
+@Tag(name = "Owner ItemCategory", description = "점주 상품 카테고리 관리 API")
 @RestController
-@RequestMapping("/api/stores/{storeId}/item-categories")
+@RequestMapping("/api/owner")
 @RequiredArgsConstructor
-public class ItemCategoryController {
+public class OwnerItemCategoryController {
 
     private final ItemCategoryService itemCategoryService;
 
@@ -35,31 +35,31 @@ public class ItemCategoryController {
             @ApiResponse(responseCode = "403", description = "권한 없음", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class))),
             @ApiResponse(responseCode = "404", description = "매장 없음", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class)))
     })
-    @PostMapping
+    @PostMapping("/stores/{storeId}/item-categories")
     public ResponseEntity<CommonResponse<Long>> createItemCategory(
             @PathVariable Long storeId,
-            @AuthenticationPrincipal PrincipalDetails principalDetails,
+            @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,
             @RequestBody Map<String, String> request
     ) {
         Long categoryId = itemCategoryService.createItemCategoryForOwner(storeId, principalDetails.getUser(), request.get("name"));
         return ResponseEntity.status(HttpStatus.CREATED).body(CommonResponse.success(categoryId));
     }
 
-    @Operation(summary = "[공통] 상품 카테고리 목록 조회", description = "매장의 상품 카테고리 목록을 조회합니다.")
-    @GetMapping
+    @Operation(summary = "[점주] 상품 카테고리 목록 조회", description = "매장의 상품 카테고리 목록을 조회합니다.")
+    @GetMapping("/stores/{storeId}/item-categories")
     public ResponseEntity<CommonResponse<List<ItemCategoryResponse>>> getItemCategories(
             @PathVariable Long storeId
     ) {
-        List<ItemCategoryResponse> categories = itemCategoryService.getItemCategoriesForStudent(storeId);
+        List<ItemCategoryResponse> categories = itemCategoryService.getItemCategoriesForOwner(storeId);
         return ResponseEntity.ok(CommonResponse.success(categories));
     }
 
     @Operation(summary = "[점주] 상품 카테고리 수정", description = "상품 카테고리 이름을 수정합니다.")
-    @PatchMapping("/{categoryId}")
+    @PatchMapping("/stores/{storeId}/item-categories/{categoryId}")
     public ResponseEntity<CommonResponse<Void>> updateItemCategory(
             @PathVariable Long storeId,
             @PathVariable Long categoryId,
-            @AuthenticationPrincipal PrincipalDetails principalDetails,
+            @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,
             @RequestBody Map<String, String> request
     ) {
         itemCategoryService.updateItemCategoryForOwner(storeId, categoryId, principalDetails.getUser(), request.get("name"));
@@ -71,11 +71,11 @@ public class ItemCategoryController {
             @ApiResponse(responseCode = "204", description = "카테고리 삭제 성공"),
             @ApiResponse(responseCode = "409", description = "상품이 연결되어 있어 삭제 불가", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class)))
     })
-    @DeleteMapping("/{categoryId}")
+    @DeleteMapping("/stores/{storeId}/item-categories/{categoryId}")
     public ResponseEntity<CommonResponse<Void>> deleteItemCategory(
             @PathVariable Long storeId,
             @PathVariable Long categoryId,
-            @AuthenticationPrincipal PrincipalDetails principalDetails
+            @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails
     ) {
         itemCategoryService.deleteItemCategoryForOwner(storeId, categoryId, principalDetails.getUser());
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body(CommonResponse.success(null));

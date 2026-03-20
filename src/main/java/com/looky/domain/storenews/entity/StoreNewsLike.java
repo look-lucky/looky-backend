@@ -15,6 +15,7 @@ public class StoreNewsLike extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "store_news_like_id")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)

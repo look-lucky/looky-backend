@@ -13,6 +13,7 @@ public class UserOrganization {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "user_organization_id")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)

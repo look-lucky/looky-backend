@@ -16,7 +16,7 @@ import java.util.Set;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "events")
+@Table(name = "event")
 public class Event extends BaseEntity {
 
     @Id
@@ -33,7 +33,7 @@ public class Event extends BaseEntity {
     private String subtitle; // 이벤트 부제목
 
     @ElementCollection(targetClass = EventType.class)
-    @CollectionTable(name = "event_types", joinColumns = @JoinColumn(name = "event_id"))
+    @CollectionTable(name = "event_type", joinColumns = @JoinColumn(name = "event_id"))
     @Enumerated(EnumType.STRING)
     @Column(name = "event_type")
     private Set<EventType> eventTypes = new HashSet<>();

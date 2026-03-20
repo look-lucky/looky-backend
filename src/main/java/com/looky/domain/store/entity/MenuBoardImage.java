@@ -15,6 +15,7 @@ public class MenuBoardImage implements OrderedImage {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "menu_board_image_id")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)

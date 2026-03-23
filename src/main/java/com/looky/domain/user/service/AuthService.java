@@ -15,7 +15,6 @@ import com.looky.domain.user.repository.CouncilProfileRepository;
 import com.looky.domain.user.repository.OwnerProfileRepository;
 import com.looky.domain.user.repository.StudentProfileRepository;
 import com.looky.domain.user.repository.UserRepository;
-import com.looky.domain.user.repository.WithdrawalFeedbackRepository;
 import com.looky.security.details.PrincipalDetails;
 import com.looky.security.jwt.JwtTokenProvider;
 import io.jsonwebtoken.Claims;
@@ -59,7 +58,6 @@ public class AuthService {
     private final UniversityRepository universityRepository;
     private final OrganizationRepository organizationRepository;
     private final UserOrganizationRepository userOrganizationRepository;
-    private final WithdrawalFeedbackRepository withdrawalFeedbackRepository;
     private final EmailVerificationService emailVerificationService;
 
     // 아이디 찾기 - 인증 후 아이디 반환
@@ -466,33 +464,6 @@ public class AuthService {
         return generateTokenResponse(user);
     }
 
-    @Transactional
-    public void withdraw(User user, WithdrawRequest request) {
-
-        if (request.getReasons().contains(WithdrawalReason.OTHER)) {
-            if (request.getDetailReason() == null || request.getDetailReason().trim().isEmpty()) {
-                throw new CustomException(ErrorCode.BAD_REQUEST, "기타 사유 선택 시 상세 내용은 필수입니다.");
-            }
-        }
-
-        // 피드백 저장
-        WithdrawalFeedback feedback = WithdrawalFeedback.builder()
-                .user(user)
-                .reasons(request.getReasons())
-                .detailReason(request.getDetailReason())
-                .build();
-        withdrawalFeedbackRepository.save(feedback);
-
-        // 유저 소프트 딜리트
-        User currentUser = userRepository.findById(user.getId())
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-                
-        currentUser.withdraw();
-
-        // 리프레시 토큰 삭제
-        refreshTokenService.delete(user.getId());
-    }
-    
     private void createStudentProfile(User user, String nickname, Long universityId, Long collegeId, Long departmentId, Boolean isClubMember) {
 
         University university = universityRepository.findById(universityId)

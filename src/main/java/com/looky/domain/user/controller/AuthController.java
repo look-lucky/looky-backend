@@ -4,9 +4,11 @@ import com.looky.common.response.CommonResponse;
 import com.looky.common.response.SwaggerErrorResponse;
 import com.looky.common.util.CookieUtil;
 import com.looky.domain.user.dto.*;
+import com.looky.domain.user.service.AccountService;
 import com.looky.domain.user.service.AuthService;
 import com.looky.domain.user.service.EmailVerificationService;
 import com.looky.security.details.PrincipalDetails;
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -32,6 +34,7 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
         private final AuthService authService;
+        private final AccountService accountService;
         private final EmailVerificationService emailVerificationService;
         private final CookieUtil cookieUtil;
 
@@ -214,18 +217,17 @@ public class AuthController {
                         .body(CommonResponse.success(LoginResponse.of(authTokens.getAccessToken(), authTokens.getExpiresIn())));
         }
 
-        @Operation(summary = "[공통] 회원 탈퇴", description = "회원을 탈퇴 처리합니다. (Soft Delete)")
-        @ApiResponses(value = {
-                @ApiResponse(responseCode = "204", description = "회원 탈퇴 성공"),
-                @ApiResponse(responseCode = "400", description = "잘못된 요청 (기타 사유 미입력 등)", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class))),
-                @ApiResponse(responseCode = "401", description = "인증 실패", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class)))
-        })
+        /**
+         * @deprecated 하위 호환용. 신규 클라이언트는 DELETE /api/account/withdraw 를 사용하세요.
+         */
+        @Deprecated
+        @Hidden
         @DeleteMapping("/withdraw")
         public ResponseEntity<CommonResponse<Void>> withdraw(
                 @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,
                 @RequestBody @Valid WithdrawRequest request
         ) {
-            authService.withdraw(principalDetails.getUser(), request);
+            accountService.withdraw(principalDetails.getUser(), request);
             
             // 리프레시 토큰 쿠키 삭제
             ResponseCookie deleteCookie = cookieUtil.createExpiredCookie("refreshToken");

@@ -1,4 +1,3 @@
-// src/main/java/hello/wsd/config/SecurityConfig.java
 package com.looky.security.config;
 
 import com.looky.security.handler.CustomAccessDeniedHandler;
@@ -92,18 +91,24 @@ public class SecurityConfig {
                 // 경로별 인가 작업
                 http
                         .authorizeHttpRequests((auth) -> auth
-                                .requestMatchers(HttpMethod.DELETE, "/api/auth/withdraw").authenticated()
 
-                                // 공통 API
-                                .requestMatchers("/api/auth/**", "/reissue", "/docs", "/swagger-ui/**", "/v3/api-docs/**", "/health")
+                                .requestMatchers(HttpMethod.DELETE, "/api/auth/withdraw").authenticated() //todo: 제거. /api/account/withdraw로 이전
+                                
+                                // 공통 API (인증 불필요)
+                                .requestMatchers("/api/auth/**", "/docs", "/swagger-ui/**", "/v3/api-docs/**", "/health")
                                 .permitAll()
-                                // 학생 및 점주 회원 가입 API
-                                .requestMatchers(HttpMethod.GET, "/api/universities/**", "/api/organizations/**", "/api/store-claims/search")
+
+                                // 학생 회원가입 시 필요한 공개 조회 API
+                                .requestMatchers(HttpMethod.GET, "/api/universities/**", "/api/organizations/**")
                                 .permitAll()
+
                                 // 점주 사업자 인증 API
-                                .requestMatchers(HttpMethod.POST, "/api/biz-reg-no/verify", "/api/store-claims/**")
+                                .requestMatchers(HttpMethod.GET, "/api/store-claims/search")
+                                .permitAll()
+                                .requestMatchers(HttpMethod.POST, "/api/biz-reg-no/verify")
                                 .permitAll()
 
+                                // 역할별 API
                                 .requestMatchers("/api/student/**").hasRole("STUDENT")
                                 .requestMatchers("/api/owner/**").hasRole("OWNER")
                                 .requestMatchers("/api/admin/**").hasRole("ADMIN")

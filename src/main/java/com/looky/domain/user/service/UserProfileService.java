@@ -2,12 +2,6 @@ package com.looky.domain.user.service;
 
 import com.looky.common.exception.CustomException;
 import com.looky.common.exception.ErrorCode;
-import com.looky.common.service.S3Service;
-import com.looky.domain.coupon.entity.Coupon;
-import com.looky.domain.coupon.repository.CouponRepository;
-import com.looky.domain.item.entity.Item;
-import com.looky.domain.item.repository.ItemCategoryRepository;
-import com.looky.domain.item.repository.ItemRepository;
 import com.looky.domain.organization.entity.Organization;
 import com.looky.domain.organization.entity.OrganizationCategory;
 import com.looky.domain.organization.entity.University;
@@ -15,11 +9,6 @@ import com.looky.domain.organization.entity.UserOrganization;
 import com.looky.domain.organization.repository.OrganizationRepository;
 import com.looky.domain.organization.repository.UniversityRepository;
 import com.looky.domain.organization.repository.UserOrganizationRepository;
-import com.looky.domain.store.entity.StoreImage;
-import com.looky.domain.store.repository.StoreRepository;
-import com.looky.domain.storenews.entity.StoreNews;
-import com.looky.domain.storenews.entity.StoreNewsImage;
-import com.looky.domain.storenews.repository.StoreNewsRepository;
 import com.looky.domain.user.dto.OwnerInfoResponse;
 import com.looky.domain.user.dto.StudentInfoResponse;
 import com.looky.domain.user.dto.UpdateStudentProfileRequest;
@@ -48,12 +37,6 @@ public class UserProfileService {
     private final OrganizationRepository organizationRepository;
     private final UserOrganizationRepository userOrganizationRepository;
     private final UniversityRepository universityRepository;
-    private final StoreRepository storeRepository;
-    private final CouponRepository couponRepository;
-    private final StoreNewsRepository storeNewsRepository;
-    private final ItemRepository itemRepository;
-    private final ItemCategoryRepository itemCategoryRepository;
-    private final S3Service s3Service;
 
     public StudentInfoResponse getStudentInfoForStudent(Long userId) {
         User user = userRepository.findById(userId)
@@ -157,50 +140,6 @@ public class UserProfileService {
         userOrganizationRepository.deleteByUserAndOrganizationCategory(user, OrganizationCategory.DEPARTMENT);
 
         profile.update(null, profile.getIsClubMember(), university);
-    }
-
-    @Transactional
-    public void withdrawOwner(Long userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-
-        if (user.getRole() != Role.ROLE_OWNER) {
-            throw new CustomException(ErrorCode.FORBIDDEN, "점주 회원만 이용 가능합니다.");
-        }
-
-        List<com.looky.domain.store.entity.Store> stores = storeRepository.findAllByUser(user);
-        for (com.looky.domain.store.entity.Store store : stores) {
-            for (StoreImage image : store.getImages()) {
-                s3Service.deleteFile(image.getImageUrl());
-            }
-
-            List<StoreNews> newsList = storeNewsRepository.findByStoreId(store.getId(), org.springframework.data.domain.Pageable.unpaged()).getContent();
-            for (StoreNews news : newsList) {
-                for (StoreNewsImage image : news.getImages()) {
-                    s3Service.deleteFile(image.getImageUrl());
-                }
-            }
-
-            List<Item> items = itemRepository.findByStoreId(store.getId());
-            for (Item item : items) {
-                if (item.getImageUrl() != null) {
-                    s3Service.deleteFile(item.getImageUrl());
-                }
-            }
-
-            store.unclaim();
-
-            List<Coupon> coupons = couponRepository.findByStoreId(store.getId());
-            for (Coupon coupon : coupons) {
-                if (coupon.getStatus() == com.looky.domain.coupon.entity.CouponStatus.ACTIVE) {
-                    coupon.expireByWithdrawal();
-                }
-            }
-
-            storeNewsRepository.deleteByStore(store);
-            itemRepository.deleteByStoreId(store.getId());
-            itemCategoryRepository.deleteByStoreId(store.getId());
-        }
     }
 
     private void updateUserOrganization(User user, Long organizationId, OrganizationCategory category) {

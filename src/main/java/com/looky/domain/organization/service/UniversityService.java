@@ -24,22 +24,20 @@ public class UniversityService {
     private final UniversityRepository universityRepository;
     private final OrganizationRepository organizationRepository;
 
-    @Transactional
-    public Long createUniversity(CreateUniversityRequest request) {
-        University university = request.toEntity();
-        University savedUniversity = universityRepository.save(university);
-        return savedUniversity.getId();
-    }
-
-    public List<UniversityResponse> getUniversities() {
+    public List<UniversityResponse> getUniversitiesForAll() {
         return universityRepository.findAllByOrderByNameAsc().stream()
                 .map(UniversityResponse::from)
                 .collect(Collectors.toList());
     }
 
     @Transactional
-    public void updateUniversity(Long universityId, UpdateUniversityRequest request) {
+    public Long createUniversityForAdmin(CreateUniversityRequest request) {
+        University university = request.toEntity();
+        return universityRepository.save(university).getId();
+    }
 
+    @Transactional
+    public void updateUniversityForAdmin(Long universityId, UpdateUniversityRequest request) {
         University university = universityRepository.findById(universityId)
                 .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "대학을 찾을 수 없습니다."));
 
@@ -50,10 +48,10 @@ public class UniversityService {
             }
         }
         if (request.getEmailDomains().isPresent()) {
-             List<String> emailDomains = request.getEmailDomains().get();
-             if (emailDomains == null || emailDomains.isEmpty()) {
-                 throw new CustomException(ErrorCode.BAD_REQUEST, "이메일 도메인은 필수입니다.");
-             }
+            List<String> emailDomains = request.getEmailDomains().get();
+            if (emailDomains == null || emailDomains.isEmpty()) {
+                throw new CustomException(ErrorCode.BAD_REQUEST, "이메일 도메인은 필수입니다.");
+            }
         }
 
         String emailDomains = null;
@@ -71,7 +69,7 @@ public class UniversityService {
     }
 
     @Transactional
-    public void deleteUniversity(Long universityId) {
+    public void deleteUniversityForAdmin(Long universityId) {
         University university = universityRepository.findById(universityId)
                 .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "대학을 찾을 수 없습니다."));
 

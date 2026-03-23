@@ -3,6 +3,7 @@ package com.looky.domain.storeclaim.service;
 import com.looky.common.exception.CustomException;
 import com.looky.common.exception.ErrorCode;
 import com.looky.domain.store.dto.StoreResponse;
+import com.looky.domain.store.entity.Store;
 import com.looky.domain.store.repository.StoreRepository;
 import com.looky.domain.storeclaim.dto.BizValidationApiRequest;
 import com.looky.domain.storeclaim.dto.BizVerificationRequest;
@@ -46,7 +47,7 @@ public class StoreClaimService {
 
     public List<StoreResponse> searchUnclaimedStoresForOwner(String keyword) {
         log.debug("[StoreClaimService] searchUnclaimedStores 호출 - keyword: '{}'", keyword);
-        List<com.looky.domain.store.entity.Store> stores = storeRepository.findUnclaimedByNameOrAddress(keyword);
+        List<Store> stores = storeRepository.findUnclaimedByNameOrAddress(keyword);
         log.debug("[StoreClaimService] DB 조회 결과 - 총 {}건", stores.size());
         return stores.stream()
                 .map(StoreResponse::from)
@@ -122,21 +123,21 @@ public class StoreClaimService {
             throw new CustomException(ErrorCode.FORBIDDEN, "점주만 가게 점유 신청을 할 수 있습니다.");
         }
 
-        storeRepository.findById(request.getStoreId())
+        Store store = storeRepository.findById(request.getStoreId())
                 .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "존재하지 않는 상점입니다."));
 
-        if (storeClaimRepository.existsByStoreIdAndStatus(request.getStoreId(), StoreClaimStatus.PENDING)) {
+        if (storeClaimRepository.existsByStoreAndStatus(store, StoreClaimStatus.PENDING)) {
             throw new CustomException(ErrorCode.STATE_CONFLICT, "이미 같은 가게에 대해 승인 대기 중인 요청이 존재합니다.");
         }
 
-        StoreClaim storeClaim = request.toEntity();
+        StoreClaim storeClaim = request.toEntity(store, owner);
         StoreClaim savedStoreClaim = storeClaimRepository.save(storeClaim);
 
         return savedStoreClaim.getId();
     }
 
     public List<MyStoreClaimResponse> getMyStoreClaimsForOwner(User user) {
-        return storeClaimRepository.findByUserId(user.getId()).stream()
+        return storeClaimRepository.findByUser_Id(user.getId()).stream()
                 .map(MyStoreClaimResponse::from)
                 .collect(Collectors.toList());
     }

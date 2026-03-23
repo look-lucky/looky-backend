@@ -21,7 +21,7 @@ public class MyStoreClaimResponse {
     public static MyStoreClaimResponse from(StoreClaim storeClaim) {
         return MyStoreClaimResponse.builder()
                 .id(storeClaim.getId())
-                .storeId(storeClaim.getStoreId())
+                .storeId(storeClaim.getStore().getId())
                 .storeName(storeClaim.getStoreName())
                 .representativeName(storeClaim.getRepresentativeName())
                 .status(storeClaim.getStatus())

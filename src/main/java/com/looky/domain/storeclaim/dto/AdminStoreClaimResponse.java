@@ -26,8 +26,8 @@ public class AdminStoreClaimResponse {
     public static AdminStoreClaimResponse from(StoreClaim storeClaim, String name) {
         return AdminStoreClaimResponse.builder()
                 .id(storeClaim.getId())
-                .storeId(storeClaim.getStoreId())
-                .userId(storeClaim.getUserId())
+                .storeId(storeClaim.getStore().getId())
+                .userId(storeClaim.getUser().getId())
                 .name(name)
                 .storeName(storeClaim.getStoreName())
                 .bizRegNo(storeClaim.getBizRegNo())

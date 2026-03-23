@@ -27,6 +27,8 @@ public class User extends BaseEntity {
     private String password;
 
     // 사용자 성별
+    @Enumerated(EnumType.STRING)
+    @Column(length = 50)
     private Gender gender;
 
     // 사용자 나이

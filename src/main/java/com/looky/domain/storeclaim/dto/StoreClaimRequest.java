@@ -1,6 +1,8 @@
 package com.looky.domain.storeclaim.dto;
 
+import com.looky.domain.store.entity.Store;
 import com.looky.domain.storeclaim.entity.StoreClaim;
+import com.looky.domain.user.entity.User;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -16,9 +18,6 @@ public class StoreClaimRequest {
     @NotNull(message = "가게 식별자는 필수입니다.")
     private Long storeId;
 
-    @NotNull(message = "사용자 식별자는 필수입니다.")
-    private Long userId;
-
     @NotNull(message = "사업자등록번호는 필수입니다.")
     private String bizRegNo;
 
@@ -32,10 +31,10 @@ public class StoreClaimRequest {
 
     private String licenseImageUrl;
 
-    public StoreClaim toEntity() {
+    public StoreClaim toEntity(Store store, User user) {
         return StoreClaim.builder()
-                .storeId(storeId)
-                .userId(userId)
+                .store(store)
+                .user(user)
                 .bizRegNo(bizRegNo)
                 .representativeName(representativeName)
                 .storeName(storeName)

@@ -1,6 +1,8 @@
 package com.looky.domain.storeclaim.entity;
 
 import com.looky.common.entity.BaseEntity;
+import com.looky.domain.store.entity.Store;
+import com.looky.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -15,22 +17,24 @@ public class StoreClaim extends BaseEntity {
     @Column(name = "store_claim_request_id")
     private Long id;
 
-    @Column(nullable = false)
-    private Long storeId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "store_id", nullable = false)
+    private Store store;
 
-    @Column(nullable = false)
-    private Long userId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     @Column(name = "biz_reg_no", nullable = false)
     private String bizRegNo;
 
     @Column(nullable = false)
-    private String representativeName; // 대표자명
+    private String representativeName;
 
     @Column(nullable = false)
-    private String storeName;   // 상호명
+    private String storeName;
 
-    private String storePhone;  // 가게 전화번호
+    private String storePhone;
 
     @Column(nullable = false)
     private String licenseImageUrl;
@@ -39,15 +43,15 @@ public class StoreClaim extends BaseEntity {
     @Column(nullable = false)
     private StoreClaimStatus status;
 
-    private String rejectReason; // 반려 사유
+    private String rejectReason;
 
     @Lob
-    private String adminMemo; // 관리자 전용 메모
+    private String adminMemo;
 
     @Builder
-    public StoreClaim(Long storeId, Long userId, String bizRegNo, String representativeName, String storeName, String storePhone, String licenseImageUrl, StoreClaimStatus status) {
-        this.storeId = storeId;
-        this.userId = userId;
+    public StoreClaim(Store store, User user, String bizRegNo, String representativeName, String storeName, String storePhone, String licenseImageUrl, StoreClaimStatus status) {
+        this.store = store;
+        this.user = user;
         this.bizRegNo = bizRegNo;
         this.representativeName = representativeName;
         this.storeName = storeName;

@@ -4,533 +4,356 @@
 SET FOREIGN_KEY_CHECKS = 0;
 
 /* Universities */
-INSERT IGNORE INTO university (university_id, email_domain, name) VALUES (1, 'snu.ac.kr', '서울대학교');
-INSERT IGNORE INTO university (university_id, email_domain, name) VALUES (2, 'yonsei.ac.kr', '연세대학교');
-INSERT IGNORE INTO university (university_id, email_domain, name) VALUES (3, 'korea.ac.kr', '고려대학교');
-INSERT IGNORE INTO university (university_id, email_domain, name) VALUES (4, 'sogang.ac.kr', '서강대학교');
-INSERT IGNORE INTO university (university_id, email_domain, name) VALUES (5, 'skku.edu', '성균관대학교');
-INSERT IGNORE INTO university (university_id, email_domain, name) VALUES (6, 'hanyang.ac.kr', '한양대학교');
-INSERT IGNORE INTO university (university_id, email_domain, name) VALUES (7, 'cau.ac.kr', '중앙대학교');
-INSERT IGNORE INTO university (university_id, email_domain, name) VALUES (8, 'khu.ac.kr', '경희대학교');
-INSERT IGNORE INTO university (university_id, email_domain, name) VALUES (9, 'hufs.ac.kr', '한국외국어대학교');
-INSERT IGNORE INTO university (university_id, email_domain, name) VALUES (10, 'uos.ac.kr', '서울시립대학교');
-INSERT IGNORE INTO university (university_id, email_domain, name) VALUES (11, 'ewha.ac.kr', '이화여자대학교');
-INSERT IGNORE INTO university (university_id, email_domain, name) VALUES (12, 'hongik.ac.kr', '홍익대학교');
-INSERT IGNORE INTO university (university_id, email_domain, name) VALUES (13, 'dongguk.edu', '동국대학교');
-INSERT IGNORE INTO university (university_id, email_domain, name) VALUES (14, 'konkuk.ac.kr', '건국대학교');
-INSERT IGNORE INTO university (university_id, email_domain, name) VALUES (15, 'jbnu.ac.kr', '전북대학교');
+INSERT IGNORE INTO university (university_id, email_domain, name) VALUES
+    (1, 'snu.ac.kr', '서울대학교'),
+    (2, 'yonsei.ac.kr', '연세대학교'),
+    (3, 'korea.ac.kr', '고려대학교'),
+    (4, 'sogang.ac.kr', '서강대학교'),
+    (5, 'hanyang.ac.kr', '한양대학교'),
+    (6, 'jbnu.ac.kr', '전북대학교');
 
-/* Users & Profiles */
-INSERT IGNORE INTO user (user_id, created_at, modified_at, created_by, last_modified_by, username, password, gender, birth_date, role, social_type, social_id, email, deleted, deleted_at) VALUES (1, '2026-02-22 15:29:59', '2026-02-22 15:29:59', 'system', 'system', 'admin', '$2a$10$wT.f/h.d3M9Zq8vQZ3.8eu.Y.xG7c./UvT/F3mX.s.', 1, '1986-01-01', 'ROLE_ADMIN', 'KAKAO', 'KAKAO_1', 'admin@example.com', 0, NULL);
-INSERT IGNORE INTO user (user_id, created_at, modified_at, created_by, last_modified_by, username, password, gender, birth_date, role, social_type, social_id, email, deleted, deleted_at) VALUES (2, '2025-06-16 15:29:59', '2025-06-16 15:29:59', 'system', 'system', 'user2', '$2a$10$wT.f/h.d3M9Zq8vQZ3.8eu.Y.xG7c./UvT/F3mX.s.', 0, '1988-01-01', 'ROLE_STUDENT', 'KAKAO', 'KAKAO_2', 'user2@example.com', 0, NULL);
-INSERT IGNORE INTO user (user_id, created_at, modified_at, created_by, last_modified_by, username, password, gender, birth_date, role, social_type, social_id, email, deleted, deleted_at) VALUES (3, '2025-06-27 15:29:59', '2025-06-27 15:29:59', 'system', 'system', 'user3', '$2a$10$wT.f/h.d3M9Zq8vQZ3.8eu.Y.xG7c./UvT/F3mX.s.', 1, '1986-01-01', 'ROLE_STUDENT', 'KAKAO', 'KAKAO_3', 'user3@example.com', 0, NULL);
-INSERT IGNORE INTO user (user_id, created_at, modified_at, created_by, last_modified_by, username, password, gender, birth_date, role, social_type, social_id, email, deleted, deleted_at) VALUES (4, '2025-11-09 15:29:59', '2025-11-09 15:29:59', 'system', 'system', 'user4', '$2a$10$wT.f/h.d3M9Zq8vQZ3.8eu.Y.xG7c./UvT/F3mX.s.', 2, '1998-01-01', 'ROLE_STUDENT', 'KAKAO', 'KAKAO_4', 'user4@example.com', 0, NULL);
-INSERT IGNORE INTO user (user_id, created_at, modified_at, created_by, last_modified_by, username, password, gender, birth_date, role, social_type, social_id, email, deleted, deleted_at) VALUES (5, '2026-01-15 15:29:59', '2026-01-15 15:29:59', 'system', 'system', 'user5', '$2a$10$wT.f/h.d3M9Zq8vQZ3.8eu.Y.xG7c./UvT/F3mX.s.', 0, '1992-01-01', 'ROLE_STUDENT', 'KAKAO', 'KAKAO_5', 'user5@example.com', 0, NULL);
-INSERT IGNORE INTO user (user_id, created_at, modified_at, created_by, last_modified_by, username, password, gender, birth_date, role, social_type, social_id, email, deleted, deleted_at) VALUES (6, '2025-07-30 15:29:59', '2025-07-30 15:29:59', 'system', 'system', 'user6', '$2a$10$wT.f/h.d3M9Zq8vQZ3.8eu.Y.xG7c./UvT/F3mX.s.', 2, '2001-01-01', 'ROLE_STUDENT', 'KAKAO', 'KAKAO_6', 'user6@example.com', 0, NULL);
-INSERT IGNORE INTO user (user_id, created_at, modified_at, created_by, last_modified_by, username, password, gender, birth_date, role, social_type, social_id, email, deleted, deleted_at) VALUES (7, '2026-01-31 15:29:59', '2026-01-31 15:29:59', 'system', 'system', 'user7', '$2a$10$wT.f/h.d3M9Zq8vQZ3.8eu.Y.xG7c./UvT/F3mX.s.', 0, '2001-01-01', 'ROLE_STUDENT', 'KAKAO', 'KAKAO_7', 'user7@example.com', 0, NULL);
-INSERT IGNORE INTO user (user_id, created_at, modified_at, created_by, last_modified_by, username, password, gender, birth_date, role, social_type, social_id, email, deleted, deleted_at) VALUES (8, '2025-08-22 15:29:59', '2025-08-22 15:29:59', 'system', 'system', 'user8', '$2a$10$wT.f/h.d3M9Zq8vQZ3.8eu.Y.xG7c./UvT/F3mX.s.', 0, '1991-01-01', 'ROLE_STUDENT', 'KAKAO', 'KAKAO_8', 'user8@example.com', 0, NULL);
-INSERT IGNORE INTO user (user_id, created_at, modified_at, created_by, last_modified_by, username, password, gender, birth_date, role, social_type, social_id, email, deleted, deleted_at) VALUES (9, '2025-06-08 15:29:59', '2025-06-08 15:29:59', 'system', 'system', 'user9', '$2a$10$wT.f/h.d3M9Zq8vQZ3.8eu.Y.xG7c./UvT/F3mX.s.', 1, '1998-01-01', 'ROLE_STUDENT', 'KAKAO', 'KAKAO_9', 'user9@example.com', 0, NULL);
-INSERT IGNORE INTO user (user_id, created_at, modified_at, created_by, last_modified_by, username, password, gender, birth_date, role, social_type, social_id, email, deleted, deleted_at) VALUES (10, '2025-06-08 15:29:59', '2025-06-08 15:29:59', 'system', 'system', 'user10', '$2a$10$wT.f/h.d3M9Zq8vQZ3.8eu.Y.xG7c./UvT/F3mX.s.', 1, '1989-01-01', 'ROLE_STUDENT', 'KAKAO', 'KAKAO_10', 'user10@example.com', 0, NULL);
-INSERT IGNORE INTO user (user_id, created_at, modified_at, created_by, last_modified_by, username, password, gender, birth_date, role, social_type, social_id, email, deleted, deleted_at) VALUES (11, '2025-06-12 15:29:59', '2025-06-12 15:29:59', 'system', 'system', 'user11', '$2a$10$wT.f/h.d3M9Zq8vQZ3.8eu.Y.xG7c./UvT/F3mX.s.', 0, '1997-01-01', 'ROLE_STUDENT', 'KAKAO', 'KAKAO_11', 'user11@example.com', 0, NULL);
-INSERT IGNORE INTO user (user_id, created_at, modified_at, created_by, last_modified_by, username, password, gender, birth_date, role, social_type, social_id, email, deleted, deleted_at) VALUES (12, '2025-09-03 15:29:59', '2025-09-03 15:29:59', 'system', 'system', 'user12', '$2a$10$wT.f/h.d3M9Zq8vQZ3.8eu.Y.xG7c./UvT/F3mX.s.', 1, '1984-01-01', 'ROLE_OWNER', 'KAKAO', 'KAKAO_12', 'user12@example.com', 0, NULL);
-INSERT IGNORE INTO user (user_id, created_at, modified_at, created_by, last_modified_by, username, password, gender, birth_date, role, social_type, social_id, email, deleted, deleted_at) VALUES (13, '2025-08-27 15:29:59', '2025-08-27 15:29:59', 'system', 'system', 'user13', '$2a$10$wT.f/h.d3M9Zq8vQZ3.8eu.Y.xG7c./UvT/F3mX.s.', 0, '1995-01-01', 'ROLE_OWNER', 'KAKAO', 'KAKAO_13', 'user13@example.com', 0, NULL);
-INSERT IGNORE INTO user (user_id, created_at, modified_at, created_by, last_modified_by, username, password, gender, birth_date, role, social_type, social_id, email, deleted, deleted_at) VALUES (14, '2025-08-28 15:29:59', '2025-08-28 15:29:59', 'system', 'system', 'user14', '$2a$10$wT.f/h.d3M9Zq8vQZ3.8eu.Y.xG7c./UvT/F3mX.s.', 2, '1997-01-01', 'ROLE_OWNER', 'KAKAO', 'KAKAO_14', 'user14@example.com', 0, NULL);
-INSERT IGNORE INTO user (user_id, created_at, modified_at, created_by, last_modified_by, username, password, gender, birth_date, role, social_type, social_id, email, deleted, deleted_at) VALUES (15, '2025-09-20 15:29:59', '2025-09-20 15:29:59', 'system', 'system', 'user15', '$2a$10$wT.f/h.d3M9Zq8vQZ3.8eu.Y.xG7c./UvT/F3mX.s.', 2, '1984-01-01', 'ROLE_OWNER', 'KAKAO', 'KAKAO_15', 'user15@example.com', 0, NULL);
-INSERT IGNORE INTO user (user_id, created_at, modified_at, created_by, last_modified_by, username, password, gender, birth_date, role, social_type, social_id, email, deleted, deleted_at) VALUES (16, '2025-10-11 15:29:59', '2025-10-11 15:29:59', 'system', 'system', 'user16', '$2a$10$wT.f/h.d3M9Zq8vQZ3.8eu.Y.xG7c./UvT/F3mX.s.', 1, '1989-01-01', 'ROLE_OWNER', 'KAKAO', 'KAKAO_16', 'user16@example.com', 0, NULL);
-INSERT IGNORE INTO user (user_id, created_at, modified_at, created_by, last_modified_by, username, password, gender, birth_date, role, social_type, social_id, email, deleted, deleted_at) VALUES (17, '2025-09-01 15:29:59', '2025-09-01 15:29:59', 'system', 'system', 'user17', '$2a$10$wT.f/h.d3M9Zq8vQZ3.8eu.Y.xG7c./UvT/F3mX.s.', 2, '1985-01-01', 'ROLE_OWNER', 'KAKAO', 'KAKAO_17', 'user17@example.com', 0, NULL);
-INSERT IGNORE INTO user (user_id, created_at, modified_at, created_by, last_modified_by, username, password, gender, birth_date, role, social_type, social_id, email, deleted, deleted_at) VALUES (18, '2026-02-02 15:29:59', '2026-02-02 15:29:59', 'system', 'system', 'user18', '$2a$10$wT.f/h.d3M9Zq8vQZ3.8eu.Y.xG7c./UvT/F3mX.s.', 2, '2000-01-01', 'ROLE_OWNER', 'KAKAO', 'KAKAO_18', 'user18@example.com', 0, NULL);
-INSERT IGNORE INTO user (user_id, created_at, modified_at, created_by, last_modified_by, username, password, gender, birth_date, role, social_type, social_id, email, deleted, deleted_at) VALUES (19, '2025-10-31 15:29:59', '2025-10-31 15:29:59', 'system', 'system', 'user19', '$2a$10$wT.f/h.d3M9Zq8vQZ3.8eu.Y.xG7c./UvT/F3mX.s.', 1, '1997-01-01', 'ROLE_OWNER', 'KAKAO', 'KAKAO_19', 'user19@example.com', 0, NULL);
-INSERT IGNORE INTO user (user_id, created_at, modified_at, created_by, last_modified_by, username, password, gender, birth_date, role, social_type, social_id, email, deleted, deleted_at) VALUES (20, '2025-08-09 15:29:59', '2025-08-09 15:29:59', 'system', 'system', 'user20', '$2a$10$wT.f/h.d3M9Zq8vQZ3.8eu.Y.xG7c./UvT/F3mX.s.', 0, '1994-01-01', 'ROLE_OWNER', 'KAKAO', 'KAKAO_20', 'user20@example.com', 0, NULL);
-INSERT IGNORE INTO user (user_id, created_at, modified_at, created_by, last_modified_by, username, password, gender, birth_date, role, social_type, social_id, email, deleted, deleted_at) VALUES (21, '2026-03-08 15:29:59', '2026-03-08 15:29:59', 'system', 'system', 'user21', '$2a$10$wT.f/h.d3M9Zq8vQZ3.8eu.Y.xG7c./UvT/F3mX.s.', 0, '1983-01-01', 'ROLE_OWNER', 'KAKAO', 'KAKAO_21', 'user21@example.com', 0, NULL);
-INSERT IGNORE INTO user (user_id, created_at, modified_at, created_by, last_modified_by, username, password, gender, birth_date, role, social_type, social_id, email, deleted, deleted_at) VALUES (22, '2025-11-23 15:29:59', '2025-11-23 15:29:59', 'system', 'system', 'user22', '$2a$10$wT.f/h.d3M9Zq8vQZ3.8eu.Y.xG7c./UvT/F3mX.s.', 2, '1991-01-01', 'ROLE_COUNCIL', 'KAKAO', 'KAKAO_22', 'user22@example.com', 0, NULL);
-INSERT IGNORE INTO user (user_id, created_at, modified_at, created_by, last_modified_by, username, password, gender, birth_date, role, social_type, social_id, email, deleted, deleted_at) VALUES (23, '2025-06-06 15:29:59', '2025-06-06 15:29:59', 'system', 'system', 'user23', '$2a$10$wT.f/h.d3M9Zq8vQZ3.8eu.Y.xG7c./UvT/F3mX.s.', 1, '1990-01-01', 'ROLE_COUNCIL', 'KAKAO', 'KAKAO_23', 'user23@example.com', 0, NULL);
-INSERT IGNORE INTO user (user_id, created_at, modified_at, created_by, last_modified_by, username, password, gender, birth_date, role, social_type, social_id, email, deleted, deleted_at) VALUES (24, '2026-02-24 15:29:59', '2026-02-24 15:29:59', 'system', 'system', 'user24', '$2a$10$wT.f/h.d3M9Zq8vQZ3.8eu.Y.xG7c./UvT/F3mX.s.', 0, '1992-01-01', 'ROLE_COUNCIL', 'KAKAO', 'KAKAO_24', 'user24@example.com', 0, NULL);
-INSERT IGNORE INTO user (user_id, created_at, modified_at, created_by, last_modified_by, username, password, gender, birth_date, role, social_type, social_id, email, deleted, deleted_at) VALUES (25, '2025-09-28 15:29:59', '2025-09-28 15:29:59', 'system', 'system', 'user25', '$2a$10$wT.f/h.d3M9Zq8vQZ3.8eu.Y.xG7c./UvT/F3mX.s.', 2, '1980-01-01', 'ROLE_COUNCIL', 'KAKAO', 'KAKAO_25', 'user25@example.com', 0, NULL);
-INSERT IGNORE INTO user (user_id, created_at, modified_at, created_by, last_modified_by, username, password, gender, birth_date, role, social_type, social_id, email, deleted, deleted_at) VALUES (26, '2025-10-09 15:29:59', '2025-10-09 15:29:59', 'system', 'system', 'user26', '$2a$10$wT.f/h.d3M9Zq8vQZ3.8eu.Y.xG7c./UvT/F3mX.s.', 1, '1998-01-01', 'ROLE_COUNCIL', 'KAKAO', 'KAKAO_26', 'user26@example.com', 0, NULL);
-INSERT IGNORE INTO user (user_id, created_at, modified_at, created_by, last_modified_by, username, password, gender, birth_date, role, social_type, social_id, email, deleted, deleted_at) VALUES (27, '2025-12-21 15:29:59', '2025-12-21 15:29:59', 'system', 'system', 'user27', '$2a$10$wT.f/h.d3M9Zq8vQZ3.8eu.Y.xG7c./UvT/F3mX.s.', 2, '2004-01-01', 'ROLE_COUNCIL', 'KAKAO', 'KAKAO_27', 'user27@example.com', 0, NULL);
-INSERT IGNORE INTO user (user_id, created_at, modified_at, created_by, last_modified_by, username, password, gender, birth_date, role, social_type, social_id, email, deleted, deleted_at) VALUES (28, '2025-11-07 15:29:59', '2025-11-07 15:29:59', 'system', 'system', 'user28', '$2a$10$wT.f/h.d3M9Zq8vQZ3.8eu.Y.xG7c./UvT/F3mX.s.', 2, '1998-01-01', 'ROLE_COUNCIL', 'KAKAO', 'KAKAO_28', 'user28@example.com', 0, NULL);
-INSERT IGNORE INTO user (user_id, created_at, modified_at, created_by, last_modified_by, username, password, gender, birth_date, role, social_type, social_id, email, deleted, deleted_at) VALUES (29, '2025-07-25 15:29:59', '2025-07-25 15:29:59', 'system', 'system', 'user29', '$2a$10$wT.f/h.d3M9Zq8vQZ3.8eu.Y.xG7c./UvT/F3mX.s.', 2, '1980-01-01', 'ROLE_COUNCIL', 'KAKAO', 'KAKAO_29', 'user29@example.com', 0, NULL);
-INSERT IGNORE INTO user (user_id, created_at, modified_at, created_by, last_modified_by, username, password, gender, birth_date, role, social_type, social_id, email, deleted, deleted_at) VALUES (30, '2025-10-31 15:29:59', '2025-10-31 15:29:59', 'system', 'system', 'user30', '$2a$10$wT.f/h.d3M9Zq8vQZ3.8eu.Y.xG7c./UvT/F3mX.s.', 0, '1989-01-01', 'ROLE_COUNCIL', 'KAKAO', 'KAKAO_30', 'user30@example.com', 0, NULL);
-INSERT IGNORE INTO user (user_id, created_at, modified_at, created_by, last_modified_by, username, password, gender, birth_date, role, social_type, social_id, email, deleted, deleted_at) VALUES (31, '2026-01-28 15:29:59', '2026-01-28 15:29:59', 'system', 'system', 'user31', '$2a$10$wT.f/h.d3M9Zq8vQZ3.8eu.Y.xG7c./UvT/F3mX.s.', 1, '1983-01-01', 'ROLE_COUNCIL', 'KAKAO', 'KAKAO_31', 'user31@example.com', 0, NULL);
+/* Users */
+INSERT IGNORE INTO user (
+    user_id, created_at, modified_at, created_by, last_modified_by,
+    username, password, gender, birth_date, role, social_type, social_id, email, deleted, deleted_at
+) VALUES
+    (1, '2026-03-01 09:00:00', '2026-03-01 09:00:00', 'seed', 'seed', 'admin', '$2a$10$wT.f/h.d3M9Zq8vQZ3.8eu.Y.xG7c./UvT/F3mX.s.', 2, '1990-01-15', 'ROLE_ADMIN', 'LOCAL', NULL, 'admin@looky.local', 0, NULL),
+    (2, '2026-02-10 10:00:00', '2026-02-10 10:00:00', 'seed', 'seed', 'minjun.jbnu', '$2a$10$wT.f/h.d3M9Zq8vQZ3.8eu.Y.xG7c./UvT/F3mX.s.', 0, '2001-03-12', 'ROLE_STUDENT', 'LOCAL', NULL, 'minjun@jbnu.ac.kr', 0, NULL),
+    (3, '2026-02-11 10:00:00', '2026-02-11 10:00:00', 'seed', 'seed', 'soeun.jbnu', '$2a$10$wT.f/h.d3M9Zq8vQZ3.8eu.Y.xG7c./UvT/F3mX.s.', 1, '2000-08-24', 'ROLE_STUDENT', 'GOOGLE', 'google-student-3', 'soeun@jbnu.ac.kr', 0, NULL),
+    (4, '2026-02-12 10:00:00', '2026-02-12 10:00:00', 'seed', 'seed', 'hyunwoo.snu', '$2a$10$wT.f/h.d3M9Zq8vQZ3.8eu.Y.xG7c./UvT/F3mX.s.', 0, '1999-11-03', 'ROLE_STUDENT', 'APPLE', 'apple-student-4', 'hyunwoo@snu.ac.kr', 0, NULL),
+    (5, '2026-02-13 10:00:00', '2026-02-13 10:00:00', 'seed', 'seed', 'yebin.ku', '$2a$10$wT.f/h.d3M9Zq8vQZ3.8eu.Y.xG7c./UvT/F3mX.s.', 1, '2001-05-30', 'ROLE_STUDENT', 'KAKAO', 'kakao-student-5', 'yebin@korea.ac.kr', 0, NULL),
+    (6, '2026-02-14 10:00:00', '2026-02-14 10:00:00', 'seed', 'seed', 'seojun.hyu', '$2a$10$wT.f/h.d3M9Zq8vQZ3.8eu.Y.xG7c./UvT/F3mX.s.', 0, '2002-01-17', 'ROLE_STUDENT', 'LOCAL', NULL, 'seojun@hanyang.ac.kr', 0, NULL),
+    (7, '2026-02-15 10:00:00', '2026-02-15 10:00:00', 'seed', 'seed', 'chaeon.yonsei', '$2a$10$wT.f/h.d3M9Zq8vQZ3.8eu.Y.xG7c./UvT/F3mX.s.', 1, '2001-09-09', 'ROLE_STUDENT', 'GOOGLE', 'google-student-7', 'chaeon@yonsei.ac.kr', 0, NULL),
+    (8, '2026-02-16 10:00:00', '2026-02-16 10:00:00', 'seed', 'seed', 'dowon.jbnu', '$2a$10$wT.f/h.d3M9Zq8vQZ3.8eu.Y.xG7c./UvT/F3mX.s.', 2, '2003-12-01', 'ROLE_STUDENT', 'APPLE', 'apple-student-8', 'dowon@jbnu.ac.kr', 0, NULL),
+    (9, '2026-02-17 10:00:00', '2026-02-17 10:00:00', 'seed', 'seed', 'owner.kim', '$2a$10$wT.f/h.d3M9Zq8vQZ3.8eu.Y.xG7c./UvT/F3mX.s.', 1, '1988-07-04', 'ROLE_OWNER', 'LOCAL', NULL, 'owner.kim@looky.local', 0, NULL),
+    (10, '2026-02-18 10:00:00', '2026-02-18 10:00:00', 'seed', 'seed', 'owner.park', '$2a$10$wT.f/h.d3M9Zq8vQZ3.8eu.Y.xG7c./UvT/F3mX.s.', 0, '1986-04-11', 'ROLE_OWNER', 'KAKAO', 'kakao-owner-10', 'owner.park@looky.local', 0, NULL),
+    (11, '2026-02-19 10:00:00', '2026-02-19 10:00:00', 'seed', 'seed', 'owner.lee', '$2a$10$wT.f/h.d3M9Zq8vQZ3.8eu.Y.xG7c./UvT/F3mX.s.', 0, '1989-02-14', 'ROLE_OWNER', 'GOOGLE', 'google-owner-11', 'owner.lee@looky.local', 0, NULL),
+    (12, '2026-02-20 10:00:00', '2026-02-20 10:00:00', 'seed', 'seed', 'owner.choi', '$2a$10$wT.f/h.d3M9Zq8vQZ3.8eu.Y.xG7c./UvT/F3mX.s.', 1, '1991-10-22', 'ROLE_OWNER', 'LOCAL', NULL, 'owner.choi@looky.local', 0, NULL),
+    (13, '2026-02-21 10:00:00', '2026-02-21 10:00:00', 'seed', 'seed', 'council.jbnu', '$2a$10$wT.f/h.d3M9Zq8vQZ3.8eu.Y.xG7c./UvT/F3mX.s.', 0, '1998-06-13', 'ROLE_COUNCIL', 'LOCAL', NULL, 'council@jbnu.ac.kr', 0, NULL),
+    (14, '2026-02-22 10:00:00', '2026-02-22 10:00:00', 'seed', 'seed', 'council.snu', '$2a$10$wT.f/h.d3M9Zq8vQZ3.8eu.Y.xG7c./UvT/F3mX.s.', 1, '1997-03-28', 'ROLE_COUNCIL', 'LOCAL', NULL, 'council@snu.ac.kr', 0, NULL),
+    (15, '2026-02-23 10:00:00', '2026-02-23 10:00:00', 'seed', 'seed', 'harin.sogang', '$2a$10$wT.f/h.d3M9Zq8vQZ3.8eu.Y.xG7c./UvT/F3mX.s.', 1, '2002-07-15', 'ROLE_STUDENT', 'KAKAO', 'kakao-student-15', 'harin@sogang.ac.kr', 0, NULL);
 
-INSERT IGNORE INTO student_profile (user_id, nickname, university_id, is_club_member) VALUES (2, '학생닉네임2', 15, 0);
-INSERT IGNORE INTO student_profile (user_id, nickname, university_id, is_club_member) VALUES (3, '학생닉네임3', 15, 0);
-INSERT IGNORE INTO student_profile (user_id, nickname, university_id, is_club_member) VALUES (4, '학생닉네임4', 15, 0);
-INSERT IGNORE INTO student_profile (user_id, nickname, university_id, is_club_member) VALUES (5, '학생닉네임5', 15, 1);
-INSERT IGNORE INTO student_profile (user_id, nickname, university_id, is_club_member) VALUES (6, '학생닉네임6', 15, 1);
-INSERT IGNORE INTO student_profile (user_id, nickname, university_id, is_club_member) VALUES (7, '학생닉네임7', 15, 0);
-INSERT IGNORE INTO student_profile (user_id, nickname, university_id, is_club_member) VALUES (8, '학생닉네임8', 15, 0);
-INSERT IGNORE INTO student_profile (user_id, nickname, university_id, is_club_member) VALUES (9, '학생닉네임9', 15, 1);
-INSERT IGNORE INTO student_profile (user_id, nickname, university_id, is_club_member) VALUES (10, '학생닉네임10', 15, 1);
-INSERT IGNORE INTO student_profile (user_id, nickname, university_id, is_club_member) VALUES (11, '학생닉네임11', 15, 0);
-INSERT IGNORE INTO owner_profile (user_id, name) VALUES (12, '사장님12');
-INSERT IGNORE INTO owner_profile (user_id, name) VALUES (13, '사장님13');
-INSERT IGNORE INTO owner_profile (user_id, name) VALUES (14, '사장님14');
-INSERT IGNORE INTO owner_profile (user_id, name) VALUES (15, '사장님15');
-INSERT IGNORE INTO owner_profile (user_id, name) VALUES (16, '사장님16');
-INSERT IGNORE INTO owner_profile (user_id, name) VALUES (17, '사장님17');
-INSERT IGNORE INTO owner_profile (user_id, name) VALUES (18, '사장님18');
-INSERT IGNORE INTO owner_profile (user_id, name) VALUES (19, '사장님19');
-INSERT IGNORE INTO owner_profile (user_id, name) VALUES (20, '사장님20');
-INSERT IGNORE INTO owner_profile (user_id, name) VALUES (21, '사장님21');
-INSERT IGNORE INTO council_profile (user_id, university_id) VALUES (22, 15);
-INSERT IGNORE INTO council_profile (user_id, university_id) VALUES (23, 15);
-INSERT IGNORE INTO council_profile (user_id, university_id) VALUES (24, 15);
-INSERT IGNORE INTO council_profile (user_id, university_id) VALUES (25, 15);
-INSERT IGNORE INTO council_profile (user_id, university_id) VALUES (26, 15);
-INSERT IGNORE INTO council_profile (user_id, university_id) VALUES (27, 15);
-INSERT IGNORE INTO council_profile (user_id, university_id) VALUES (28, 15);
-INSERT IGNORE INTO council_profile (user_id, university_id) VALUES (29, 15);
-INSERT IGNORE INTO council_profile (user_id, university_id) VALUES (30, 15);
-INSERT IGNORE INTO council_profile (user_id, university_id) VALUES (31, 15);
+INSERT IGNORE INTO student_profile (user_id, nickname, university_id, is_club_member) VALUES
+    (2, '전주점심헌터', 6, 1),
+    (3, '카페수집가', 6, 0),
+    (4, '관악산책러', 1, 1),
+    (5, '쿠폰먼저보는편', 3, 0),
+    (6, '헬시푸드파인더', 5, 1),
+    (7, '야식탐험대', 2, 0),
+    (8, '리뷰는신중하게', 6, 0),
+    (15, '비건브런치러버', 4, 1);
+
+INSERT IGNORE INTO owner_profile (user_id, name) VALUES
+    (9, '김윤서'),
+    (10, '박준형'),
+    (11, '이도현'),
+    (12, '최서연');
+
+INSERT IGNORE INTO council_profile (user_id, university_id) VALUES
+    (13, 6),
+    (14, 1);
 
 /* Organizations */
-INSERT IGNORE INTO organization (organization_id, created_at, modified_at, created_by, last_modified_by, category, name, expires_at, university_id, user_id) VALUES (1, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'system', 'system', '단과대학생회', '전북대학교 단과대학생회 1동', '2027-03-20 15:29:59', 15, 11);
-INSERT IGNORE INTO organization (organization_id, created_at, modified_at, created_by, last_modified_by, category, name, expires_at, university_id, user_id) VALUES (2, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'system', 'system', '동아리', '전북대학교 동아리 2동', '2027-03-20 15:29:59', 15, 2);
-INSERT IGNORE INTO organization (organization_id, created_at, modified_at, created_by, last_modified_by, category, name, expires_at, university_id, user_id) VALUES (3, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'system', 'system', '총학생회', '전북대학교 단과대학생회 3동', '2027-03-20 15:29:59', 15, 8);
-INSERT IGNORE INTO organization (organization_id, created_at, modified_at, created_by, last_modified_by, category, name, expires_at, university_id, user_id) VALUES (4, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'system', 'system', '동아리', '전북대학교 단과대학생회 4동', '2027-03-20 15:29:59', 15, 4);
-INSERT IGNORE INTO organization (organization_id, created_at, modified_at, created_by, last_modified_by, category, name, expires_at, university_id, user_id) VALUES (5, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'system', 'system', '총학생회', '전북대학교 총학생회 5동', '2027-03-20 15:29:59', 15, 9);
-INSERT IGNORE INTO organization (organization_id, created_at, modified_at, created_by, last_modified_by, category, name, expires_at, university_id, user_id) VALUES (6, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'system', 'system', '학회', '전북대학교 동아리 6동', '2027-03-20 15:29:59', 15, 7);
-INSERT IGNORE INTO organization (organization_id, created_at, modified_at, created_by, last_modified_by, category, name, expires_at, university_id, user_id) VALUES (7, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'system', 'system', '학회', '전북대학교 학회 7동', '2027-03-20 15:29:59', 15, 10);
-INSERT IGNORE INTO organization (organization_id, created_at, modified_at, created_by, last_modified_by, category, name, expires_at, university_id, user_id) VALUES (8, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'system', 'system', '학회', '전북대학교 학회 8동', '2027-03-20 15:29:59', 15, 3);
-INSERT IGNORE INTO organization (organization_id, created_at, modified_at, created_by, last_modified_by, category, name, expires_at, university_id, user_id) VALUES (9, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'system', 'system', '총학생회', '전북대학교 단과대학생회 9동', '2027-03-20 15:29:59', 15, 4);
-INSERT IGNORE INTO organization (organization_id, created_at, modified_at, created_by, last_modified_by, category, name, expires_at, university_id, user_id) VALUES (10, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'system', 'system', '학회', '전북대학교 학회 10동', '2027-03-20 15:29:59', 15, 9);
+INSERT IGNORE INTO organization (
+    organization_id, created_at, modified_at, created_by, last_modified_by,
+    category, name, expires_at, university_id, parent_id, user_id
+) VALUES
+    (1, '2026-03-05 09:00:00', '2026-03-05 09:00:00', 'seed', 'seed', 'UNIVERSITY_COUNCIL', '전북대학교 총학생회', '2027-02-28 23:59:59', 6, NULL, 13),
+    (2, '2026-03-05 09:05:00', '2026-03-05 09:05:00', 'seed', 'seed', 'COLLEGE', '전북대학교 공과대학 학생회', '2027-02-28 23:59:59', 6, 1, 13),
+    (3, '2026-03-05 09:10:00', '2026-03-05 09:10:00', 'seed', 'seed', 'DEPARTMENT', '전북대학교 소프트웨어공학과 학생회', '2027-02-28 23:59:59', 6, 2, 13),
+    (4, '2026-03-05 09:15:00', '2026-03-05 09:15:00', 'seed', 'seed', 'CLUB_ASSOCIATION', '전북대학교 중앙동아리연합회', '2026-12-31 23:59:59', 6, 1, 13),
+    (5, '2026-03-05 09:20:00', '2026-03-05 09:20:00', 'seed', 'seed', 'UNIVERSITY_COUNCIL', '서울대학교 총학생회', '2027-02-28 23:59:59', 1, NULL, 14);
+
+INSERT IGNORE INTO user_organization (user_organization_id, user_id, organization_id) VALUES
+    (1, 2, 3),
+    (2, 3, 4),
+    (3, 8, 1),
+    (4, 15, 4);
 
 /* Stores */
-INSERT IGNORE INTO store (store_id, created_at, modified_at, created_by, last_modified_by, name, branch, biz_reg_no, road_address, jibun_address, latitude, longitude, store_phone, representative_name, is_suspended, introduction, operating_hours, profile_image_url, store_status, clover_grade, user_id) VALUES (1, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'system', 'system', '전북대 펍 1호점', '본점', '123-45-67891', '전북특별자치도 전주시 덕진구 명륜1길 4', '전북특별자치도 전주시 덕진구 명륜1길 4', 35.84002872394817, 127.12502807574742, '063-270-1001', '사장1', 0, '안녕하세요. 전북대 학생 여러분! 정성을 다하는 전북대 펍입니다.', '09:00 - 22:00', 'http://img.com/p1.jpg', 'PENDING', 'SEED', 13);
-INSERT IGNORE INTO store (store_id, created_at, modified_at, created_by, last_modified_by, name, branch, biz_reg_no, road_address, jibun_address, latitude, longitude, store_phone, representative_name, is_suspended, introduction, operating_hours, profile_image_url, store_status, clover_grade, user_id) VALUES (2, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'system', 'system', '구정문 맛집 2호점', '본점', '123-45-67892', '전북특별자치도 전주시 덕진구 명륜2길 24', '전북특별자치도 전주시 덕진구 명륜2길 24', 35.848998550721426, 127.1228489128996, '063-270-1002', '사장2', 0, '안녕하세요. 전북대 학생 여러분! 정성을 다하는 구정문 맛집입니다.', '09:00 - 22:00', 'http://img.com/p2.jpg', 'ACTIVE', 'SEED', 14);
-INSERT IGNORE INTO store (store_id, created_at, modified_at, created_by, last_modified_by, name, branch, biz_reg_no, road_address, jibun_address, latitude, longitude, store_phone, representative_name, is_suspended, introduction, operating_hours, profile_image_url, store_status, clover_grade, user_id) VALUES (3, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'system', 'system', '전북대 펍 3호점', '본점', '123-45-67893', '전북특별자치도 전주시 덕진구 명륜5길 12', '전북특별자치도 전주시 덕진구 명륜5길 12', 35.84719749455685, 127.128581294954, '063-270-1003', '사장3', 0, '안녕하세요. 전북대 학생 여러분! 정성을 다하는 전북대 펍입니다.', '09:00 - 22:00', 'http://img.com/p3.jpg', 'ACTIVE', 'SEED', 15);
-INSERT IGNORE INTO store (store_id, created_at, modified_at, created_by, last_modified_by, name, branch, biz_reg_no, road_address, jibun_address, latitude, longitude, store_phone, representative_name, is_suspended, introduction, operating_hours, profile_image_url, store_status, clover_grade, user_id) VALUES (4, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'system', 'system', '사대부고 사거리 식당 4호점', '본점', '123-45-67894', '전북특별자치도 전주시 덕진구 명륜1길 13', '전북특별자치도 전주시 덕진구 명륜1길 13', 35.84506247107148, 127.1290609996114, '063-270-1004', '사장4', 0, '안녕하세요. 전북대 학생 여러분! 정성을 다하는 사대부고 사거리 식당입니다.', '09:00 - 22:00', 'http://img.com/p4.jpg', 'ACTIVE', 'SEED', 16);
-INSERT IGNORE INTO store (store_id, created_at, modified_at, created_by, last_modified_by, name, branch, biz_reg_no, road_address, jibun_address, latitude, longitude, store_phone, representative_name, is_suspended, introduction, operating_hours, profile_image_url, store_status, clover_grade, user_id) VALUES (5, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'system', 'system', '북대 고깃집 5호점', '본점', '123-45-67895', '전북특별자치도 전주시 덕진구 명륜2길 5', '전북특별자치도 전주시 덕진구 명륜2길 5', 35.845549213689395, 127.12127910236244, '063-270-1005', '사장5', 0, '안녕하세요. 전북대 학생 여러분! 정성을 다하는 북대 고깃집입니다.', '09:00 - 22:00', 'http://img.com/p5.jpg', 'ACTIVE', 'SEED', 17);
-INSERT IGNORE INTO store (store_id, created_at, modified_at, created_by, last_modified_by, name, branch, biz_reg_no, road_address, jibun_address, latitude, longitude, store_phone, representative_name, is_suspended, introduction, operating_hours, profile_image_url, store_status, clover_grade, user_id) VALUES (6, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'system', 'system', '전북대 빙수 6호점', '본점', '123-45-67896', '전북특별자치도 전주시 덕진구 명륜5길 22', '전북특별자치도 전주시 덕진구 명륜5길 22', 35.84252090605194, 127.12369351464366, '063-270-1006', '사장6', 0, '안녕하세요. 전북대 학생 여러분! 정성을 다하는 전북대 빙수입니다.', '09:00 - 22:00', 'http://img.com/p6.jpg', 'PENDING', 'SEED', 18);
-INSERT IGNORE INTO store (store_id, created_at, modified_at, created_by, last_modified_by, name, branch, biz_reg_no, road_address, jibun_address, latitude, longitude, store_phone, representative_name, is_suspended, introduction, operating_hours, profile_image_url, store_status, clover_grade, user_id) VALUES (7, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'system', 'system', '사대부고 사거리 식당 7호점', '본점', '123-45-67897', '전북특별자치도 전주시 덕진구 명륜4길 23', '전북특별자치도 전주시 덕진구 명륜4길 23', 35.846074004093985, 127.12406857067522, '063-270-1007', '사장7', 0, '안녕하세요. 전북대 학생 여러분! 정성을 다하는 사대부고 사거리 식당입니다.', '09:00 - 22:00', 'http://img.com/p7.jpg', 'ACTIVE', 'SEED', 19);
-INSERT IGNORE INTO store (store_id, created_at, modified_at, created_by, last_modified_by, name, branch, biz_reg_no, road_address, jibun_address, latitude, longitude, store_phone, representative_name, is_suspended, introduction, operating_hours, profile_image_url, store_status, clover_grade, user_id) VALUES (8, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'system', 'system', '구정문 맛집 8호점', '본점', '123-45-67898', '전북특별자치도 전주시 덕진구 명륜5길 2', '전북특별자치도 전주시 덕진구 명륜5길 2', 35.847125891327806, 127.12993363258623, '063-270-1008', '사장8', 0, '안녕하세요. 전북대 학생 여러분! 정성을 다하는 구정문 맛집입니다.', '09:00 - 22:00', 'http://img.com/p8.jpg', 'ACTIVE', 'SEED', 20);
-INSERT IGNORE INTO store (store_id, created_at, modified_at, created_by, last_modified_by, name, branch, biz_reg_no, road_address, jibun_address, latitude, longitude, store_phone, representative_name, is_suspended, introduction, operating_hours, profile_image_url, store_status, clover_grade, user_id) VALUES (9, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'system', 'system', '북대 닭갈비 9호점', '본점', '123-45-67899', '전북특별자치도 전주시 덕진구 명륜5길 30', '전북특별자치도 전주시 덕진구 명륜5길 30', 35.844324133001926, 127.12150107797623, '063-270-1009', '사장9', 0, '안녕하세요. 전북대 학생 여러분! 정성을 다하는 북대 닭갈비입니다.', '09:00 - 22:00', 'http://img.com/p9.jpg', 'PENDING', 'SEED', 21);
-INSERT IGNORE INTO store (store_id, created_at, modified_at, created_by, last_modified_by, name, branch, biz_reg_no, road_address, jibun_address, latitude, longitude, store_phone, representative_name, is_suspended, introduction, operating_hours, profile_image_url, store_status, clover_grade, user_id) VALUES (10, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'system', 'system', '전북대 펍 10호점', '본점', '123-45-67900', '전북특별자치도 전주시 덕진구 명륜5길 15', '전북특별자치도 전주시 덕진구 명륜5길 15', 35.84314955180664, 127.1227729588611, '063-270-1010', '사장10', 0, '안녕하세요. 전북대 학생 여러분! 정성을 다하는 전북대 펍입니다.', '09:00 - 22:00', 'http://img.com/p10.jpg', 'PENDING', 'SEED', 12);
-INSERT IGNORE INTO store (store_id, created_at, modified_at, created_by, last_modified_by, name, branch, biz_reg_no, road_address, jibun_address, latitude, longitude, store_phone, representative_name, is_suspended, introduction, operating_hours, profile_image_url, store_status, clover_grade, user_id) VALUES (11, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'system', 'system', '사대부고 사거리 식당 11호점', '본점', '123-45-67901', '전북특별자치도 전주시 덕진구 명륜5길 12', '전북특별자치도 전주시 덕진구 명륜5길 12', 35.840271417328836, 127.12995528769389, '063-270-1011', '사장11', 0, '안녕하세요. 전북대 학생 여러분! 정성을 다하는 사대부고 사거리 식당입니다.', '09:00 - 22:00', 'http://img.com/p11.jpg', 'ACTIVE', 'SEED', 13);
-INSERT IGNORE INTO store (store_id, created_at, modified_at, created_by, last_modified_by, name, branch, biz_reg_no, road_address, jibun_address, latitude, longitude, store_phone, representative_name, is_suspended, introduction, operating_hours, profile_image_url, store_status, clover_grade, user_id) VALUES (12, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'system', 'system', '사대부고 사거리 식당 12호점', '본점', '123-45-67902', '전북특별자치도 전주시 덕진구 명륜1길 10', '전북특별자치도 전주시 덕진구 명륜1길 10', 35.845984928014516, 127.12243167305623, '063-270-1012', '사장12', 0, '안녕하세요. 전북대 학생 여러분! 정성을 다하는 사대부고 사거리 식당입니다.', '09:00 - 22:00', 'http://img.com/p12.jpg', 'PENDING', 'SEED', 14);
-INSERT IGNORE INTO store (store_id, created_at, modified_at, created_by, last_modified_by, name, branch, biz_reg_no, road_address, jibun_address, latitude, longitude, store_phone, representative_name, is_suspended, introduction, operating_hours, profile_image_url, store_status, clover_grade, user_id) VALUES (13, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'system', 'system', '전북대 빙수 13호점', '본점', '123-45-67903', '전북특별자치도 전주시 덕진구 명륜1길 20', '전북특별자치도 전주시 덕진구 명륜1길 20', 35.84602212064938, 127.12330149391968, '063-270-1013', '사장13', 0, '안녕하세요. 전북대 학생 여러분! 정성을 다하는 전북대 빙수입니다.', '09:00 - 22:00', 'http://img.com/p13.jpg', 'PENDING', 'SEED', 15);
-INSERT IGNORE INTO store (store_id, created_at, modified_at, created_by, last_modified_by, name, branch, biz_reg_no, road_address, jibun_address, latitude, longitude, store_phone, representative_name, is_suspended, introduction, operating_hours, profile_image_url, store_status, clover_grade, user_id) VALUES (14, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'system', 'system', '신정문 카페 14호점', '본점', '123-45-67904', '전북특별자치도 전주시 덕진구 명륜5길 28', '전북특별자치도 전주시 덕진구 명륜5길 28', 35.843957236692454, 127.12389157207598, '063-270-1014', '사장14', 0, '안녕하세요. 전북대 학생 여러분! 정성을 다하는 신정문 카페입니다.', '09:00 - 22:00', 'http://img.com/p14.jpg', 'PENDING', 'SEED', 16);
-INSERT IGNORE INTO store (store_id, created_at, modified_at, created_by, last_modified_by, name, branch, biz_reg_no, road_address, jibun_address, latitude, longitude, store_phone, representative_name, is_suspended, introduction, operating_hours, profile_image_url, store_status, clover_grade, user_id) VALUES (15, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'system', 'system', '전북대 펍 15호점', '본점', '123-45-67905', '전북특별자치도 전주시 덕진구 명륜1길 26', '전북특별자치도 전주시 덕진구 명륜1길 26', 35.84724348576211, 127.12476786776747, '063-270-1015', '사장15', 0, '안녕하세요. 전북대 학생 여러분! 정성을 다하는 전북대 펍입니다.', '09:00 - 22:00', 'http://img.com/p15.jpg', 'ACTIVE', 'SEED', 17);
-INSERT IGNORE INTO store (store_id, created_at, modified_at, created_by, last_modified_by, name, branch, biz_reg_no, road_address, jibun_address, latitude, longitude, store_phone, representative_name, is_suspended, introduction, operating_hours, profile_image_url, store_status, clover_grade, user_id) VALUES (16, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'system', 'system', '전주 마카롱 16호점', '본점', '123-45-67906', '전북특별자치도 전주시 덕진구 명륜1길 15', '전북특별자치도 전주시 덕진구 명륜1길 15', 35.84813005787214, 127.12389938521359, '063-270-1016', '사장16', 0, '안녕하세요. 전북대 학생 여러분! 정성을 다하는 전주 마카롱입니다.', '09:00 - 22:00', 'http://img.com/p16.jpg', 'PENDING', 'SEED', 18);
-INSERT IGNORE INTO store (store_id, created_at, modified_at, created_by, last_modified_by, name, branch, biz_reg_no, road_address, jibun_address, latitude, longitude, store_phone, representative_name, is_suspended, introduction, operating_hours, profile_image_url, store_status, clover_grade, user_id) VALUES (17, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'system', 'system', '전주 마카롱 17호점', '본점', '123-45-67907', '전북특별자치도 전주시 덕진구 명륜5길 27', '전북특별자치도 전주시 덕진구 명륜5길 27', 35.84684667224493, 127.1263000516982, '063-270-1017', '사장17', 0, '안녕하세요. 전북대 학생 여러분! 정성을 다하는 전주 마카롱입니다.', '09:00 - 22:00', 'http://img.com/p17.jpg', 'ACTIVE', 'SEED', 19);
-INSERT IGNORE INTO store (store_id, created_at, modified_at, created_by, last_modified_by, name, branch, biz_reg_no, road_address, jibun_address, latitude, longitude, store_phone, representative_name, is_suspended, introduction, operating_hours, profile_image_url, store_status, clover_grade, user_id) VALUES (18, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'system', 'system', '사대부고 사거리 식당 18호점', '본점', '123-45-67908', '전북특별자치도 전주시 덕진구 명륜1길 29', '전북특별자치도 전주시 덕진구 명륜1길 29', 35.840931599265836, 127.12953401112186, '063-270-1018', '사장18', 0, '안녕하세요. 전북대 학생 여러분! 정성을 다하는 사대부고 사거리 식당입니다.', '09:00 - 22:00', 'http://img.com/p18.jpg', 'PENDING', 'SEED', 20);
-INSERT IGNORE INTO store (store_id, created_at, modified_at, created_by, last_modified_by, name, branch, biz_reg_no, road_address, jibun_address, latitude, longitude, store_phone, representative_name, is_suspended, introduction, operating_hours, profile_image_url, store_status, clover_grade, user_id) VALUES (19, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'system', 'system', '신정문 카페 19호점', '본점', '123-45-67909', '전북특별자치도 전주시 덕진구 명륜3길 9', '전북특별자치도 전주시 덕진구 명륜3길 9', 35.84716305557545, 127.12912935308256, '063-270-1019', '사장19', 0, '안녕하세요. 전북대 학생 여러분! 정성을 다하는 신정문 카페입니다.', '09:00 - 22:00', 'http://img.com/p19.jpg', 'ACTIVE', 'SEED', 21);
-INSERT IGNORE INTO store (store_id, created_at, modified_at, created_by, last_modified_by, name, branch, biz_reg_no, road_address, jibun_address, latitude, longitude, store_phone, representative_name, is_suspended, introduction, operating_hours, profile_image_url, store_status, clover_grade, user_id) VALUES (20, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'system', 'system', '전주 마카롱 20호점', '본점', '123-45-67910', '전북특별자치도 전주시 덕진구 명륜1길 11', '전북특별자치도 전주시 덕진구 명륜1길 11', 35.84555166558483, 127.12918919254413, '063-270-1020', '사장20', 0, '안녕하세요. 전북대 학생 여러분! 정성을 다하는 전주 마카롱입니다.', '09:00 - 22:00', 'http://img.com/p20.jpg', 'PENDING', 'SEED', 12);
-INSERT IGNORE INTO store (store_id, created_at, modified_at, created_by, last_modified_by, name, branch, biz_reg_no, road_address, jibun_address, latitude, longitude, store_phone, representative_name, is_suspended, introduction, operating_hours, profile_image_url, store_status, clover_grade, user_id) VALUES (21, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'system', 'system', '덕진공원 뷰 카페 21호점', '본점', '123-45-67911', '전북특별자치도 전주시 덕진구 명륜5길 5', '전북특별자치도 전주시 덕진구 명륜5길 5', 35.84944593687971, 127.12754622521986, '063-270-1021', '사장21', 0, '안녕하세요. 전북대 학생 여러분! 정성을 다하는 덕진공원 뷰 카페입니다.', '09:00 - 22:00', 'http://img.com/p21.jpg', 'PENDING', 'SEED', 13);
-INSERT IGNORE INTO store (store_id, created_at, modified_at, created_by, last_modified_by, name, branch, biz_reg_no, road_address, jibun_address, latitude, longitude, store_phone, representative_name, is_suspended, introduction, operating_hours, profile_image_url, store_status, clover_grade, user_id) VALUES (22, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'system', 'system', '신정문 카페 22호점', '본점', '123-45-67912', '전북특별자치도 전주시 덕진구 명륜4길 4', '전북특별자치도 전주시 덕진구 명륜4길 4', 35.84436708813572, 127.1277904736101, '063-270-1022', '사장22', 0, '안녕하세요. 전북대 학생 여러분! 정성을 다하는 신정문 카페입니다.', '09:00 - 22:00', 'http://img.com/p22.jpg', 'PENDING', 'SEED', 14);
-INSERT IGNORE INTO store (store_id, created_at, modified_at, created_by, last_modified_by, name, branch, biz_reg_no, road_address, jibun_address, latitude, longitude, store_phone, representative_name, is_suspended, introduction, operating_hours, profile_image_url, store_status, clover_grade, user_id) VALUES (23, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'system', 'system', '북대 닭갈비 23호점', '본점', '123-45-67913', '전북특별자치도 전주시 덕진구 명륜5길 22', '전북특별자치도 전주시 덕진구 명륜5길 22', 35.847713003622005, 127.12349876151278, '063-270-1023', '사장23', 0, '안녕하세요. 전북대 학생 여러분! 정성을 다하는 북대 닭갈비입니다.', '09:00 - 22:00', 'http://img.com/p23.jpg', 'ACTIVE', 'SEED', 15);
-INSERT IGNORE INTO store (store_id, created_at, modified_at, created_by, last_modified_by, name, branch, biz_reg_no, road_address, jibun_address, latitude, longitude, store_phone, representative_name, is_suspended, introduction, operating_hours, profile_image_url, store_status, clover_grade, user_id) VALUES (24, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'system', 'system', '구정문 맛집 24호점', '본점', '123-45-67914', '전북특별자치도 전주시 덕진구 명륜2길 25', '전북특별자치도 전주시 덕진구 명륜2길 25', 35.843098194232915, 127.12608398956925, '063-270-1024', '사장24', 0, '안녕하세요. 전북대 학생 여러분! 정성을 다하는 구정문 맛집입니다.', '09:00 - 22:00', 'http://img.com/p24.jpg', 'ACTIVE', 'SEED', 16);
-INSERT IGNORE INTO store (store_id, created_at, modified_at, created_by, last_modified_by, name, branch, biz_reg_no, road_address, jibun_address, latitude, longitude, store_phone, representative_name, is_suspended, introduction, operating_hours, profile_image_url, store_status, clover_grade, user_id) VALUES (25, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'system', 'system', '신정문 카페 25호점', '본점', '123-45-67915', '전북특별자치도 전주시 덕진구 명륜4길 23', '전북특별자치도 전주시 덕진구 명륜4길 23', 35.84171138909181, 127.12519605742149, '063-270-1025', '사장25', 0, '안녕하세요. 전북대 학생 여러분! 정성을 다하는 신정문 카페입니다.', '09:00 - 22:00', 'http://img.com/p25.jpg', 'PENDING', 'SEED', 17);
-INSERT IGNORE INTO store (store_id, created_at, modified_at, created_by, last_modified_by, name, branch, biz_reg_no, road_address, jibun_address, latitude, longitude, store_phone, representative_name, is_suspended, introduction, operating_hours, profile_image_url, store_status, clover_grade, user_id) VALUES (26, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'system', 'system', '구정문 맛집 26호점', '본점', '123-45-67916', '전북특별자치도 전주시 덕진구 명륜5길 1', '전북특별자치도 전주시 덕진구 명륜5길 1', 35.844192903059565, 127.12103493694293, '063-270-1026', '사장26', 0, '안녕하세요. 전북대 학생 여러분! 정성을 다하는 구정문 맛집입니다.', '09:00 - 22:00', 'http://img.com/p26.jpg', 'ACTIVE', 'SEED', 18);
-INSERT IGNORE INTO store (store_id, created_at, modified_at, created_by, last_modified_by, name, branch, biz_reg_no, road_address, jibun_address, latitude, longitude, store_phone, representative_name, is_suspended, introduction, operating_hours, profile_image_url, store_status, clover_grade, user_id) VALUES (27, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'system', 'system', '구정문 맛집 27호점', '본점', '123-45-67917', '전북특별자치도 전주시 덕진구 명륜1길 19', '전북특별자치도 전주시 덕진구 명륜1길 19', 35.84281418691252, 127.12267650215665, '063-270-1027', '사장27', 0, '안녕하세요. 전북대 학생 여러분! 정성을 다하는 구정문 맛집입니다.', '09:00 - 22:00', 'http://img.com/p27.jpg', 'PENDING', 'SEED', 19);
-INSERT IGNORE INTO store (store_id, created_at, modified_at, created_by, last_modified_by, name, branch, biz_reg_no, road_address, jibun_address, latitude, longitude, store_phone, representative_name, is_suspended, introduction, operating_hours, profile_image_url, store_status, clover_grade, user_id) VALUES (28, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'system', 'system', '북대 닭갈비 28호점', '본점', '123-45-67918', '전북특별자치도 전주시 덕진구 명륜4길 29', '전북특별자치도 전주시 덕진구 명륜4길 29', 35.84824915278105, 127.12251923053418, '063-270-1028', '사장28', 0, '안녕하세요. 전북대 학생 여러분! 정성을 다하는 북대 닭갈비입니다.', '09:00 - 22:00', 'http://img.com/p28.jpg', 'ACTIVE', 'SEED', 20);
-INSERT IGNORE INTO store (store_id, created_at, modified_at, created_by, last_modified_by, name, branch, biz_reg_no, road_address, jibun_address, latitude, longitude, store_phone, representative_name, is_suspended, introduction, operating_hours, profile_image_url, store_status, clover_grade, user_id) VALUES (29, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'system', 'system', '전북대 빙수 29호점', '본점', '123-45-67919', '전북특별자치도 전주시 덕진구 명륜4길 9', '전북특별자치도 전주시 덕진구 명륜4길 9', 35.84279577564997, 127.12919759316138, '063-270-1029', '사장29', 0, '안녕하세요. 전북대 학생 여러분! 정성을 다하는 전북대 빙수입니다.', '09:00 - 22:00', 'http://img.com/p29.jpg', 'ACTIVE', 'SEED', 21);
-INSERT IGNORE INTO store (store_id, created_at, modified_at, created_by, last_modified_by, name, branch, biz_reg_no, road_address, jibun_address, latitude, longitude, store_phone, representative_name, is_suspended, introduction, operating_hours, profile_image_url, store_status, clover_grade, user_id) VALUES (30, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'system', 'system', '사대부고 사거리 식당 30호점', '본점', '123-45-67920', '전북특별자치도 전주시 덕진구 명륜2길 14', '전북특별자치도 전주시 덕진구 명륜2길 14', 35.84666860578892, 127.1244759765655, '063-270-1030', '사장30', 0, '안녕하세요. 전북대 학생 여러분! 정성을 다하는 사대부고 사거리 식당입니다.', '09:00 - 22:00', 'http://img.com/p30.jpg', 'PENDING', 'SEED', 12);
+INSERT IGNORE INTO store (
+    store_id, created_at, modified_at, created_by, last_modified_by,
+    name, branch, biz_reg_no, road_address, jibun_address, latitude, longitude,
+    store_phone, representative_name, need_to_check, check_reason, introduction,
+    operating_hours, profile_image_url, store_status, is_suspended, clover_grade, user_id
+) VALUES
+    (1, '2026-03-06 11:00:00', '2026-03-06 11:00:00', 'seed', 'seed', '백미담 백반연구소', '전북대 북문점', '204-81-10001', '전북특별자치도 전주시 덕진구 명륜3길 12', '전북특별자치도 전주시 덕진구 금암동 634-12', 35.846210, 127.128530, '063-271-1001', '김윤서', 0, NULL, '점심 피크타임 회전이 빠르고 혼밥 좌석과 단체석을 모두 갖춘 학생식당형 한식 매장입니다.', '{"weekday":{"open":"11:00","close":"20:30","break":"15:00-17:00"},"sat":{"open":"11:30","close":"20:00"},"sun":"CLOSED"}', 'https://cdn.looky.dev/stores/1/profile.jpg', 'ACTIVE', 0, 'SPROUT', 9),
+    (2, '2026-03-06 11:10:00', '2026-03-06 11:10:00', 'seed', 'seed', '모노그레이 로스터스', '구정문점', '204-81-10002', '전북특별자치도 전주시 덕진구 명륜2길 8', '전북특별자치도 전주시 덕진구 금암동 642-7', 35.845730, 127.126820, '063-271-1002', '박준형', 0, NULL, '원두 산미와 좌석 간격에 신경 쓴 로스터리 카페로, 조용한 카공 수요가 많은 매장입니다.', '{"weekday":{"open":"08:00","close":"22:00"},"weekend":{"open":"10:00","close":"22:30"}}', 'https://cdn.looky.dev/stores/2/profile.jpg', 'ACTIVE', 0, 'THREE_LEAF', 10),
+    (3, '2026-03-06 11:20:00', '2026-03-06 11:20:00', 'seed', 'seed', '별밤포차', '신정문점', '204-81-10003', '전북특별자치도 전주시 덕진구 명륜1길 19', '전북특별자치도 전주시 덕진구 금암동 651-2', 35.844120, 127.127910, '063-271-1003', '이도현', 0, NULL, '야식과 모임 수요가 많은 포차형 매장으로 늦은 시간에도 간단한 식사가 가능합니다.', '{"sun-thu":{"open":"17:00","close":"01:00"},"fri-sat":{"open":"17:00","close":"02:00"}}', 'https://cdn.looky.dev/stores/3/profile.jpg', 'ACTIVE', 0, 'SEED', 11),
+    (4, '2026-03-06 11:30:00', '2026-03-06 11:30:00', 'seed', 'seed', '리듬존 코인노래연습장', '전북대점', '204-81-10004', '전북특별자치도 전주시 덕진구 백제대로 567', '전북특별자치도 전주시 덕진구 금암동 478-14', 35.847950, 127.123770, '063-271-1004', '최서연', 0, NULL, '시험기간 새벽 수요가 높아 심야 운영을 유지하는 엔터테인먼트 매장입니다.', '{"daily":{"open":"10:00","close":"02:00"},"examPeriodClose":"03:00"}', 'https://cdn.looky.dev/stores/4/profile.jpg', 'ACTIVE', 1, 'SPROUT', 12),
+    (5, '2026-03-06 11:40:00', '2026-03-06 11:40:00', 'seed', 'seed', '온기피부랩', '캠퍼스점', '204-81-10005', '전북특별자치도 전주시 덕진구 가련산로 24', '전북특별자치도 전주시 덕진구 덕진동1가 1312-1', 35.849110, 127.126010, '063-271-1005', '최서연', 0, NULL, '학생 대상 저자극 케어와 피부진단 프로그램을 운영하는 뷰티 헬스 매장입니다.', '{"weekday":{"open":"10:30","close":"20:00"},"lunch":"13:00-14:00","sun":"CLOSED"}', 'https://cdn.looky.dev/stores/5/profile.jpg', 'ACTIVE', 0, 'SPROUT', 12),
+    (6, '2026-03-06 11:50:00', '2026-03-06 11:50:00', 'seed', 'seed', '전북국수 정문점', NULL, NULL, '전북특별자치도 전주시 덕진구 명륜4길 5', '전북특별자치도 전주시 덕진구 금암동 660-9', 35.843490, 127.129140, NULL, NULL, 1, '지도 기반 자동 등록 매장으로 영업 정보와 대표자 확인이 필요합니다.', '자동 등록된 매장으로 보이며 학생들이 혼밥 장소로 자주 언급합니다.', '{"weekday":{"open":"10:30","close":"19:30"},"break":"15:00-16:00","sun":"CLOSED"}', 'https://cdn.looky.dev/stores/6/profile.jpg', 'UNCLAIMED', 0, 'SEED', NULL),
+    (7, '2026-03-06 12:00:00', '2026-03-06 12:00:00', 'seed', 'seed', '캠퍼스 샐러드 바', '중앙도서관점', '204-81-10007', '전북특별자치도 전주시 덕진구 명륜2길 18', '전북특별자치도 전주시 덕진구 금암동 640-4', 35.846980, 127.125960, '063-271-1007', '박준형', 0, NULL, '비건 옵션과 단백질 토핑을 강화한 샐러드 브런치 매장으로 여성 고객 재방문율이 높습니다.', '{"weekday":{"open":"09:00","close":"21:00"},"weekend":{"open":"10:00","close":"20:00"}}', 'https://cdn.looky.dev/stores/7/profile.jpg', 'ACTIVE', 0, 'THREE_LEAF', 10),
+    (8, '2026-03-06 12:10:00', '2026-03-06 12:10:00', 'seed', 'seed', '만화카페 아지트', '관악점', '204-81-10008', '서울특별시 관악구 대학길 7', '서울특별시 관악구 봉천동 1598-4', 37.460820, 126.951240, '02-871-1008', '이도현', 0, NULL, '장시간 체류 고객이 많았던 매장이지만 현재 운영정책 위반 이력이 있어 노출 제한 상태입니다.', '{"daily":{"open":"11:00","close":"23:00"}}', 'https://cdn.looky.dev/stores/8/profile.jpg', 'BANNED', 1, 'SEED', 11);
 
-INSERT IGNORE INTO store_category (store_id, category) VALUES (1, 'ASIAN');
-INSERT IGNORE INTO store_mood (store_id, mood) VALUES (1, '단체회식');
-INSERT IGNORE INTO store_university (store_id, university_id) VALUES (1, 15);
-INSERT IGNORE INTO store_image (store_id, image_url, order_index) VALUES (1, 'http://img.com/img1.jpg', 1);
-INSERT IGNORE INTO store_category (store_id, category) VALUES (2, 'KOREAN');
-INSERT IGNORE INTO store_mood (store_id, mood) VALUES (2, '데이트');
-INSERT IGNORE INTO store_university (store_id, university_id) VALUES (2, 15);
-INSERT IGNORE INTO store_image (store_id, image_url, order_index) VALUES (2, 'http://img.com/img2.jpg', 1);
-INSERT IGNORE INTO store_category (store_id, category) VALUES (3, 'JAPANESE');
-INSERT IGNORE INTO store_mood (store_id, mood) VALUES (3, '공부하기좋은');
-INSERT IGNORE INTO store_university (store_id, university_id) VALUES (3, 15);
-INSERT IGNORE INTO store_image (store_id, image_url, order_index) VALUES (3, 'http://img.com/img3.jpg', 1);
-INSERT IGNORE INTO store_category (store_id, category) VALUES (4, 'DESSERT');
-INSERT IGNORE INTO store_mood (store_id, mood) VALUES (4, '가성비');
-INSERT IGNORE INTO store_university (store_id, university_id) VALUES (4, 15);
-INSERT IGNORE INTO store_image (store_id, image_url, order_index) VALUES (4, 'http://img.com/img4.jpg', 1);
-INSERT IGNORE INTO store_category (store_id, category) VALUES (5, 'CHINESE');
-INSERT IGNORE INTO store_mood (store_id, mood) VALUES (5, '가성비');
-INSERT IGNORE INTO store_university (store_id, university_id) VALUES (5, 15);
-INSERT IGNORE INTO store_image (store_id, image_url, order_index) VALUES (5, 'http://img.com/img5.jpg', 1);
-INSERT IGNORE INTO store_category (store_id, category) VALUES (6, 'CAFE');
-INSERT IGNORE INTO store_mood (store_id, mood) VALUES (6, '깔끔한');
-INSERT IGNORE INTO store_university (store_id, university_id) VALUES (6, 15);
-INSERT IGNORE INTO store_image (store_id, image_url, order_index) VALUES (6, 'http://img.com/img6.jpg', 1);
-INSERT IGNORE INTO store_category (store_id, category) VALUES (7, 'JAPANESE');
-INSERT IGNORE INTO store_mood (store_id, mood) VALUES (7, '공부하기좋은');
-INSERT IGNORE INTO store_university (store_id, university_id) VALUES (7, 15);
-INSERT IGNORE INTO store_image (store_id, image_url, order_index) VALUES (7, 'http://img.com/img7.jpg', 1);
-INSERT IGNORE INTO store_category (store_id, category) VALUES (8, 'CHINESE');
-INSERT IGNORE INTO store_mood (store_id, mood) VALUES (8, '가성비');
-INSERT IGNORE INTO store_university (store_id, university_id) VALUES (8, 15);
-INSERT IGNORE INTO store_image (store_id, image_url, order_index) VALUES (8, 'http://img.com/img8.jpg', 1);
-INSERT IGNORE INTO store_category (store_id, category) VALUES (9, 'CAFE');
-INSERT IGNORE INTO store_mood (store_id, mood) VALUES (9, '데이트');
-INSERT IGNORE INTO store_university (store_id, university_id) VALUES (9, 15);
-INSERT IGNORE INTO store_image (store_id, image_url, order_index) VALUES (9, 'http://img.com/img9.jpg', 1);
-INSERT IGNORE INTO store_category (store_id, category) VALUES (10, 'KOREAN');
-INSERT IGNORE INTO store_mood (store_id, mood) VALUES (10, '혼밥');
-INSERT IGNORE INTO store_university (store_id, university_id) VALUES (10, 15);
-INSERT IGNORE INTO store_image (store_id, image_url, order_index) VALUES (10, 'http://img.com/img10.jpg', 1);
-INSERT IGNORE INTO store_category (store_id, category) VALUES (11, 'ASIAN');
-INSERT IGNORE INTO store_mood (store_id, mood) VALUES (11, '분위기');
-INSERT IGNORE INTO store_university (store_id, university_id) VALUES (11, 15);
-INSERT IGNORE INTO store_image (store_id, image_url, order_index) VALUES (11, 'http://img.com/img11.jpg', 1);
-INSERT IGNORE INTO store_category (store_id, category) VALUES (12, 'CAFE');
-INSERT IGNORE INTO store_mood (store_id, mood) VALUES (12, '데이트');
-INSERT IGNORE INTO store_university (store_id, university_id) VALUES (12, 15);
-INSERT IGNORE INTO store_image (store_id, image_url, order_index) VALUES (12, 'http://img.com/img12.jpg', 1);
-INSERT IGNORE INTO store_category (store_id, category) VALUES (13, 'PUB');
-INSERT IGNORE INTO store_mood (store_id, mood) VALUES (13, '카공');
-INSERT IGNORE INTO store_university (store_id, university_id) VALUES (13, 15);
-INSERT IGNORE INTO store_image (store_id, image_url, order_index) VALUES (13, 'http://img.com/img13.jpg', 1);
-INSERT IGNORE INTO store_category (store_id, category) VALUES (14, 'CAFE');
-INSERT IGNORE INTO store_mood (store_id, mood) VALUES (14, '분위기');
-INSERT IGNORE INTO store_university (store_id, university_id) VALUES (14, 15);
-INSERT IGNORE INTO store_image (store_id, image_url, order_index) VALUES (14, 'http://img.com/img14.jpg', 1);
-INSERT IGNORE INTO store_category (store_id, category) VALUES (15, 'WESTERN');
-INSERT IGNORE INTO store_mood (store_id, mood) VALUES (15, '가성비');
-INSERT IGNORE INTO store_university (store_id, university_id) VALUES (15, 15);
-INSERT IGNORE INTO store_image (store_id, image_url, order_index) VALUES (15, 'http://img.com/img15.jpg', 1);
-INSERT IGNORE INTO store_category (store_id, category) VALUES (16, 'KOREAN');
-INSERT IGNORE INTO store_mood (store_id, mood) VALUES (16, '데이트');
-INSERT IGNORE INTO store_university (store_id, university_id) VALUES (16, 15);
-INSERT IGNORE INTO store_image (store_id, image_url, order_index) VALUES (16, 'http://img.com/img16.jpg', 1);
-INSERT IGNORE INTO store_category (store_id, category) VALUES (17, 'ASIAN');
-INSERT IGNORE INTO store_mood (store_id, mood) VALUES (17, '가성비');
-INSERT IGNORE INTO store_university (store_id, university_id) VALUES (17, 15);
-INSERT IGNORE INTO store_image (store_id, image_url, order_index) VALUES (17, 'http://img.com/img17.jpg', 1);
-INSERT IGNORE INTO store_category (store_id, category) VALUES (18, 'WESTERN');
-INSERT IGNORE INTO store_mood (store_id, mood) VALUES (18, '데이트');
-INSERT IGNORE INTO store_university (store_id, university_id) VALUES (18, 15);
-INSERT IGNORE INTO store_image (store_id, image_url, order_index) VALUES (18, 'http://img.com/img18.jpg', 1);
-INSERT IGNORE INTO store_category (store_id, category) VALUES (19, 'ASIAN');
-INSERT IGNORE INTO store_mood (store_id, mood) VALUES (19, '가성비');
-INSERT IGNORE INTO store_university (store_id, university_id) VALUES (19, 15);
-INSERT IGNORE INTO store_image (store_id, image_url, order_index) VALUES (19, 'http://img.com/img19.jpg', 1);
-INSERT IGNORE INTO store_category (store_id, category) VALUES (20, 'DESSERT');
-INSERT IGNORE INTO store_mood (store_id, mood) VALUES (20, '공부하기좋은');
-INSERT IGNORE INTO store_university (store_id, university_id) VALUES (20, 15);
-INSERT IGNORE INTO store_image (store_id, image_url, order_index) VALUES (20, 'http://img.com/img20.jpg', 1);
-INSERT IGNORE INTO store_category (store_id, category) VALUES (21, 'JAPANESE');
-INSERT IGNORE INTO store_mood (store_id, mood) VALUES (21, '데이트');
-INSERT IGNORE INTO store_university (store_id, university_id) VALUES (21, 15);
-INSERT IGNORE INTO store_image (store_id, image_url, order_index) VALUES (21, 'http://img.com/img21.jpg', 1);
-INSERT IGNORE INTO store_category (store_id, category) VALUES (22, 'PUB');
-INSERT IGNORE INTO store_mood (store_id, mood) VALUES (22, '가성비');
-INSERT IGNORE INTO store_university (store_id, university_id) VALUES (22, 15);
-INSERT IGNORE INTO store_image (store_id, image_url, order_index) VALUES (22, 'http://img.com/img22.jpg', 1);
-INSERT IGNORE INTO store_category (store_id, category) VALUES (23, 'MEAT');
-INSERT IGNORE INTO store_mood (store_id, mood) VALUES (23, '카공');
-INSERT IGNORE INTO store_university (store_id, university_id) VALUES (23, 15);
-INSERT IGNORE INTO store_image (store_id, image_url, order_index) VALUES (23, 'http://img.com/img23.jpg', 1);
-INSERT IGNORE INTO store_category (store_id, category) VALUES (24, 'ASIAN');
-INSERT IGNORE INTO store_mood (store_id, mood) VALUES (24, '깔끔한');
-INSERT IGNORE INTO store_university (store_id, university_id) VALUES (24, 15);
-INSERT IGNORE INTO store_image (store_id, image_url, order_index) VALUES (24, 'http://img.com/img24.jpg', 1);
-INSERT IGNORE INTO store_category (store_id, category) VALUES (25, 'DESSERT');
-INSERT IGNORE INTO store_mood (store_id, mood) VALUES (25, '단체회식');
-INSERT IGNORE INTO store_university (store_id, university_id) VALUES (25, 15);
-INSERT IGNORE INTO store_image (store_id, image_url, order_index) VALUES (25, 'http://img.com/img25.jpg', 1);
-INSERT IGNORE INTO store_category (store_id, category) VALUES (26, 'MEAT');
-INSERT IGNORE INTO store_mood (store_id, mood) VALUES (26, '분위기');
-INSERT IGNORE INTO store_university (store_id, university_id) VALUES (26, 15);
-INSERT IGNORE INTO store_image (store_id, image_url, order_index) VALUES (26, 'http://img.com/img26.jpg', 1);
-INSERT IGNORE INTO store_category (store_id, category) VALUES (27, 'PUB');
-INSERT IGNORE INTO store_mood (store_id, mood) VALUES (27, '데이트');
-INSERT IGNORE INTO store_university (store_id, university_id) VALUES (27, 15);
-INSERT IGNORE INTO store_image (store_id, image_url, order_index) VALUES (27, 'http://img.com/img27.jpg', 1);
-INSERT IGNORE INTO store_category (store_id, category) VALUES (28, 'WESTERN');
-INSERT IGNORE INTO store_mood (store_id, mood) VALUES (28, '깔끔한');
-INSERT IGNORE INTO store_university (store_id, university_id) VALUES (28, 15);
-INSERT IGNORE INTO store_image (store_id, image_url, order_index) VALUES (28, 'http://img.com/img28.jpg', 1);
-INSERT IGNORE INTO store_category (store_id, category) VALUES (29, 'KOREAN');
-INSERT IGNORE INTO store_mood (store_id, mood) VALUES (29, '깔끔한');
-INSERT IGNORE INTO store_university (store_id, university_id) VALUES (29, 15);
-INSERT IGNORE INTO store_image (store_id, image_url, order_index) VALUES (29, 'http://img.com/img29.jpg', 1);
-INSERT IGNORE INTO store_category (store_id, category) VALUES (30, 'MEAT');
-INSERT IGNORE INTO store_mood (store_id, mood) VALUES (30, '카공');
-INSERT IGNORE INTO store_university (store_id, university_id) VALUES (30, 15);
-INSERT IGNORE INTO store_image (store_id, image_url, order_index) VALUES (30, 'http://img.com/img30.jpg', 1);
+INSERT IGNORE INTO store_category (store_id, category) VALUES
+    (1, 'RESTAURANT'),
+    (2, 'CAFE'),
+    (3, 'BAR'),
+    (3, 'ETC'),
+    (4, 'ENTERTAINMENT'),
+    (5, 'BEAUTY_HEALTH'),
+    (6, 'RESTAURANT'),
+    (7, 'CAFE'),
+    (7, 'ETC'),
+    (8, 'ENTERTAINMENT');
 
-/* Items */
-INSERT IGNORE INTO item_category (item_category_id, created_at, modified_at, created_by, last_modified_by, name, store_id) VALUES (1, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '메인메뉴', 1);
-INSERT IGNORE INTO item (item_id, created_at, modified_at, created_by, last_modified_by, name, price, description, image_url, is_sold_out, item_order, is_representative, is_hidden, badge, store_id, item_category_id) VALUES (1, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '대표메뉴1', 8000, '전북대 최고의 맛', 'http://img.com/item_m_1.jpg', 0, 0, 1, 0, 'BEST', 1, 1);
-INSERT IGNORE INTO item (item_id, created_at, modified_at, created_by, last_modified_by, name, price, description, image_url, is_sold_out, item_order, is_representative, is_hidden, badge, store_id, item_category_id) VALUES (2, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '대표메뉴2', 14000, '전북대 최고의 맛', 'http://img.com/item_m_2.jpg', 0, 1, 0, 0, 'BEST', 1, 1);
-INSERT IGNORE INTO item_category (item_category_id, created_at, modified_at, created_by, last_modified_by, name, store_id) VALUES (2, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '메인메뉴', 2);
-INSERT IGNORE INTO item (item_id, created_at, modified_at, created_by, last_modified_by, name, price, description, image_url, is_sold_out, item_order, is_representative, is_hidden, badge, store_id, item_category_id) VALUES (3, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '대표메뉴1', 6000, '전북대 최고의 맛', 'http://img.com/item_m_3.jpg', 0, 0, 1, 0, 'BEST', 2, 2);
-INSERT IGNORE INTO item (item_id, created_at, modified_at, created_by, last_modified_by, name, price, description, image_url, is_sold_out, item_order, is_representative, is_hidden, badge, store_id, item_category_id) VALUES (4, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '대표메뉴2', 12000, '전북대 최고의 맛', 'http://img.com/item_m_4.jpg', 0, 1, 0, 0, 'BEST', 2, 2);
-INSERT IGNORE INTO item_category (item_category_id, created_at, modified_at, created_by, last_modified_by, name, store_id) VALUES (3, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '메인메뉴', 3);
-INSERT IGNORE INTO item (item_id, created_at, modified_at, created_by, last_modified_by, name, price, description, image_url, is_sold_out, item_order, is_representative, is_hidden, badge, store_id, item_category_id) VALUES (5, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '대표메뉴1', 7000, '전북대 최고의 맛', 'http://img.com/item_m_5.jpg', 0, 0, 1, 0, 'BEST', 3, 3);
-INSERT IGNORE INTO item (item_id, created_at, modified_at, created_by, last_modified_by, name, price, description, image_url, is_sold_out, item_order, is_representative, is_hidden, badge, store_id, item_category_id) VALUES (6, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '대표메뉴2', 14000, '전북대 최고의 맛', 'http://img.com/item_m_6.jpg', 0, 1, 0, 0, 'BEST', 3, 3);
-INSERT IGNORE INTO item_category (item_category_id, created_at, modified_at, created_by, last_modified_by, name, store_id) VALUES (4, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '메인메뉴', 4);
-INSERT IGNORE INTO item (item_id, created_at, modified_at, created_by, last_modified_by, name, price, description, image_url, is_sold_out, item_order, is_representative, is_hidden, badge, store_id, item_category_id) VALUES (7, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '대표메뉴1', 10000, '전북대 최고의 맛', 'http://img.com/item_m_7.jpg', 0, 0, 1, 0, 'BEST', 4, 4);
-INSERT IGNORE INTO item (item_id, created_at, modified_at, created_by, last_modified_by, name, price, description, image_url, is_sold_out, item_order, is_representative, is_hidden, badge, store_id, item_category_id) VALUES (8, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '대표메뉴2', 8000, '전북대 최고의 맛', 'http://img.com/item_m_8.jpg', 0, 1, 0, 0, 'BEST', 4, 4);
-INSERT IGNORE INTO item_category (item_category_id, created_at, modified_at, created_by, last_modified_by, name, store_id) VALUES (5, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '메인메뉴', 5);
-INSERT IGNORE INTO item (item_id, created_at, modified_at, created_by, last_modified_by, name, price, description, image_url, is_sold_out, item_order, is_representative, is_hidden, badge, store_id, item_category_id) VALUES (9, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '대표메뉴1', 9000, '전북대 최고의 맛', 'http://img.com/item_m_9.jpg', 0, 0, 1, 0, 'BEST', 5, 5);
-INSERT IGNORE INTO item (item_id, created_at, modified_at, created_by, last_modified_by, name, price, description, image_url, is_sold_out, item_order, is_representative, is_hidden, badge, store_id, item_category_id) VALUES (10, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '대표메뉴2', 5000, '전북대 최고의 맛', 'http://img.com/item_m_10.jpg', 0, 1, 0, 0, 'BEST', 5, 5);
-INSERT IGNORE INTO item_category (item_category_id, created_at, modified_at, created_by, last_modified_by, name, store_id) VALUES (6, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '메인메뉴', 6);
-INSERT IGNORE INTO item (item_id, created_at, modified_at, created_by, last_modified_by, name, price, description, image_url, is_sold_out, item_order, is_representative, is_hidden, badge, store_id, item_category_id) VALUES (11, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '대표메뉴1', 10000, '전북대 최고의 맛', 'http://img.com/item_m_11.jpg', 0, 0, 1, 0, 'BEST', 6, 6);
-INSERT IGNORE INTO item (item_id, created_at, modified_at, created_by, last_modified_by, name, price, description, image_url, is_sold_out, item_order, is_representative, is_hidden, badge, store_id, item_category_id) VALUES (12, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '대표메뉴2', 10000, '전북대 최고의 맛', 'http://img.com/item_m_12.jpg', 0, 1, 0, 0, 'BEST', 6, 6);
-INSERT IGNORE INTO item_category (item_category_id, created_at, modified_at, created_by, last_modified_by, name, store_id) VALUES (7, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '메인메뉴', 7);
-INSERT IGNORE INTO item (item_id, created_at, modified_at, created_by, last_modified_by, name, price, description, image_url, is_sold_out, item_order, is_representative, is_hidden, badge, store_id, item_category_id) VALUES (13, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '대표메뉴1', 14000, '전북대 최고의 맛', 'http://img.com/item_m_13.jpg', 0, 0, 1, 0, 'BEST', 7, 7);
-INSERT IGNORE INTO item (item_id, created_at, modified_at, created_by, last_modified_by, name, price, description, image_url, is_sold_out, item_order, is_representative, is_hidden, badge, store_id, item_category_id) VALUES (14, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '대표메뉴2', 12000, '전북대 최고의 맛', 'http://img.com/item_m_14.jpg', 0, 1, 0, 0, 'BEST', 7, 7);
-INSERT IGNORE INTO item_category (item_category_id, created_at, modified_at, created_by, last_modified_by, name, store_id) VALUES (8, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '메인메뉴', 8);
-INSERT IGNORE INTO item (item_id, created_at, modified_at, created_by, last_modified_by, name, price, description, image_url, is_sold_out, item_order, is_representative, is_hidden, badge, store_id, item_category_id) VALUES (15, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '대표메뉴1', 7000, '전북대 최고의 맛', 'http://img.com/item_m_15.jpg', 0, 0, 1, 0, 'BEST', 8, 8);
-INSERT IGNORE INTO item (item_id, created_at, modified_at, created_by, last_modified_by, name, price, description, image_url, is_sold_out, item_order, is_representative, is_hidden, badge, store_id, item_category_id) VALUES (16, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '대표메뉴2', 8000, '전북대 최고의 맛', 'http://img.com/item_m_16.jpg', 0, 1, 0, 0, 'BEST', 8, 8);
-INSERT IGNORE INTO item_category (item_category_id, created_at, modified_at, created_by, last_modified_by, name, store_id) VALUES (9, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '메인메뉴', 9);
-INSERT IGNORE INTO item (item_id, created_at, modified_at, created_by, last_modified_by, name, price, description, image_url, is_sold_out, item_order, is_representative, is_hidden, badge, store_id, item_category_id) VALUES (17, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '대표메뉴1', 11000, '전북대 최고의 맛', 'http://img.com/item_m_17.jpg', 0, 0, 1, 0, 'BEST', 9, 9);
-INSERT IGNORE INTO item (item_id, created_at, modified_at, created_by, last_modified_by, name, price, description, image_url, is_sold_out, item_order, is_representative, is_hidden, badge, store_id, item_category_id) VALUES (18, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '대표메뉴2', 7000, '전북대 최고의 맛', 'http://img.com/item_m_18.jpg', 0, 1, 0, 0, 'BEST', 9, 9);
-INSERT IGNORE INTO item_category (item_category_id, created_at, modified_at, created_by, last_modified_by, name, store_id) VALUES (10, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '메인메뉴', 10);
-INSERT IGNORE INTO item (item_id, created_at, modified_at, created_by, last_modified_by, name, price, description, image_url, is_sold_out, item_order, is_representative, is_hidden, badge, store_id, item_category_id) VALUES (19, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '대표메뉴1', 8000, '전북대 최고의 맛', 'http://img.com/item_m_19.jpg', 0, 0, 1, 0, 'BEST', 10, 10);
-INSERT IGNORE INTO item (item_id, created_at, modified_at, created_by, last_modified_by, name, price, description, image_url, is_sold_out, item_order, is_representative, is_hidden, badge, store_id, item_category_id) VALUES (20, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '대표메뉴2', 15000, '전북대 최고의 맛', 'http://img.com/item_m_20.jpg', 0, 1, 0, 0, 'BEST', 10, 10);
-INSERT IGNORE INTO item_category (item_category_id, created_at, modified_at, created_by, last_modified_by, name, store_id) VALUES (11, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '메인메뉴', 11);
-INSERT IGNORE INTO item (item_id, created_at, modified_at, created_by, last_modified_by, name, price, description, image_url, is_sold_out, item_order, is_representative, is_hidden, badge, store_id, item_category_id) VALUES (21, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '대표메뉴1', 5000, '전북대 최고의 맛', 'http://img.com/item_m_21.jpg', 0, 0, 1, 0, 'BEST', 11, 11);
-INSERT IGNORE INTO item (item_id, created_at, modified_at, created_by, last_modified_by, name, price, description, image_url, is_sold_out, item_order, is_representative, is_hidden, badge, store_id, item_category_id) VALUES (22, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '대표메뉴2', 14000, '전북대 최고의 맛', 'http://img.com/item_m_22.jpg', 0, 1, 0, 0, 'BEST', 11, 11);
-INSERT IGNORE INTO item_category (item_category_id, created_at, modified_at, created_by, last_modified_by, name, store_id) VALUES (12, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '메인메뉴', 12);
-INSERT IGNORE INTO item (item_id, created_at, modified_at, created_by, last_modified_by, name, price, description, image_url, is_sold_out, item_order, is_representative, is_hidden, badge, store_id, item_category_id) VALUES (23, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '대표메뉴1', 9000, '전북대 최고의 맛', 'http://img.com/item_m_23.jpg', 0, 0, 1, 0, 'BEST', 12, 12);
-INSERT IGNORE INTO item (item_id, created_at, modified_at, created_by, last_modified_by, name, price, description, image_url, is_sold_out, item_order, is_representative, is_hidden, badge, store_id, item_category_id) VALUES (24, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '대표메뉴2', 15000, '전북대 최고의 맛', 'http://img.com/item_m_24.jpg', 0, 1, 0, 0, 'BEST', 12, 12);
-INSERT IGNORE INTO item_category (item_category_id, created_at, modified_at, created_by, last_modified_by, name, store_id) VALUES (13, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '메인메뉴', 13);
-INSERT IGNORE INTO item (item_id, created_at, modified_at, created_by, last_modified_by, name, price, description, image_url, is_sold_out, item_order, is_representative, is_hidden, badge, store_id, item_category_id) VALUES (25, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '대표메뉴1', 7000, '전북대 최고의 맛', 'http://img.com/item_m_25.jpg', 0, 0, 1, 0, 'BEST', 13, 13);
-INSERT IGNORE INTO item (item_id, created_at, modified_at, created_by, last_modified_by, name, price, description, image_url, is_sold_out, item_order, is_representative, is_hidden, badge, store_id, item_category_id) VALUES (26, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '대표메뉴2', 9000, '전북대 최고의 맛', 'http://img.com/item_m_26.jpg', 0, 1, 0, 0, 'BEST', 13, 13);
-INSERT IGNORE INTO item_category (item_category_id, created_at, modified_at, created_by, last_modified_by, name, store_id) VALUES (14, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '메인메뉴', 14);
-INSERT IGNORE INTO item (item_id, created_at, modified_at, created_by, last_modified_by, name, price, description, image_url, is_sold_out, item_order, is_representative, is_hidden, badge, store_id, item_category_id) VALUES (27, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '대표메뉴1', 14000, '전북대 최고의 맛', 'http://img.com/item_m_27.jpg', 0, 0, 1, 0, 'BEST', 14, 14);
-INSERT IGNORE INTO item (item_id, created_at, modified_at, created_by, last_modified_by, name, price, description, image_url, is_sold_out, item_order, is_representative, is_hidden, badge, store_id, item_category_id) VALUES (28, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '대표메뉴2', 8000, '전북대 최고의 맛', 'http://img.com/item_m_28.jpg', 0, 1, 0, 0, 'BEST', 14, 14);
-INSERT IGNORE INTO item_category (item_category_id, created_at, modified_at, created_by, last_modified_by, name, store_id) VALUES (15, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '메인메뉴', 15);
-INSERT IGNORE INTO item (item_id, created_at, modified_at, created_by, last_modified_by, name, price, description, image_url, is_sold_out, item_order, is_representative, is_hidden, badge, store_id, item_category_id) VALUES (29, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '대표메뉴1', 5000, '전북대 최고의 맛', 'http://img.com/item_m_29.jpg', 0, 0, 1, 0, 'BEST', 15, 15);
-INSERT IGNORE INTO item (item_id, created_at, modified_at, created_by, last_modified_by, name, price, description, image_url, is_sold_out, item_order, is_representative, is_hidden, badge, store_id, item_category_id) VALUES (30, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '대표메뉴2', 11000, '전북대 최고의 맛', 'http://img.com/item_m_30.jpg', 0, 1, 0, 0, 'BEST', 15, 15);
-INSERT IGNORE INTO item_category (item_category_id, created_at, modified_at, created_by, last_modified_by, name, store_id) VALUES (16, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '메인메뉴', 16);
-INSERT IGNORE INTO item (item_id, created_at, modified_at, created_by, last_modified_by, name, price, description, image_url, is_sold_out, item_order, is_representative, is_hidden, badge, store_id, item_category_id) VALUES (31, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '대표메뉴1', 5000, '전북대 최고의 맛', 'http://img.com/item_m_31.jpg', 0, 0, 1, 0, 'BEST', 16, 16);
-INSERT IGNORE INTO item (item_id, created_at, modified_at, created_by, last_modified_by, name, price, description, image_url, is_sold_out, item_order, is_representative, is_hidden, badge, store_id, item_category_id) VALUES (32, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '대표메뉴2', 15000, '전북대 최고의 맛', 'http://img.com/item_m_32.jpg', 0, 1, 0, 0, 'BEST', 16, 16);
-INSERT IGNORE INTO item_category (item_category_id, created_at, modified_at, created_by, last_modified_by, name, store_id) VALUES (17, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '메인메뉴', 17);
-INSERT IGNORE INTO item (item_id, created_at, modified_at, created_by, last_modified_by, name, price, description, image_url, is_sold_out, item_order, is_representative, is_hidden, badge, store_id, item_category_id) VALUES (33, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '대표메뉴1', 9000, '전북대 최고의 맛', 'http://img.com/item_m_33.jpg', 0, 0, 1, 0, 'BEST', 17, 17);
-INSERT IGNORE INTO item (item_id, created_at, modified_at, created_by, last_modified_by, name, price, description, image_url, is_sold_out, item_order, is_representative, is_hidden, badge, store_id, item_category_id) VALUES (34, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '대표메뉴2', 6000, '전북대 최고의 맛', 'http://img.com/item_m_34.jpg', 0, 1, 0, 0, 'BEST', 17, 17);
-INSERT IGNORE INTO item_category (item_category_id, created_at, modified_at, created_by, last_modified_by, name, store_id) VALUES (18, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '메인메뉴', 18);
-INSERT IGNORE INTO item (item_id, created_at, modified_at, created_by, last_modified_by, name, price, description, image_url, is_sold_out, item_order, is_representative, is_hidden, badge, store_id, item_category_id) VALUES (35, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '대표메뉴1', 13000, '전북대 최고의 맛', 'http://img.com/item_m_35.jpg', 0, 0, 1, 0, 'BEST', 18, 18);
-INSERT IGNORE INTO item (item_id, created_at, modified_at, created_by, last_modified_by, name, price, description, image_url, is_sold_out, item_order, is_representative, is_hidden, badge, store_id, item_category_id) VALUES (36, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '대표메뉴2', 13000, '전북대 최고의 맛', 'http://img.com/item_m_36.jpg', 0, 1, 0, 0, 'BEST', 18, 18);
-INSERT IGNORE INTO item_category (item_category_id, created_at, modified_at, created_by, last_modified_by, name, store_id) VALUES (19, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '메인메뉴', 19);
-INSERT IGNORE INTO item (item_id, created_at, modified_at, created_by, last_modified_by, name, price, description, image_url, is_sold_out, item_order, is_representative, is_hidden, badge, store_id, item_category_id) VALUES (37, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '대표메뉴1', 9000, '전북대 최고의 맛', 'http://img.com/item_m_37.jpg', 0, 0, 1, 0, 'BEST', 19, 19);
-INSERT IGNORE INTO item (item_id, created_at, modified_at, created_by, last_modified_by, name, price, description, image_url, is_sold_out, item_order, is_representative, is_hidden, badge, store_id, item_category_id) VALUES (38, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '대표메뉴2', 12000, '전북대 최고의 맛', 'http://img.com/item_m_38.jpg', 0, 1, 0, 0, 'BEST', 19, 19);
-INSERT IGNORE INTO item_category (item_category_id, created_at, modified_at, created_by, last_modified_by, name, store_id) VALUES (20, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '메인메뉴', 20);
-INSERT IGNORE INTO item (item_id, created_at, modified_at, created_by, last_modified_by, name, price, description, image_url, is_sold_out, item_order, is_representative, is_hidden, badge, store_id, item_category_id) VALUES (39, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '대표메뉴1', 14000, '전북대 최고의 맛', 'http://img.com/item_m_39.jpg', 0, 0, 1, 0, 'BEST', 20, 20);
-INSERT IGNORE INTO item (item_id, created_at, modified_at, created_by, last_modified_by, name, price, description, image_url, is_sold_out, item_order, is_representative, is_hidden, badge, store_id, item_category_id) VALUES (40, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '대표메뉴2', 5000, '전북대 최고의 맛', 'http://img.com/item_m_40.jpg', 0, 1, 0, 0, 'BEST', 20, 20);
-INSERT IGNORE INTO item_category (item_category_id, created_at, modified_at, created_by, last_modified_by, name, store_id) VALUES (21, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '메인메뉴', 21);
-INSERT IGNORE INTO item (item_id, created_at, modified_at, created_by, last_modified_by, name, price, description, image_url, is_sold_out, item_order, is_representative, is_hidden, badge, store_id, item_category_id) VALUES (41, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '대표메뉴1', 5000, '전북대 최고의 맛', 'http://img.com/item_m_41.jpg', 0, 0, 1, 0, 'BEST', 21, 21);
-INSERT IGNORE INTO item (item_id, created_at, modified_at, created_by, last_modified_by, name, price, description, image_url, is_sold_out, item_order, is_representative, is_hidden, badge, store_id, item_category_id) VALUES (42, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '대표메뉴2', 7000, '전북대 최고의 맛', 'http://img.com/item_m_42.jpg', 0, 1, 0, 0, 'BEST', 21, 21);
-INSERT IGNORE INTO item_category (item_category_id, created_at, modified_at, created_by, last_modified_by, name, store_id) VALUES (22, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '메인메뉴', 22);
-INSERT IGNORE INTO item (item_id, created_at, modified_at, created_by, last_modified_by, name, price, description, image_url, is_sold_out, item_order, is_representative, is_hidden, badge, store_id, item_category_id) VALUES (43, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '대표메뉴1', 11000, '전북대 최고의 맛', 'http://img.com/item_m_43.jpg', 0, 0, 1, 0, 'BEST', 22, 22);
-INSERT IGNORE INTO item (item_id, created_at, modified_at, created_by, last_modified_by, name, price, description, image_url, is_sold_out, item_order, is_representative, is_hidden, badge, store_id, item_category_id) VALUES (44, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '대표메뉴2', 5000, '전북대 최고의 맛', 'http://img.com/item_m_44.jpg', 0, 1, 0, 0, 'BEST', 22, 22);
-INSERT IGNORE INTO item_category (item_category_id, created_at, modified_at, created_by, last_modified_by, name, store_id) VALUES (23, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '메인메뉴', 23);
-INSERT IGNORE INTO item (item_id, created_at, modified_at, created_by, last_modified_by, name, price, description, image_url, is_sold_out, item_order, is_representative, is_hidden, badge, store_id, item_category_id) VALUES (45, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '대표메뉴1', 8000, '전북대 최고의 맛', 'http://img.com/item_m_45.jpg', 0, 0, 1, 0, 'BEST', 23, 23);
-INSERT IGNORE INTO item (item_id, created_at, modified_at, created_by, last_modified_by, name, price, description, image_url, is_sold_out, item_order, is_representative, is_hidden, badge, store_id, item_category_id) VALUES (46, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '대표메뉴2', 8000, '전북대 최고의 맛', 'http://img.com/item_m_46.jpg', 0, 1, 0, 0, 'BEST', 23, 23);
-INSERT IGNORE INTO item_category (item_category_id, created_at, modified_at, created_by, last_modified_by, name, store_id) VALUES (24, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '메인메뉴', 24);
-INSERT IGNORE INTO item (item_id, created_at, modified_at, created_by, last_modified_by, name, price, description, image_url, is_sold_out, item_order, is_representative, is_hidden, badge, store_id, item_category_id) VALUES (47, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '대표메뉴1', 7000, '전북대 최고의 맛', 'http://img.com/item_m_47.jpg', 0, 0, 1, 0, 'BEST', 24, 24);
-INSERT IGNORE INTO item (item_id, created_at, modified_at, created_by, last_modified_by, name, price, description, image_url, is_sold_out, item_order, is_representative, is_hidden, badge, store_id, item_category_id) VALUES (48, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '대표메뉴2', 13000, '전북대 최고의 맛', 'http://img.com/item_m_48.jpg', 0, 1, 0, 0, 'BEST', 24, 24);
-INSERT IGNORE INTO item_category (item_category_id, created_at, modified_at, created_by, last_modified_by, name, store_id) VALUES (25, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '메인메뉴', 25);
-INSERT IGNORE INTO item (item_id, created_at, modified_at, created_by, last_modified_by, name, price, description, image_url, is_sold_out, item_order, is_representative, is_hidden, badge, store_id, item_category_id) VALUES (49, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '대표메뉴1', 9000, '전북대 최고의 맛', 'http://img.com/item_m_49.jpg', 0, 0, 1, 0, 'BEST', 25, 25);
-INSERT IGNORE INTO item (item_id, created_at, modified_at, created_by, last_modified_by, name, price, description, image_url, is_sold_out, item_order, is_representative, is_hidden, badge, store_id, item_category_id) VALUES (50, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '대표메뉴2', 13000, '전북대 최고의 맛', 'http://img.com/item_m_50.jpg', 0, 1, 0, 0, 'BEST', 25, 25);
-INSERT IGNORE INTO item_category (item_category_id, created_at, modified_at, created_by, last_modified_by, name, store_id) VALUES (26, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '메인메뉴', 26);
-INSERT IGNORE INTO item (item_id, created_at, modified_at, created_by, last_modified_by, name, price, description, image_url, is_sold_out, item_order, is_representative, is_hidden, badge, store_id, item_category_id) VALUES (51, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '대표메뉴1', 12000, '전북대 최고의 맛', 'http://img.com/item_m_51.jpg', 0, 0, 1, 0, 'BEST', 26, 26);
-INSERT IGNORE INTO item (item_id, created_at, modified_at, created_by, last_modified_by, name, price, description, image_url, is_sold_out, item_order, is_representative, is_hidden, badge, store_id, item_category_id) VALUES (52, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '대표메뉴2', 10000, '전북대 최고의 맛', 'http://img.com/item_m_52.jpg', 0, 1, 0, 0, 'BEST', 26, 26);
-INSERT IGNORE INTO item_category (item_category_id, created_at, modified_at, created_by, last_modified_by, name, store_id) VALUES (27, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '메인메뉴', 27);
-INSERT IGNORE INTO item (item_id, created_at, modified_at, created_by, last_modified_by, name, price, description, image_url, is_sold_out, item_order, is_representative, is_hidden, badge, store_id, item_category_id) VALUES (53, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '대표메뉴1', 12000, '전북대 최고의 맛', 'http://img.com/item_m_53.jpg', 0, 0, 1, 0, 'BEST', 27, 27);
-INSERT IGNORE INTO item (item_id, created_at, modified_at, created_by, last_modified_by, name, price, description, image_url, is_sold_out, item_order, is_representative, is_hidden, badge, store_id, item_category_id) VALUES (54, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '대표메뉴2', 10000, '전북대 최고의 맛', 'http://img.com/item_m_54.jpg', 0, 1, 0, 0, 'BEST', 27, 27);
-INSERT IGNORE INTO item_category (item_category_id, created_at, modified_at, created_by, last_modified_by, name, store_id) VALUES (28, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '메인메뉴', 28);
-INSERT IGNORE INTO item (item_id, created_at, modified_at, created_by, last_modified_by, name, price, description, image_url, is_sold_out, item_order, is_representative, is_hidden, badge, store_id, item_category_id) VALUES (55, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '대표메뉴1', 9000, '전북대 최고의 맛', 'http://img.com/item_m_55.jpg', 0, 0, 1, 0, 'BEST', 28, 28);
-INSERT IGNORE INTO item (item_id, created_at, modified_at, created_by, last_modified_by, name, price, description, image_url, is_sold_out, item_order, is_representative, is_hidden, badge, store_id, item_category_id) VALUES (56, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '대표메뉴2', 7000, '전북대 최고의 맛', 'http://img.com/item_m_56.jpg', 0, 1, 0, 0, 'BEST', 28, 28);
-INSERT IGNORE INTO item_category (item_category_id, created_at, modified_at, created_by, last_modified_by, name, store_id) VALUES (29, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '메인메뉴', 29);
-INSERT IGNORE INTO item (item_id, created_at, modified_at, created_by, last_modified_by, name, price, description, image_url, is_sold_out, item_order, is_representative, is_hidden, badge, store_id, item_category_id) VALUES (57, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '대표메뉴1', 15000, '전북대 최고의 맛', 'http://img.com/item_m_57.jpg', 0, 0, 1, 0, 'BEST', 29, 29);
-INSERT IGNORE INTO item (item_id, created_at, modified_at, created_by, last_modified_by, name, price, description, image_url, is_sold_out, item_order, is_representative, is_hidden, badge, store_id, item_category_id) VALUES (58, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '대표메뉴2', 13000, '전북대 최고의 맛', 'http://img.com/item_m_58.jpg', 0, 1, 0, 0, 'BEST', 29, 29);
-INSERT IGNORE INTO item_category (item_category_id, created_at, modified_at, created_by, last_modified_by, name, store_id) VALUES (30, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '메인메뉴', 30);
-INSERT IGNORE INTO item (item_id, created_at, modified_at, created_by, last_modified_by, name, price, description, image_url, is_sold_out, item_order, is_representative, is_hidden, badge, store_id, item_category_id) VALUES (59, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '대표메뉴1', 13000, '전북대 최고의 맛', 'http://img.com/item_m_59.jpg', 0, 0, 1, 0, 'BEST', 30, 30);
-INSERT IGNORE INTO item (item_id, created_at, modified_at, created_by, last_modified_by, name, price, description, image_url, is_sold_out, item_order, is_representative, is_hidden, badge, store_id, item_category_id) VALUES (60, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '대표메뉴2', 6000, '전북대 최고의 맛', 'http://img.com/item_m_60.jpg', 0, 1, 0, 0, 'BEST', 30, 30);
+INSERT IGNORE INTO store_mood (store_id, mood) VALUES
+    (1, 'SOLO_DINING'),
+    (1, 'GROUP_GATHERING'),
+    (2, 'SOLO_DINING'),
+    (2, 'ROMANTIC'),
+    (3, 'GROUP_GATHERING'),
+    (3, 'LATE_NIGHT'),
+    (4, 'GROUP_GATHERING'),
+    (4, 'LATE_NIGHT'),
+    (5, 'ROMANTIC'),
+    (6, 'SOLO_DINING'),
+    (7, 'SOLO_DINING'),
+    (7, 'ROMANTIC'),
+    (8, 'SOLO_DINING'),
+    (8, 'GROUP_GATHERING');
+
+INSERT IGNORE INTO store_university (store_university_id, store_id, university_id) VALUES
+    (1, 1, 6),
+    (2, 2, 6),
+    (3, 2, 1),
+    (4, 3, 6),
+    (5, 4, 6),
+    (6, 5, 6),
+    (7, 6, 6),
+    (8, 7, 6),
+    (9, 7, 5),
+    (10, 8, 1);
+
+INSERT IGNORE INTO store_image (store_image_id, store_id, image_url, order_index) VALUES
+    (1, 1, 'https://cdn.looky.dev/stores/1/cover.jpg', 0),
+    (2, 1, 'https://cdn.looky.dev/stores/1/interior.jpg', 1),
+    (3, 2, 'https://cdn.looky.dev/stores/2/cover.jpg', 0),
+    (4, 2, 'https://cdn.looky.dev/stores/2/beans.jpg', 1),
+    (5, 3, 'https://cdn.looky.dev/stores/3/cover.jpg', 0),
+    (6, 3, 'https://cdn.looky.dev/stores/3/menu.jpg', 1),
+    (7, 4, 'https://cdn.looky.dev/stores/4/cover.jpg', 0),
+    (8, 4, 'https://cdn.looky.dev/stores/4/room.jpg', 1),
+    (9, 5, 'https://cdn.looky.dev/stores/5/cover.jpg', 0),
+    (10, 5, 'https://cdn.looky.dev/stores/5/care.jpg', 1),
+    (11, 6, 'https://cdn.looky.dev/stores/6/cover.jpg', 0),
+    (12, 7, 'https://cdn.looky.dev/stores/7/cover.jpg', 0),
+    (13, 7, 'https://cdn.looky.dev/stores/7/brunch.jpg', 1),
+    (14, 8, 'https://cdn.looky.dev/stores/8/cover.jpg', 0);
+
+INSERT IGNORE INTO store_holiday (store_id, holiday_date) VALUES
+    (2, '2026-03-25'),
+    (3, '2026-03-30'),
+    (5, '2026-04-01'),
+    (7, '2026-03-26'),
+    (7, '2026-04-02');
+
+/* Item categories and items */
+INSERT IGNORE INTO item_category (
+    item_category_id, created_at, modified_at, created_by, last_modified_by, name, store_id
+) VALUES
+    (1, '2026-03-07 10:00:00', '2026-03-07 10:00:00', 'seed', 'seed', '식사메뉴', 1),
+    (2, '2026-03-07 10:01:00', '2026-03-07 10:01:00', 'seed', 'seed', '사이드', 1),
+    (3, '2026-03-07 10:02:00', '2026-03-07 10:02:00', 'seed', 'seed', '커피', 2),
+    (4, '2026-03-07 10:03:00', '2026-03-07 10:03:00', 'seed', 'seed', '디저트', 2),
+    (5, '2026-03-07 10:04:00', '2026-03-07 10:04:00', 'seed', 'seed', '안주', 3),
+    (6, '2026-03-07 10:05:00', '2026-03-07 10:05:00', 'seed', 'seed', '주류', 3),
+    (7, '2026-03-07 10:06:00', '2026-03-07 10:06:00', 'seed', 'seed', '이용권', 4),
+    (8, '2026-03-07 10:07:00', '2026-03-07 10:07:00', 'seed', 'seed', '케어', 5),
+    (9, '2026-03-07 10:08:00', '2026-03-07 10:08:00', 'seed', 'seed', '국수', 6),
+    (10, '2026-03-07 10:09:00', '2026-03-07 10:09:00', 'seed', 'seed', '샐러드', 7),
+    (11, '2026-03-07 10:10:00', '2026-03-07 10:10:00', 'seed', 'seed', '브런치', 7);
+
+INSERT IGNORE INTO item (
+    item_id, created_at, modified_at, created_by, last_modified_by,
+    name, price, description, image_url, is_sold_out, item_order, is_representative, is_hidden, badge, store_id, item_category_id
+) VALUES
+    (1, '2026-03-07 11:00:00', '2026-03-07 11:00:00', 'seed', 'seed', '제육정식', 8500, '점심시간 회전이 빠른 대표 한상 메뉴입니다.', 'https://cdn.looky.dev/items/1.jpg', 0, 1, 1, 0, 'HOT', 1, 1),
+    (2, '2026-03-07 11:01:00', '2026-03-07 11:01:00', 'seed', 'seed', '된장찌개 정식', 8000, '자극적이지 않은 국물 맛으로 재주문이 많은 메뉴입니다.', 'https://cdn.looky.dev/items/2.jpg', 0, 2, 0, 0, 'BEST', 1, 1),
+    (3, '2026-03-07 11:02:00', '2026-03-07 11:02:00', 'seed', 'seed', '계란말이', 4000, '2인 이상 주문 시 곁들이기 좋은 사이드입니다.', 'https://cdn.looky.dev/items/3.jpg', 0, 3, 0, 0, 'NEW', 1, 2),
+    (4, '2026-03-07 11:03:00', '2026-03-07 11:03:00', 'seed', 'seed', '고등어구이', 9500, '당일 소진이 빠른 구이 메뉴입니다.', 'https://cdn.looky.dev/items/4.jpg', 1, 4, 0, 0, NULL, 1, 1),
+    (5, '2026-03-07 11:04:00', '2026-03-07 11:04:00', 'seed', 'seed', '플랫화이트', 4500, '원두 산미가 부드럽게 살아있는 시그니처 커피입니다.', 'https://cdn.looky.dev/items/5.jpg', 0, 1, 1, 0, 'BEST', 2, 3),
+    (6, '2026-03-07 11:05:00', '2026-03-07 11:05:00', 'seed', 'seed', '아인슈페너', 5500, '크림층과 에스프레소 밸런스가 안정적인 메뉴입니다.', 'https://cdn.looky.dev/items/6.jpg', 0, 2, 0, 0, 'HOT', 2, 3),
+    (7, '2026-03-07 11:06:00', '2026-03-07 11:06:00', 'seed', 'seed', '바스크 치즈케이크', 6800, '주말 방문객 비중이 높은 디저트입니다.', 'https://cdn.looky.dev/items/7.jpg', 0, 3, 0, 0, 'NEW', 2, 4),
+    (8, '2026-03-07 11:07:00', '2026-03-07 11:07:00', 'seed', 'seed', '휘낭시에 세트', 5900, '행사 기간에만 노출하는 한정 세트입니다.', 'https://cdn.looky.dev/items/8.jpg', 0, 4, 0, 1, NULL, 2, 4),
+    (9, '2026-03-07 11:08:00', '2026-03-07 11:08:00', 'seed', 'seed', '닭갈비 철판볶음', 16900, '2인 이상 방문객이 가장 많이 고르는 메인 안주입니다.', 'https://cdn.looky.dev/items/9.jpg', 0, 1, 1, 0, 'HOT', 3, 5),
+    (10, '2026-03-07 11:09:00', '2026-03-07 11:09:00', 'seed', 'seed', '국물닭발', 18900, '매운맛 단계 선택이 가능한 인기 안주입니다.', 'https://cdn.looky.dev/items/10.jpg', 0, 2, 0, 0, 'BEST', 3, 5),
+    (11, '2026-03-07 11:10:00', '2026-03-07 11:10:00', 'seed', 'seed', '생맥주 500cc', 4500, '단체 주문 비중이 높은 기본 주류입니다.', 'https://cdn.looky.dev/items/11.jpg', 0, 3, 0, 0, NULL, 3, 6),
+    (12, '2026-03-07 11:11:00', '2026-03-07 11:11:00', 'seed', 'seed', '청포도하이볼', 6900, '여성 고객 선호도가 높은 상큼한 하이볼입니다.', 'https://cdn.looky.dev/items/12.jpg', 0, 4, 0, 0, 'NEW', 3, 6),
+    (13, '2026-03-07 11:12:00', '2026-03-07 11:12:00', 'seed', 'seed', '1시간 이용권', 5000, '짧은 공강 시간에 가장 많이 구매되는 이용권입니다.', 'https://cdn.looky.dev/items/13.jpg', 0, 1, 1, 0, 'HOT', 4, 7),
+    (14, '2026-03-07 11:13:00', '2026-03-07 11:13:00', 'seed', 'seed', '3시간 이용권', 12000, '시험기간 패키지로 가장 반응이 좋은 이용권입니다.', 'https://cdn.looky.dev/items/14.jpg', 0, 2, 0, 0, 'BEST', 4, 7),
+    (15, '2026-03-07 11:14:00', '2026-03-07 11:14:00', 'seed', 'seed', '학생 피부진단', 10000, '민감도와 유수분 밸런스를 빠르게 확인할 수 있는 체험 상품입니다.', 'https://cdn.looky.dev/items/15.jpg', 0, 1, 1, 0, 'BEST', 5, 8),
+    (16, '2026-03-07 11:15:00', '2026-03-07 11:15:00', 'seed', 'seed', '진정 마스크팩', 5000, '학생 할인 적용 시 재구매율이 높은 상품입니다.', 'https://cdn.looky.dev/items/16.jpg', 0, 2, 0, 0, 'NEW', 5, 8),
+    (17, '2026-03-07 11:16:00', '2026-03-07 11:16:00', 'seed', 'seed', '눈가 집중 케어', 15000, '시험기간 피로 회복 수요가 높은 집중 케어입니다.', 'https://cdn.looky.dev/items/17.jpg', 0, 3, 0, 0, 'HOT', 5, 8),
+    (18, '2026-03-07 11:17:00', '2026-03-07 11:17:00', 'seed', 'seed', '잔치국수', 5000, '가볍게 한 끼 해결하려는 혼밥 수요가 가장 많은 메뉴입니다.', 'https://cdn.looky.dev/items/18.jpg', 0, 1, 1, 0, 'BEST', 6, 9),
+    (19, '2026-03-07 11:18:00', '2026-03-07 11:18:00', 'seed', 'seed', '비빔국수', 6000, '매콤한 양념을 선호하는 학생층이 자주 찾는 메뉴입니다.', 'https://cdn.looky.dev/items/19.jpg', 0, 2, 0, 0, 'HOT', 6, 9),
+    (20, '2026-03-07 11:19:00', '2026-03-07 11:19:00', 'seed', 'seed', '연어 포케', 12500, '단백질 토핑 선택이 가능한 대표 샐러드입니다.', 'https://cdn.looky.dev/items/20.jpg', 0, 1, 1, 0, 'BEST', 7, 10),
+    (21, '2026-03-07 11:20:00', '2026-03-07 11:20:00', 'seed', 'seed', '두부 곡물볼', 9800, '비건 선택지를 찾는 학생층에게 반응이 좋은 메뉴입니다.', 'https://cdn.looky.dev/items/21.jpg', 0, 2, 0, 0, 'VEGAN', 7, 10),
+    (22, '2026-03-07 11:21:00', '2026-03-07 11:21:00', 'seed', 'seed', '아보카도 오픈토스트', 8500, '브런치 시간대 판매 비중이 높은 메뉴입니다.', 'https://cdn.looky.dev/items/22.jpg', 0, 3, 0, 0, 'NEW', 7, 11),
+    (23, '2026-03-07 11:22:00', '2026-03-07 11:22:00', 'seed', 'seed', '그릭요거트 볼', 6500, '가볍게 먹기 좋은 후식형 메뉴입니다.', 'https://cdn.looky.dev/items/23.jpg', 0, 4, 0, 0, 'HOT', 7, 11),
+    (24, '2026-03-07 11:23:00', '2026-03-07 11:23:00', 'seed', 'seed', '캔음료', 2000, '이용권과 함께 가장 많이 추가되는 부가 상품입니다.', 'https://cdn.looky.dev/items/24.jpg', 0, 3, 0, 0, NULL, 4, 7);
 
 /* Coupons */
-INSERT IGNORE INTO coupon (coupon_id, created_at, modified_at, created_by, last_modified_by, title, issue_starts_at, issue_ends_at, valid_days, total_quantity, limit_per_user, status, benefit_type, benefit_value, min_order_amount, download_count, store_id) VALUES (1, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '오픈 기념 쿠폰', '2026-03-18 15:29:59', '2026-04-19 15:29:59', 30, 100, 1, 'EXPIRED', 'DISCOUNT_AMOUNT', '1000원', 15000, 49, 1);
-INSERT IGNORE INTO student_coupon (student_coupon_id, created_at, modified_at, created_by, last_modified_by, verification_code, status, downloaded_at, expires_at, user_id, coupon_id) VALUES (NULL, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 'A1B2', 'ISSUED', '2026-03-20 15:29:59', '2026-04-19 15:29:59', 7, 1);
-INSERT IGNORE INTO student_coupon (student_coupon_id, created_at, modified_at, created_by, last_modified_by, verification_code, status, downloaded_at, expires_at, user_id, coupon_id) VALUES (NULL, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 'A1B2', 'ISSUED', '2026-03-20 15:29:59', '2026-04-19 15:29:59', 9, 1);
-INSERT IGNORE INTO student_coupon (student_coupon_id, created_at, modified_at, created_by, last_modified_by, verification_code, status, downloaded_at, expires_at, user_id, coupon_id) VALUES (NULL, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 'A1B2', 'ISSUED', '2026-03-20 15:29:59', '2026-04-19 15:29:59', 8, 1);
-INSERT IGNORE INTO coupon (coupon_id, created_at, modified_at, created_by, last_modified_by, title, issue_starts_at, issue_ends_at, valid_days, total_quantity, limit_per_user, status, benefit_type, benefit_value, min_order_amount, download_count, store_id) VALUES (2, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '오픈 기념 쿠폰', '2026-03-18 15:29:59', '2026-04-19 15:29:59', 30, 100, 1, 'EXPIRED', 'DISCOUNT_AMOUNT', '1000원', 15000, 3, 4);
-INSERT IGNORE INTO student_coupon (student_coupon_id, created_at, modified_at, created_by, last_modified_by, verification_code, status, downloaded_at, expires_at, user_id, coupon_id) VALUES (NULL, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 'A1B2', 'ISSUED', '2026-03-20 15:29:59', '2026-04-19 15:29:59', 9, 2);
-INSERT IGNORE INTO student_coupon (student_coupon_id, created_at, modified_at, created_by, last_modified_by, verification_code, status, downloaded_at, expires_at, user_id, coupon_id) VALUES (NULL, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 'A1B2', 'ISSUED', '2026-03-20 15:29:59', '2026-04-19 15:29:59', 3, 2);
-INSERT IGNORE INTO student_coupon (student_coupon_id, created_at, modified_at, created_by, last_modified_by, verification_code, status, downloaded_at, expires_at, user_id, coupon_id) VALUES (NULL, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 'A1B2', 'ISSUED', '2026-03-20 15:29:59', '2026-04-19 15:29:59', 6, 2);
-INSERT IGNORE INTO coupon (coupon_id, created_at, modified_at, created_by, last_modified_by, title, issue_starts_at, issue_ends_at, valid_days, total_quantity, limit_per_user, status, benefit_type, benefit_value, min_order_amount, download_count, store_id) VALUES (3, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '오픈 기념 쿠폰', '2026-03-18 15:29:59', '2026-04-19 15:29:59', 30, 100, 1, 'EXPIRED', 'DISCOUNT_AMOUNT', '1000원', 15000, 34, 7);
-INSERT IGNORE INTO student_coupon (student_coupon_id, created_at, modified_at, created_by, last_modified_by, verification_code, status, downloaded_at, expires_at, user_id, coupon_id) VALUES (NULL, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 'A1B2', 'ISSUED', '2026-03-20 15:29:59', '2026-04-19 15:29:59', 3, 3);
-INSERT IGNORE INTO student_coupon (student_coupon_id, created_at, modified_at, created_by, last_modified_by, verification_code, status, downloaded_at, expires_at, user_id, coupon_id) VALUES (NULL, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 'A1B2', 'ISSUED', '2026-03-20 15:29:59', '2026-04-19 15:29:59', 8, 3);
-INSERT IGNORE INTO student_coupon (student_coupon_id, created_at, modified_at, created_by, last_modified_by, verification_code, status, downloaded_at, expires_at, user_id, coupon_id) VALUES (NULL, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 'A1B2', 'ISSUED', '2026-03-20 15:29:59', '2026-04-19 15:29:59', 4, 3);
-INSERT IGNORE INTO coupon (coupon_id, created_at, modified_at, created_by, last_modified_by, title, issue_starts_at, issue_ends_at, valid_days, total_quantity, limit_per_user, status, benefit_type, benefit_value, min_order_amount, download_count, store_id) VALUES (4, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '오픈 기념 쿠폰', '2026-03-18 15:29:59', '2026-04-19 15:29:59', 30, 100, 1, 'EXHAUSTED', 'DISCOUNT_AMOUNT', '1000원', 15000, 22, 10);
-INSERT IGNORE INTO student_coupon (student_coupon_id, created_at, modified_at, created_by, last_modified_by, verification_code, status, downloaded_at, expires_at, user_id, coupon_id) VALUES (NULL, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 'A1B2', 'ISSUED', '2026-03-20 15:29:59', '2026-04-19 15:29:59', 7, 4);
-INSERT IGNORE INTO student_coupon (student_coupon_id, created_at, modified_at, created_by, last_modified_by, verification_code, status, downloaded_at, expires_at, user_id, coupon_id) VALUES (NULL, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 'A1B2', 'ISSUED', '2026-03-20 15:29:59', '2026-04-19 15:29:59', 6, 4);
-INSERT IGNORE INTO student_coupon (student_coupon_id, created_at, modified_at, created_by, last_modified_by, verification_code, status, downloaded_at, expires_at, user_id, coupon_id) VALUES (NULL, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 'A1B2', 'ISSUED', '2026-03-20 15:29:59', '2026-04-19 15:29:59', 2, 4);
-INSERT IGNORE INTO coupon (coupon_id, created_at, modified_at, created_by, last_modified_by, title, issue_starts_at, issue_ends_at, valid_days, total_quantity, limit_per_user, status, benefit_type, benefit_value, min_order_amount, download_count, store_id) VALUES (5, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '오픈 기념 쿠폰', '2026-03-18 15:29:59', '2026-04-19 15:29:59', 30, 100, 1, 'ACTIVE', 'DISCOUNT_PERCENTAGE', '10%', 15000, 42, 12);
-INSERT IGNORE INTO student_coupon (student_coupon_id, created_at, modified_at, created_by, last_modified_by, verification_code, status, downloaded_at, expires_at, user_id, coupon_id) VALUES (NULL, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 'A1B2', 'ISSUED', '2026-03-20 15:29:59', '2026-04-19 15:29:59', 9, 5);
-INSERT IGNORE INTO student_coupon (student_coupon_id, created_at, modified_at, created_by, last_modified_by, verification_code, status, downloaded_at, expires_at, user_id, coupon_id) VALUES (NULL, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 'A1B2', 'ISSUED', '2026-03-20 15:29:59', '2026-04-19 15:29:59', 3, 5);
-INSERT IGNORE INTO student_coupon (student_coupon_id, created_at, modified_at, created_by, last_modified_by, verification_code, status, downloaded_at, expires_at, user_id, coupon_id) VALUES (NULL, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 'A1B2', 'ISSUED', '2026-03-20 15:29:59', '2026-04-19 15:29:59', 10, 5);
-INSERT IGNORE INTO coupon (coupon_id, created_at, modified_at, created_by, last_modified_by, title, issue_starts_at, issue_ends_at, valid_days, total_quantity, limit_per_user, status, benefit_type, benefit_value, min_order_amount, download_count, store_id) VALUES (6, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '오픈 기념 쿠폰', '2026-03-18 15:29:59', '2026-04-19 15:29:59', 30, 100, 1, 'ACTIVE', 'FREE_ITEM', '음료수 1캔', 15000, 26, 13);
-INSERT IGNORE INTO student_coupon (student_coupon_id, created_at, modified_at, created_by, last_modified_by, verification_code, status, downloaded_at, expires_at, user_id, coupon_id) VALUES (NULL, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 'A1B2', 'ISSUED', '2026-03-20 15:29:59', '2026-04-19 15:29:59', 5, 6);
-INSERT IGNORE INTO student_coupon (student_coupon_id, created_at, modified_at, created_by, last_modified_by, verification_code, status, downloaded_at, expires_at, user_id, coupon_id) VALUES (NULL, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 'A1B2', 'ISSUED', '2026-03-20 15:29:59', '2026-04-19 15:29:59', 8, 6);
-INSERT IGNORE INTO student_coupon (student_coupon_id, created_at, modified_at, created_by, last_modified_by, verification_code, status, downloaded_at, expires_at, user_id, coupon_id) VALUES (NULL, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 'A1B2', 'ISSUED', '2026-03-20 15:29:59', '2026-04-19 15:29:59', 2, 6);
-INSERT IGNORE INTO coupon (coupon_id, created_at, modified_at, created_by, last_modified_by, title, issue_starts_at, issue_ends_at, valid_days, total_quantity, limit_per_user, status, benefit_type, benefit_value, min_order_amount, download_count, store_id) VALUES (7, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '오픈 기념 쿠폰', '2026-03-18 15:29:59', '2026-04-19 15:29:59', 30, 100, 1, 'EXHAUSTED', 'DISCOUNT_PERCENTAGE', '10%', 15000, 37, 14);
-INSERT IGNORE INTO student_coupon (student_coupon_id, created_at, modified_at, created_by, last_modified_by, verification_code, status, downloaded_at, expires_at, user_id, coupon_id) VALUES (NULL, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 'A1B2', 'ISSUED', '2026-03-20 15:29:59', '2026-04-19 15:29:59', 11, 7);
-INSERT IGNORE INTO student_coupon (student_coupon_id, created_at, modified_at, created_by, last_modified_by, verification_code, status, downloaded_at, expires_at, user_id, coupon_id) VALUES (NULL, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 'A1B2', 'ISSUED', '2026-03-20 15:29:59', '2026-04-19 15:29:59', 2, 7);
-INSERT IGNORE INTO student_coupon (student_coupon_id, created_at, modified_at, created_by, last_modified_by, verification_code, status, downloaded_at, expires_at, user_id, coupon_id) VALUES (NULL, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 'A1B2', 'ISSUED', '2026-03-20 15:29:59', '2026-04-19 15:29:59', 4, 7);
-INSERT IGNORE INTO coupon (coupon_id, created_at, modified_at, created_by, last_modified_by, title, issue_starts_at, issue_ends_at, valid_days, total_quantity, limit_per_user, status, benefit_type, benefit_value, min_order_amount, download_count, store_id) VALUES (8, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '오픈 기념 쿠폰', '2026-03-18 15:29:59', '2026-04-19 15:29:59', 30, 100, 1, 'EXPIRED', 'DISCOUNT_PERCENTAGE', '10%', 15000, 41, 15);
-INSERT IGNORE INTO student_coupon (student_coupon_id, created_at, modified_at, created_by, last_modified_by, verification_code, status, downloaded_at, expires_at, user_id, coupon_id) VALUES (NULL, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 'A1B2', 'ISSUED', '2026-03-20 15:29:59', '2026-04-19 15:29:59', 6, 8);
-INSERT IGNORE INTO student_coupon (student_coupon_id, created_at, modified_at, created_by, last_modified_by, verification_code, status, downloaded_at, expires_at, user_id, coupon_id) VALUES (NULL, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 'A1B2', 'ISSUED', '2026-03-20 15:29:59', '2026-04-19 15:29:59', 9, 8);
-INSERT IGNORE INTO student_coupon (student_coupon_id, created_at, modified_at, created_by, last_modified_by, verification_code, status, downloaded_at, expires_at, user_id, coupon_id) VALUES (NULL, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 'A1B2', 'ISSUED', '2026-03-20 15:29:59', '2026-04-19 15:29:59', 2, 8);
-INSERT IGNORE INTO coupon (coupon_id, created_at, modified_at, created_by, last_modified_by, title, issue_starts_at, issue_ends_at, valid_days, total_quantity, limit_per_user, status, benefit_type, benefit_value, min_order_amount, download_count, store_id) VALUES (9, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '오픈 기념 쿠폰', '2026-03-18 15:29:59', '2026-04-19 15:29:59', 30, 100, 1, 'EXHAUSTED', 'DISCOUNT_PERCENTAGE', '10%', 15000, 1, 17);
-INSERT IGNORE INTO student_coupon (student_coupon_id, created_at, modified_at, created_by, last_modified_by, verification_code, status, downloaded_at, expires_at, user_id, coupon_id) VALUES (NULL, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 'A1B2', 'ISSUED', '2026-03-20 15:29:59', '2026-04-19 15:29:59', 6, 9);
-INSERT IGNORE INTO student_coupon (student_coupon_id, created_at, modified_at, created_by, last_modified_by, verification_code, status, downloaded_at, expires_at, user_id, coupon_id) VALUES (NULL, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 'A1B2', 'ISSUED', '2026-03-20 15:29:59', '2026-04-19 15:29:59', 8, 9);
-INSERT IGNORE INTO student_coupon (student_coupon_id, created_at, modified_at, created_by, last_modified_by, verification_code, status, downloaded_at, expires_at, user_id, coupon_id) VALUES (NULL, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 'A1B2', 'ISSUED', '2026-03-20 15:29:59', '2026-04-19 15:29:59', 2, 9);
-INSERT IGNORE INTO coupon (coupon_id, created_at, modified_at, created_by, last_modified_by, title, issue_starts_at, issue_ends_at, valid_days, total_quantity, limit_per_user, status, benefit_type, benefit_value, min_order_amount, download_count, store_id) VALUES (10, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '오픈 기념 쿠폰', '2026-03-18 15:29:59', '2026-04-19 15:29:59', 30, 100, 1, 'EXHAUSTED', 'FREE_ITEM', '음료수 1캔', 15000, 37, 20);
-INSERT IGNORE INTO student_coupon (student_coupon_id, created_at, modified_at, created_by, last_modified_by, verification_code, status, downloaded_at, expires_at, user_id, coupon_id) VALUES (NULL, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 'A1B2', 'ISSUED', '2026-03-20 15:29:59', '2026-04-19 15:29:59', 5, 10);
-INSERT IGNORE INTO student_coupon (student_coupon_id, created_at, modified_at, created_by, last_modified_by, verification_code, status, downloaded_at, expires_at, user_id, coupon_id) VALUES (NULL, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 'A1B2', 'ISSUED', '2026-03-20 15:29:59', '2026-04-19 15:29:59', 10, 10);
-INSERT IGNORE INTO student_coupon (student_coupon_id, created_at, modified_at, created_by, last_modified_by, verification_code, status, downloaded_at, expires_at, user_id, coupon_id) VALUES (NULL, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 'A1B2', 'ISSUED', '2026-03-20 15:29:59', '2026-04-19 15:29:59', 8, 10);
-INSERT IGNORE INTO coupon (coupon_id, created_at, modified_at, created_by, last_modified_by, title, issue_starts_at, issue_ends_at, valid_days, total_quantity, limit_per_user, status, benefit_type, benefit_value, min_order_amount, download_count, store_id) VALUES (11, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '오픈 기념 쿠폰', '2026-03-18 15:29:59', '2026-04-19 15:29:59', 30, 100, 1, 'EXHAUSTED', 'FREE_ITEM', '음료수 1캔', 15000, 49, 22);
-INSERT IGNORE INTO student_coupon (student_coupon_id, created_at, modified_at, created_by, last_modified_by, verification_code, status, downloaded_at, expires_at, user_id, coupon_id) VALUES (NULL, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 'A1B2', 'ISSUED', '2026-03-20 15:29:59', '2026-04-19 15:29:59', 2, 11);
-INSERT IGNORE INTO student_coupon (student_coupon_id, created_at, modified_at, created_by, last_modified_by, verification_code, status, downloaded_at, expires_at, user_id, coupon_id) VALUES (NULL, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 'A1B2', 'ISSUED', '2026-03-20 15:29:59', '2026-04-19 15:29:59', 3, 11);
-INSERT IGNORE INTO student_coupon (student_coupon_id, created_at, modified_at, created_by, last_modified_by, verification_code, status, downloaded_at, expires_at, user_id, coupon_id) VALUES (NULL, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 'A1B2', 'ISSUED', '2026-03-20 15:29:59', '2026-04-19 15:29:59', 5, 11);
-INSERT IGNORE INTO coupon (coupon_id, created_at, modified_at, created_by, last_modified_by, title, issue_starts_at, issue_ends_at, valid_days, total_quantity, limit_per_user, status, benefit_type, benefit_value, min_order_amount, download_count, store_id) VALUES (12, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '오픈 기념 쿠폰', '2026-03-18 15:29:59', '2026-04-19 15:29:59', 30, 100, 1, 'EXPIRED', 'DISCOUNT_PERCENTAGE', '10%', 15000, 13, 25);
-INSERT IGNORE INTO student_coupon (student_coupon_id, created_at, modified_at, created_by, last_modified_by, verification_code, status, downloaded_at, expires_at, user_id, coupon_id) VALUES (NULL, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 'A1B2', 'ISSUED', '2026-03-20 15:29:59', '2026-04-19 15:29:59', 4, 12);
-INSERT IGNORE INTO student_coupon (student_coupon_id, created_at, modified_at, created_by, last_modified_by, verification_code, status, downloaded_at, expires_at, user_id, coupon_id) VALUES (NULL, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 'A1B2', 'ISSUED', '2026-03-20 15:29:59', '2026-04-19 15:29:59', 2, 12);
-INSERT IGNORE INTO student_coupon (student_coupon_id, created_at, modified_at, created_by, last_modified_by, verification_code, status, downloaded_at, expires_at, user_id, coupon_id) VALUES (NULL, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 'A1B2', 'ISSUED', '2026-03-20 15:29:59', '2026-04-19 15:29:59', 11, 12);
-INSERT IGNORE INTO coupon (coupon_id, created_at, modified_at, created_by, last_modified_by, title, issue_starts_at, issue_ends_at, valid_days, total_quantity, limit_per_user, status, benefit_type, benefit_value, min_order_amount, download_count, store_id) VALUES (13, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '오픈 기념 쿠폰', '2026-03-18 15:29:59', '2026-04-19 15:29:59', 30, 100, 1, 'ACTIVE', 'DISCOUNT_AMOUNT', '1000원', 15000, 3, 26);
-INSERT IGNORE INTO student_coupon (student_coupon_id, created_at, modified_at, created_by, last_modified_by, verification_code, status, downloaded_at, expires_at, user_id, coupon_id) VALUES (NULL, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 'A1B2', 'ISSUED', '2026-03-20 15:29:59', '2026-04-19 15:29:59', 10, 13);
-INSERT IGNORE INTO student_coupon (student_coupon_id, created_at, modified_at, created_by, last_modified_by, verification_code, status, downloaded_at, expires_at, user_id, coupon_id) VALUES (NULL, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 'A1B2', 'ISSUED', '2026-03-20 15:29:59', '2026-04-19 15:29:59', 6, 13);
-INSERT IGNORE INTO student_coupon (student_coupon_id, created_at, modified_at, created_by, last_modified_by, verification_code, status, downloaded_at, expires_at, user_id, coupon_id) VALUES (NULL, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 'A1B2', 'ISSUED', '2026-03-20 15:29:59', '2026-04-19 15:29:59', 9, 13);
-INSERT IGNORE INTO coupon (coupon_id, created_at, modified_at, created_by, last_modified_by, title, issue_starts_at, issue_ends_at, valid_days, total_quantity, limit_per_user, status, benefit_type, benefit_value, min_order_amount, download_count, store_id) VALUES (14, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '오픈 기념 쿠폰', '2026-03-18 15:29:59', '2026-04-19 15:29:59', 30, 100, 1, 'EXHAUSTED', 'DISCOUNT_PERCENTAGE', '10%', 15000, 23, 27);
-INSERT IGNORE INTO student_coupon (student_coupon_id, created_at, modified_at, created_by, last_modified_by, verification_code, status, downloaded_at, expires_at, user_id, coupon_id) VALUES (NULL, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 'A1B2', 'ISSUED', '2026-03-20 15:29:59', '2026-04-19 15:29:59', 2, 14);
-INSERT IGNORE INTO student_coupon (student_coupon_id, created_at, modified_at, created_by, last_modified_by, verification_code, status, downloaded_at, expires_at, user_id, coupon_id) VALUES (NULL, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 'A1B2', 'ISSUED', '2026-03-20 15:29:59', '2026-04-19 15:29:59', 6, 14);
-INSERT IGNORE INTO student_coupon (student_coupon_id, created_at, modified_at, created_by, last_modified_by, verification_code, status, downloaded_at, expires_at, user_id, coupon_id) VALUES (NULL, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 'A1B2', 'ISSUED', '2026-03-20 15:29:59', '2026-04-19 15:29:59', 11, 14);
-INSERT IGNORE INTO coupon (coupon_id, created_at, modified_at, created_by, last_modified_by, title, issue_starts_at, issue_ends_at, valid_days, total_quantity, limit_per_user, status, benefit_type, benefit_value, min_order_amount, download_count, store_id) VALUES (15, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '오픈 기념 쿠폰', '2026-03-18 15:29:59', '2026-04-19 15:29:59', 30, 100, 1, 'EXHAUSTED', 'DISCOUNT_AMOUNT', '1000원', 15000, 39, 28);
-INSERT IGNORE INTO student_coupon (student_coupon_id, created_at, modified_at, created_by, last_modified_by, verification_code, status, downloaded_at, expires_at, user_id, coupon_id) VALUES (NULL, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 'A1B2', 'ISSUED', '2026-03-20 15:29:59', '2026-04-19 15:29:59', 2, 15);
-INSERT IGNORE INTO student_coupon (student_coupon_id, created_at, modified_at, created_by, last_modified_by, verification_code, status, downloaded_at, expires_at, user_id, coupon_id) VALUES (NULL, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 'A1B2', 'ISSUED', '2026-03-20 15:29:59', '2026-04-19 15:29:59', 5, 15);
-INSERT IGNORE INTO student_coupon (student_coupon_id, created_at, modified_at, created_by, last_modified_by, verification_code, status, downloaded_at, expires_at, user_id, coupon_id) VALUES (NULL, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 'A1B2', 'ISSUED', '2026-03-20 15:29:59', '2026-04-19 15:29:59', 6, 15);
-INSERT IGNORE INTO coupon (coupon_id, created_at, modified_at, created_by, last_modified_by, title, issue_starts_at, issue_ends_at, valid_days, total_quantity, limit_per_user, status, benefit_type, benefit_value, min_order_amount, download_count, store_id) VALUES (16, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '오픈 기념 쿠폰', '2026-03-18 15:29:59', '2026-04-19 15:29:59', 30, 100, 1, 'EXHAUSTED', 'DISCOUNT_AMOUNT', '1000원', 15000, 15, 29);
-INSERT IGNORE INTO student_coupon (student_coupon_id, created_at, modified_at, created_by, last_modified_by, verification_code, status, downloaded_at, expires_at, user_id, coupon_id) VALUES (NULL, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 'A1B2', 'ISSUED', '2026-03-20 15:29:59', '2026-04-19 15:29:59', 11, 16);
-INSERT IGNORE INTO student_coupon (student_coupon_id, created_at, modified_at, created_by, last_modified_by, verification_code, status, downloaded_at, expires_at, user_id, coupon_id) VALUES (NULL, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 'A1B2', 'ISSUED', '2026-03-20 15:29:59', '2026-04-19 15:29:59', 6, 16);
-INSERT IGNORE INTO student_coupon (student_coupon_id, created_at, modified_at, created_by, last_modified_by, verification_code, status, downloaded_at, expires_at, user_id, coupon_id) VALUES (NULL, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 'A1B2', 'ISSUED', '2026-03-20 15:29:59', '2026-04-19 15:29:59', 7, 16);
-INSERT IGNORE INTO coupon (coupon_id, created_at, modified_at, created_by, last_modified_by, title, issue_starts_at, issue_ends_at, valid_days, total_quantity, limit_per_user, status, benefit_type, benefit_value, min_order_amount, download_count, store_id) VALUES (17, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '오픈 기념 쿠폰', '2026-03-18 15:29:59', '2026-04-19 15:29:59', 30, 100, 1, 'EXHAUSTED', 'DISCOUNT_PERCENTAGE', '10%', 15000, 27, 30);
-INSERT IGNORE INTO student_coupon (student_coupon_id, created_at, modified_at, created_by, last_modified_by, verification_code, status, downloaded_at, expires_at, user_id, coupon_id) VALUES (NULL, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 'A1B2', 'ISSUED', '2026-03-20 15:29:59', '2026-04-19 15:29:59', 6, 17);
-INSERT IGNORE INTO student_coupon (student_coupon_id, created_at, modified_at, created_by, last_modified_by, verification_code, status, downloaded_at, expires_at, user_id, coupon_id) VALUES (NULL, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 'A1B2', 'ISSUED', '2026-03-20 15:29:59', '2026-04-19 15:29:59', 11, 17);
-INSERT IGNORE INTO student_coupon (student_coupon_id, created_at, modified_at, created_by, last_modified_by, verification_code, status, downloaded_at, expires_at, user_id, coupon_id) VALUES (NULL, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 'A1B2', 'ISSUED', '2026-03-20 15:29:59', '2026-04-19 15:29:59', 8, 17);
+INSERT IGNORE INTO coupon (
+    coupon_id, created_at, modified_at, created_by, last_modified_by,
+    title, issue_starts_at, issue_ends_at, valid_days, total_quantity, limit_per_user,
+    status, benefit_type, benefit_value, min_order_amount, download_count, store_id
+) VALUES
+    (1, '2026-03-08 09:00:00', '2026-03-08 09:00:00', 'seed', 'seed', '점심시간 1,500원 할인', '2026-03-18 00:00:00', '2026-04-10 23:59:59', 7, 120, 1, 'ACTIVE', 'FIXED_DISCOUNT', '1500', 8000, 37, 1),
+    (2, '2026-03-08 09:10:00', '2026-03-08 09:10:00', 'seed', 'seed', '시그니처 음료 10% 할인', '2026-03-10 00:00:00', '2026-03-31 23:59:59', 5, 50, 1, 'SOLD_OUT', 'PERCENTAGE_DISCOUNT', '10', 4000, 50, 2),
+    (3, '2026-03-08 09:20:00', '2026-03-08 09:20:00', 'seed', 'seed', '하이볼 1잔 서비스', '2026-03-01 00:00:00', '2026-03-25 23:59:59', 3, NULL, 1, 'WITHDRAWN_BY_OWNER', 'SERVICE_GIFT', '청포도하이볼 1잔', 20000, 18, 3),
+    (4, '2026-03-08 09:30:00', '2026-03-08 09:30:00', 'seed', 'seed', '학생 진정팩 증정', '2026-02-15 00:00:00', '2026-03-05 23:59:59', 10, 80, 1, 'EXPIRED', 'SERVICE_GIFT', '진정 마스크팩 1매', 10000, 29, 5),
+    (5, '2026-03-08 09:40:00', '2026-03-08 09:40:00', 'seed', 'seed', '샐러드 12% 할인', '2026-03-19 00:00:00', '2026-04-15 23:59:59', 5, 70, 2, 'ACTIVE', 'PERCENTAGE_DISCOUNT', '12', 9000, 16, 7);
+
+INSERT IGNORE INTO student_coupon (
+    student_coupon_id, created_at, modified_at, created_by, last_modified_by,
+    verification_code, status, downloaded_at, activated_at, used_at, expires_at, user_id, coupon_id
+) VALUES
+    (1, '2026-03-19 12:00:00', '2026-03-19 12:00:00', 'seed', 'seed', NULL, 'UNUSED', '2026-03-19 12:00:00', NULL, NULL, '2026-03-26 23:59:59', 2, 1),
+    (2, '2026-03-18 18:00:00', '2026-03-20 10:30:00', 'seed', 'seed', 'F7K2', 'ACTIVATED', '2026-03-18 18:00:00', '2026-03-20 10:30:00', NULL, '2026-03-25 23:59:59', 5, 1),
+    (3, '2026-03-15 14:00:00', '2026-03-15 19:20:00', 'seed', 'seed', 'P3L9', 'USED', '2026-03-15 14:00:00', '2026-03-15 18:50:00', '2026-03-15 19:20:00', '2026-03-22 23:59:59', 7, 1),
+    (4, '2026-03-12 09:40:00', '2026-03-13 15:00:00', 'seed', 'seed', 'Q1W8', 'USED', '2026-03-12 09:40:00', '2026-03-13 14:40:00', '2026-03-13 15:00:00', '2026-03-17 23:59:59', 3, 2),
+    (5, '2026-03-01 08:00:00', '2026-03-11 00:00:00', 'seed', 'seed', NULL, 'EXPIRED', '2026-03-01 08:00:00', NULL, NULL, '2026-03-10 23:59:59', 6, 2),
+    (6, '2026-02-25 13:00:00', '2026-03-06 00:00:00', 'seed', 'seed', NULL, 'EXPIRED', '2026-02-25 13:00:00', NULL, NULL, '2026-03-05 23:59:59', 8, 4),
+    (7, '2026-03-20 09:15:00', '2026-03-20 09:15:00', 'seed', 'seed', NULL, 'UNUSED', '2026-03-20 09:15:00', NULL, NULL, '2026-03-25 23:59:59', 15, 5),
+    (8, '2026-03-20 08:20:00', '2026-03-20 08:55:00', 'seed', 'seed', 'N4D6', 'ACTIVATED', '2026-03-20 08:20:00', '2026-03-20 08:55:00', NULL, '2026-03-25 23:59:59', 4, 5);
 
 /* Events */
-INSERT IGNORE INTO event (event_id, created_at, modified_at, created_by, last_modified_by, title, subtitle, description, latitude, longitude, place, start_date_time, end_date_time, status, university_id) VALUES (1, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '전북대 행사 1', '함께 즐겨요!', '전북대학교 전북대 구정문 특설무대에서 열리는 행사', 35.84, 127.12, '전북대 구정문 특설무대', '2026-03-16 15:29:59', '2026-03-28 15:29:59', 'ACTIVE', 15);
-INSERT IGNORE INTO event_type (event_id, event_type) VALUES (1, 'FESTIVAL');
-INSERT IGNORE INTO event (event_id, created_at, modified_at, created_by, last_modified_by, title, subtitle, description, latitude, longitude, place, start_date_time, end_date_time, status, university_id) VALUES (2, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '전북대 행사 2', '함께 즐겨요!', '전북대학교 전북대 소운동장에서 열리는 행사', 35.84, 127.12, '전북대 소운동장', '2026-03-15 15:29:59', '2026-03-26 15:29:59', 'ACTIVE', 15);
-INSERT IGNORE INTO event_type (event_id, event_type) VALUES (2, 'FESTIVAL');
-INSERT IGNORE INTO event (event_id, created_at, modified_at, created_by, last_modified_by, title, subtitle, description, latitude, longitude, place, start_date_time, end_date_time, status, university_id) VALUES (3, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '전북대 행사 3', '함께 즐겨요!', '전북대학교 전북대 진수당에서 열리는 행사', 35.84, 127.12, '전북대 진수당', '2026-03-18 15:29:59', '2026-04-02 15:29:59', 'ACTIVE', 15);
-INSERT IGNORE INTO event_type (event_id, event_type) VALUES (3, 'FESTIVAL');
-INSERT IGNORE INTO event (event_id, created_at, modified_at, created_by, last_modified_by, title, subtitle, description, latitude, longitude, place, start_date_time, end_date_time, status, university_id) VALUES (4, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '전북대 행사 4', '함께 즐겨요!', '전북대학교 전북대 진수당에서 열리는 행사', 35.84, 127.12, '전북대 진수당', '2026-03-15 15:29:59', '2026-03-31 15:29:59', 'ACTIVE', 15);
-INSERT IGNORE INTO event_type (event_id, event_type) VALUES (4, 'FESTIVAL');
-INSERT IGNORE INTO event (event_id, created_at, modified_at, created_by, last_modified_by, title, subtitle, description, latitude, longitude, place, start_date_time, end_date_time, status, university_id) VALUES (5, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '전북대 행사 5', '함께 즐겨요!', '전북대학교 전북대 구정문 특설무대에서 열리는 행사', 35.84, 127.12, '전북대 구정문 특설무대', '2026-03-18 15:29:59', '2026-03-26 15:29:59', 'ACTIVE', 15);
-INSERT IGNORE INTO event_type (event_id, event_type) VALUES (5, 'FESTIVAL');
-INSERT IGNORE INTO event (event_id, created_at, modified_at, created_by, last_modified_by, title, subtitle, description, latitude, longitude, place, start_date_time, end_date_time, status, university_id) VALUES (6, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '전북대 행사 6', '함께 즐겨요!', '전북대학교 전북대 소운동장에서 열리는 행사', 35.84, 127.12, '전북대 소운동장', '2026-03-17 15:29:59', '2026-03-29 15:29:59', 'ACTIVE', 15);
-INSERT IGNORE INTO event_type (event_id, event_type) VALUES (6, 'FESTIVAL');
-INSERT IGNORE INTO event (event_id, created_at, modified_at, created_by, last_modified_by, title, subtitle, description, latitude, longitude, place, start_date_time, end_date_time, status, university_id) VALUES (7, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '전북대 행사 7', '함께 즐겨요!', '전북대학교 전북대 구정문 특설무대에서 열리는 행사', 35.84, 127.12, '전북대 구정문 특설무대', '2026-03-16 15:29:59', '2026-03-30 15:29:59', 'ACTIVE', 15);
-INSERT IGNORE INTO event_type (event_id, event_type) VALUES (7, 'FESTIVAL');
-INSERT IGNORE INTO event (event_id, created_at, modified_at, created_by, last_modified_by, title, subtitle, description, latitude, longitude, place, start_date_time, end_date_time, status, university_id) VALUES (8, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '전북대 행사 8', '함께 즐겨요!', '전북대학교 전북대 대운동장에서 열리는 행사', 35.84, 127.12, '전북대 대운동장', '2026-03-19 15:29:59', '2026-03-27 15:29:59', 'ACTIVE', 15);
-INSERT IGNORE INTO event_type (event_id, event_type) VALUES (8, 'FESTIVAL');
-INSERT IGNORE INTO event (event_id, created_at, modified_at, created_by, last_modified_by, title, subtitle, description, latitude, longitude, place, start_date_time, end_date_time, status, university_id) VALUES (9, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '전북대 행사 9', '함께 즐겨요!', '전북대학교 전북대 대운동장에서 열리는 행사', 35.84, 127.12, '전북대 대운동장', '2026-03-18 15:29:59', '2026-04-04 15:29:59', 'ACTIVE', 15);
-INSERT IGNORE INTO event_type (event_id, event_type) VALUES (9, 'FESTIVAL');
-INSERT IGNORE INTO event (event_id, created_at, modified_at, created_by, last_modified_by, title, subtitle, description, latitude, longitude, place, start_date_time, end_date_time, status, university_id) VALUES (10, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', '전북대 행사 10', '함께 즐겨요!', '전북대학교 덕진공원 특설무대에서 열리는 행사', 35.84, 127.12, '덕진공원 특설무대', '2026-03-15 15:29:59', '2026-04-04 15:29:59', 'ACTIVE', 15);
-INSERT IGNORE INTO event_type (event_id, event_type) VALUES (10, 'FESTIVAL');
+INSERT IGNORE INTO event (
+    event_id, created_at, modified_at, created_by, last_modified_by,
+    title, subtitle, description, latitude, longitude, place,
+    start_date_time, end_date_time, status, university_id
+) VALUES
+    (1, '2026-03-09 10:00:00', '2026-03-09 10:00:00', 'seed', 'seed', '전북대 봄맞이 푸드트럭 페스타', '학생회관 앞 3일간 진행', '학생회와 지역 청년상인이 함께하는 봄맞이 먹거리 행사입니다.', 35.847310, 127.128140, '전북대학교 학생회관 앞 광장', '2026-03-27 11:00:00', '2026-03-29 20:00:00', 'UPCOMING', 6),
+    (2, '2026-03-09 10:10:00', '2026-03-09 10:10:00', 'seed', 'seed', '중앙도서관 나이트런 콘서트', '공부 끝나고 즐기는 야간 공연', '도서관 야외 계단에서 진행되는 어쿠스틱 공연입니다.', 37.459830, 126.951990, '서울대학교 중앙도서관 야외계단', '2026-03-20 18:00:00', '2026-03-20 21:30:00', 'LIVE', 1),
+    (3, '2026-03-09 10:20:00', '2026-03-09 10:20:00', 'seed', 'seed', '동아리 리크루팅 박람회', '1학기 중앙동아리 모집', '공연, 체험, 홍보 부스를 한 번에 둘러볼 수 있는 모집 행사입니다.', 35.846580, 127.127760, '전북대학교 대운동장', '2026-03-12 13:00:00', '2026-03-12 18:00:00', 'ENDED', 6),
+    (4, '2026-03-09 10:30:00', '2026-03-09 10:30:00', 'seed', 'seed', '북문 플리마켓 with 로컬 브랜드', '학생 셀러와 로컬 브랜드 팝업', '의류, 리빙, 디저트 셀러가 함께 참여하는 플리마켓입니다.', 35.845970, 127.128880, '전북대 북문 공영주차장 옆 공터', '2026-03-26 12:00:00', '2026-03-26 19:00:00', 'UPCOMING', 6),
+    (5, '2026-03-09 10:40:00', '2026-03-09 10:40:00', 'seed', 'seed', '캠퍼스 야외 영화제', '잔디광장 빈백 상영회', '학생 휴게주간 프로그램으로 운영되는 야외 영화 상영 행사입니다.', 37.551900, 126.941710, '연세대학교 노천극장 앞 잔디광장', '2026-03-21 19:00:00', '2026-03-21 22:00:00', 'UPCOMING', 2);
 
-/* Reviews & News */
-INSERT IGNORE INTO store_news (store_news_id, created_at, modified_at, created_by, last_modified_by, store_id, title, content, like_count, comment_count) VALUES (1, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'owner', 'owner', 1, '시험기간 응원 할인', '전북대 학생증 제시 시 10% 추가 할인!', 29, 8);
-INSERT IGNORE INTO review (review_id, created_at, modified_at, created_by, last_modified_by, user_id, store_id, is_verified, rating, content, status, report_count, is_private, like_count) VALUES (1, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 2, 1, 1, 3, '가성비 최고입니다. 0', 'ACTIVE', 0, 0, 15);
-INSERT IGNORE INTO review (review_id, created_at, modified_at, created_by, last_modified_by, user_id, store_id, is_verified, rating, content, status, report_count, is_private, like_count) VALUES (2, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 8, 1, 1, 3, '정말 맛있어요! 1', 'ACTIVE', 0, 0, 7);
-INSERT IGNORE INTO store_news (store_news_id, created_at, modified_at, created_by, last_modified_by, store_id, title, content, like_count, comment_count) VALUES (2, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'owner', 'owner', 2, '시험기간 응원 할인', '전북대 학생증 제시 시 10% 추가 할인!', 17, 6);
-INSERT IGNORE INTO review (review_id, created_at, modified_at, created_by, last_modified_by, user_id, store_id, is_verified, rating, content, status, report_count, is_private, like_count) VALUES (3, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 11, 2, 1, 5, '정말 맛있어요! 0', 'ACTIVE', 0, 0, 5);
-INSERT IGNORE INTO store_news (store_news_id, created_at, modified_at, created_by, last_modified_by, store_id, title, content, like_count, comment_count) VALUES (3, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'owner', 'owner', 3, '시험기간 응원 할인', '전북대 학생증 제시 시 10% 추가 할인!', 7, 9);
-INSERT IGNORE INTO review (review_id, created_at, modified_at, created_by, last_modified_by, user_id, store_id, is_verified, rating, content, status, report_count, is_private, like_count) VALUES (4, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 10, 3, 1, 5, '공강 시간에 오기 좋아요. 0', 'ACTIVE', 0, 0, 13);
-INSERT IGNORE INTO review (review_id, created_at, modified_at, created_by, last_modified_by, user_id, store_id, is_verified, rating, content, status, report_count, is_private, like_count) VALUES (5, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 2, 3, 1, 5, '가성비 최고입니다. 1', 'ACTIVE', 0, 0, 4);
-INSERT IGNORE INTO store_news (store_news_id, created_at, modified_at, created_by, last_modified_by, store_id, title, content, like_count, comment_count) VALUES (4, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'owner', 'owner', 4, '시험기간 응원 할인', '전북대 학생증 제시 시 10% 추가 할인!', 12, 5);
-INSERT IGNORE INTO review (review_id, created_at, modified_at, created_by, last_modified_by, user_id, store_id, is_verified, rating, content, status, report_count, is_private, like_count) VALUES (6, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 10, 4, 1, 3, '사장님이 친절해요. 0', 'ACTIVE', 0, 0, 0);
-INSERT IGNORE INTO review (review_id, created_at, modified_at, created_by, last_modified_by, user_id, store_id, is_verified, rating, content, status, report_count, is_private, like_count) VALUES (7, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 10, 4, 1, 4, '사장님이 친절해요. 1', 'ACTIVE', 0, 0, 10);
-INSERT IGNORE INTO review (review_id, created_at, modified_at, created_by, last_modified_by, user_id, store_id, is_verified, rating, content, status, report_count, is_private, like_count) VALUES (8, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 5, 4, 1, 5, '정말 맛있어요! 2', 'ACTIVE', 0, 0, 2);
-INSERT IGNORE INTO store_news (store_news_id, created_at, modified_at, created_by, last_modified_by, store_id, title, content, like_count, comment_count) VALUES (5, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'owner', 'owner', 5, '시험기간 응원 할인', '전북대 학생증 제시 시 10% 추가 할인!', 5, 8);
-INSERT IGNORE INTO review (review_id, created_at, modified_at, created_by, last_modified_by, user_id, store_id, is_verified, rating, content, status, report_count, is_private, like_count) VALUES (9, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 6, 5, 1, 3, '사장님이 친절해요. 0', 'ACTIVE', 0, 0, 11);
-INSERT IGNORE INTO store_news (store_news_id, created_at, modified_at, created_by, last_modified_by, store_id, title, content, like_count, comment_count) VALUES (6, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'owner', 'owner', 6, '시험기간 응원 할인', '전북대 학생증 제시 시 10% 추가 할인!', 20, 7);
-INSERT IGNORE INTO review (review_id, created_at, modified_at, created_by, last_modified_by, user_id, store_id, is_verified, rating, content, status, report_count, is_private, like_count) VALUES (10, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 6, 6, 1, 3, '정말 맛있어요! 0', 'ACTIVE', 0, 0, 7);
-INSERT IGNORE INTO review (review_id, created_at, modified_at, created_by, last_modified_by, user_id, store_id, is_verified, rating, content, status, report_count, is_private, like_count) VALUES (11, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 10, 6, 1, 4, '전북대 최고 맛집! 1', 'ACTIVE', 0, 0, 3);
-INSERT IGNORE INTO review (review_id, created_at, modified_at, created_by, last_modified_by, user_id, store_id, is_verified, rating, content, status, report_count, is_private, like_count) VALUES (12, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 6, 6, 1, 5, '전북대 최고 맛집! 2', 'ACTIVE', 0, 0, 5);
-INSERT IGNORE INTO store_news (store_news_id, created_at, modified_at, created_by, last_modified_by, store_id, title, content, like_count, comment_count) VALUES (7, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'owner', 'owner', 7, '시험기간 응원 할인', '전북대 학생증 제시 시 10% 추가 할인!', 23, 0);
-INSERT IGNORE INTO review (review_id, created_at, modified_at, created_by, last_modified_by, user_id, store_id, is_verified, rating, content, status, report_count, is_private, like_count) VALUES (13, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 7, 7, 1, 4, '전북대 최고 맛집! 0', 'ACTIVE', 0, 0, 0);
-INSERT IGNORE INTO review (review_id, created_at, modified_at, created_by, last_modified_by, user_id, store_id, is_verified, rating, content, status, report_count, is_private, like_count) VALUES (14, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 2, 7, 1, 4, '가성비 최고입니다. 1', 'ACTIVE', 0, 0, 12);
-INSERT IGNORE INTO review (review_id, created_at, modified_at, created_by, last_modified_by, user_id, store_id, is_verified, rating, content, status, report_count, is_private, like_count) VALUES (15, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 11, 7, 1, 4, '사장님이 친절해요. 2', 'ACTIVE', 0, 0, 3);
-INSERT IGNORE INTO store_news (store_news_id, created_at, modified_at, created_by, last_modified_by, store_id, title, content, like_count, comment_count) VALUES (8, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'owner', 'owner', 8, '시험기간 응원 할인', '전북대 학생증 제시 시 10% 추가 할인!', 13, 9);
-INSERT IGNORE INTO review (review_id, created_at, modified_at, created_by, last_modified_by, user_id, store_id, is_verified, rating, content, status, report_count, is_private, like_count) VALUES (16, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 8, 8, 1, 4, '정말 맛있어요! 0', 'ACTIVE', 0, 0, 2);
-INSERT IGNORE INTO review (review_id, created_at, modified_at, created_by, last_modified_by, user_id, store_id, is_verified, rating, content, status, report_count, is_private, like_count) VALUES (17, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 10, 8, 1, 4, '전북대 최고 맛집! 1', 'ACTIVE', 0, 0, 5);
-INSERT IGNORE INTO review (review_id, created_at, modified_at, created_by, last_modified_by, user_id, store_id, is_verified, rating, content, status, report_count, is_private, like_count) VALUES (18, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 3, 8, 1, 4, '가성비 최고입니다. 2', 'ACTIVE', 0, 0, 9);
-INSERT IGNORE INTO store_news (store_news_id, created_at, modified_at, created_by, last_modified_by, store_id, title, content, like_count, comment_count) VALUES (9, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'owner', 'owner', 9, '시험기간 응원 할인', '전북대 학생증 제시 시 10% 추가 할인!', 28, 2);
-INSERT IGNORE INTO review (review_id, created_at, modified_at, created_by, last_modified_by, user_id, store_id, is_verified, rating, content, status, report_count, is_private, like_count) VALUES (19, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 5, 9, 1, 3, '사장님이 친절해요. 0', 'ACTIVE', 0, 0, 2);
-INSERT IGNORE INTO review (review_id, created_at, modified_at, created_by, last_modified_by, user_id, store_id, is_verified, rating, content, status, report_count, is_private, like_count) VALUES (20, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 10, 9, 1, 5, '정말 맛있어요! 1', 'ACTIVE', 0, 0, 6);
-INSERT IGNORE INTO review (review_id, created_at, modified_at, created_by, last_modified_by, user_id, store_id, is_verified, rating, content, status, report_count, is_private, like_count) VALUES (21, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 3, 9, 1, 4, '전북대 최고 맛집! 2', 'ACTIVE', 0, 0, 2);
-INSERT IGNORE INTO store_news (store_news_id, created_at, modified_at, created_by, last_modified_by, store_id, title, content, like_count, comment_count) VALUES (10, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'owner', 'owner', 10, '시험기간 응원 할인', '전북대 학생증 제시 시 10% 추가 할인!', 27, 2);
-INSERT IGNORE INTO review (review_id, created_at, modified_at, created_by, last_modified_by, user_id, store_id, is_verified, rating, content, status, report_count, is_private, like_count) VALUES (22, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 5, 10, 1, 3, '가성비 최고입니다. 0', 'ACTIVE', 0, 0, 14);
-INSERT IGNORE INTO review (review_id, created_at, modified_at, created_by, last_modified_by, user_id, store_id, is_verified, rating, content, status, report_count, is_private, like_count) VALUES (23, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 6, 10, 1, 4, '가성비 최고입니다. 1', 'ACTIVE', 0, 0, 5);
-INSERT IGNORE INTO review (review_id, created_at, modified_at, created_by, last_modified_by, user_id, store_id, is_verified, rating, content, status, report_count, is_private, like_count) VALUES (24, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 9, 10, 1, 3, '가성비 최고입니다. 2', 'ACTIVE', 0, 0, 3);
-INSERT IGNORE INTO store_news (store_news_id, created_at, modified_at, created_by, last_modified_by, store_id, title, content, like_count, comment_count) VALUES (11, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'owner', 'owner', 11, '시험기간 응원 할인', '전북대 학생증 제시 시 10% 추가 할인!', 18, 3);
-INSERT IGNORE INTO review (review_id, created_at, modified_at, created_by, last_modified_by, user_id, store_id, is_verified, rating, content, status, report_count, is_private, like_count) VALUES (25, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 8, 11, 1, 3, '사장님이 친절해요. 0', 'ACTIVE', 0, 0, 5);
-INSERT IGNORE INTO review (review_id, created_at, modified_at, created_by, last_modified_by, user_id, store_id, is_verified, rating, content, status, report_count, is_private, like_count) VALUES (26, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 9, 11, 1, 4, '정말 맛있어요! 1', 'ACTIVE', 0, 0, 9);
-INSERT IGNORE INTO review (review_id, created_at, modified_at, created_by, last_modified_by, user_id, store_id, is_verified, rating, content, status, report_count, is_private, like_count) VALUES (27, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 9, 11, 1, 4, '전북대 최고 맛집! 2', 'ACTIVE', 0, 0, 8);
-INSERT IGNORE INTO store_news (store_news_id, created_at, modified_at, created_by, last_modified_by, store_id, title, content, like_count, comment_count) VALUES (12, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'owner', 'owner', 12, '시험기간 응원 할인', '전북대 학생증 제시 시 10% 추가 할인!', 23, 1);
-INSERT IGNORE INTO review (review_id, created_at, modified_at, created_by, last_modified_by, user_id, store_id, is_verified, rating, content, status, report_count, is_private, like_count) VALUES (28, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 6, 12, 1, 4, '사장님이 친절해요. 0', 'ACTIVE', 0, 0, 7);
-INSERT IGNORE INTO review (review_id, created_at, modified_at, created_by, last_modified_by, user_id, store_id, is_verified, rating, content, status, report_count, is_private, like_count) VALUES (29, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 8, 12, 1, 5, '가성비 최고입니다. 1', 'ACTIVE', 0, 0, 7);
-INSERT IGNORE INTO review (review_id, created_at, modified_at, created_by, last_modified_by, user_id, store_id, is_verified, rating, content, status, report_count, is_private, like_count) VALUES (30, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 6, 12, 1, 3, '공강 시간에 오기 좋아요. 2', 'ACTIVE', 0, 0, 3);
-INSERT IGNORE INTO store_news (store_news_id, created_at, modified_at, created_by, last_modified_by, store_id, title, content, like_count, comment_count) VALUES (13, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'owner', 'owner', 13, '시험기간 응원 할인', '전북대 학생증 제시 시 10% 추가 할인!', 20, 0);
-INSERT IGNORE INTO review (review_id, created_at, modified_at, created_by, last_modified_by, user_id, store_id, is_verified, rating, content, status, report_count, is_private, like_count) VALUES (31, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 7, 13, 1, 3, '전북대 최고 맛집! 0', 'ACTIVE', 0, 0, 9);
-INSERT IGNORE INTO review (review_id, created_at, modified_at, created_by, last_modified_by, user_id, store_id, is_verified, rating, content, status, report_count, is_private, like_count) VALUES (32, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 10, 13, 1, 3, '정말 맛있어요! 1', 'ACTIVE', 0, 0, 8);
-INSERT IGNORE INTO review (review_id, created_at, modified_at, created_by, last_modified_by, user_id, store_id, is_verified, rating, content, status, report_count, is_private, like_count) VALUES (33, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 8, 13, 1, 4, '사장님이 친절해요. 2', 'ACTIVE', 0, 0, 0);
-INSERT IGNORE INTO store_news (store_news_id, created_at, modified_at, created_by, last_modified_by, store_id, title, content, like_count, comment_count) VALUES (14, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'owner', 'owner', 14, '시험기간 응원 할인', '전북대 학생증 제시 시 10% 추가 할인!', 7, 7);
-INSERT IGNORE INTO review (review_id, created_at, modified_at, created_by, last_modified_by, user_id, store_id, is_verified, rating, content, status, report_count, is_private, like_count) VALUES (34, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 8, 14, 1, 4, '사장님이 친절해요. 0', 'ACTIVE', 0, 0, 15);
-INSERT IGNORE INTO store_news (store_news_id, created_at, modified_at, created_by, last_modified_by, store_id, title, content, like_count, comment_count) VALUES (15, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'owner', 'owner', 15, '시험기간 응원 할인', '전북대 학생증 제시 시 10% 추가 할인!', 15, 1);
-INSERT IGNORE INTO review (review_id, created_at, modified_at, created_by, last_modified_by, user_id, store_id, is_verified, rating, content, status, report_count, is_private, like_count) VALUES (35, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 4, 15, 1, 4, '정말 맛있어요! 0', 'ACTIVE', 0, 0, 2);
-INSERT IGNORE INTO review (review_id, created_at, modified_at, created_by, last_modified_by, user_id, store_id, is_verified, rating, content, status, report_count, is_private, like_count) VALUES (36, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 11, 15, 1, 5, '정말 맛있어요! 1', 'ACTIVE', 0, 0, 15);
-INSERT IGNORE INTO store_news (store_news_id, created_at, modified_at, created_by, last_modified_by, store_id, title, content, like_count, comment_count) VALUES (16, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'owner', 'owner', 16, '시험기간 응원 할인', '전북대 학생증 제시 시 10% 추가 할인!', 1, 9);
-INSERT IGNORE INTO review (review_id, created_at, modified_at, created_by, last_modified_by, user_id, store_id, is_verified, rating, content, status, report_count, is_private, like_count) VALUES (37, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 3, 16, 1, 5, '전북대 최고 맛집! 0', 'ACTIVE', 0, 0, 8);
-INSERT IGNORE INTO review (review_id, created_at, modified_at, created_by, last_modified_by, user_id, store_id, is_verified, rating, content, status, report_count, is_private, like_count) VALUES (38, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 2, 16, 1, 4, '정말 맛있어요! 1', 'ACTIVE', 0, 0, 3);
-INSERT IGNORE INTO review (review_id, created_at, modified_at, created_by, last_modified_by, user_id, store_id, is_verified, rating, content, status, report_count, is_private, like_count) VALUES (39, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 3, 16, 1, 5, '정말 맛있어요! 2', 'ACTIVE', 0, 0, 12);
-INSERT IGNORE INTO store_news (store_news_id, created_at, modified_at, created_by, last_modified_by, store_id, title, content, like_count, comment_count) VALUES (17, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'owner', 'owner', 17, '시험기간 응원 할인', '전북대 학생증 제시 시 10% 추가 할인!', 2, 3);
-INSERT IGNORE INTO review (review_id, created_at, modified_at, created_by, last_modified_by, user_id, store_id, is_verified, rating, content, status, report_count, is_private, like_count) VALUES (40, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 7, 17, 1, 5, '전북대 최고 맛집! 0', 'ACTIVE', 0, 0, 12);
-INSERT IGNORE INTO review (review_id, created_at, modified_at, created_by, last_modified_by, user_id, store_id, is_verified, rating, content, status, report_count, is_private, like_count) VALUES (41, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 3, 17, 1, 3, '사장님이 친절해요. 1', 'ACTIVE', 0, 0, 9);
-INSERT IGNORE INTO review (review_id, created_at, modified_at, created_by, last_modified_by, user_id, store_id, is_verified, rating, content, status, report_count, is_private, like_count) VALUES (42, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 9, 17, 1, 3, '가성비 최고입니다. 2', 'ACTIVE', 0, 0, 14);
-INSERT IGNORE INTO store_news (store_news_id, created_at, modified_at, created_by, last_modified_by, store_id, title, content, like_count, comment_count) VALUES (18, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'owner', 'owner', 18, '시험기간 응원 할인', '전북대 학생증 제시 시 10% 추가 할인!', 27, 4);
-INSERT IGNORE INTO review (review_id, created_at, modified_at, created_by, last_modified_by, user_id, store_id, is_verified, rating, content, status, report_count, is_private, like_count) VALUES (43, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 8, 18, 1, 3, '가성비 최고입니다. 0', 'ACTIVE', 0, 0, 3);
-INSERT IGNORE INTO store_news (store_news_id, created_at, modified_at, created_by, last_modified_by, store_id, title, content, like_count, comment_count) VALUES (19, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'owner', 'owner', 19, '시험기간 응원 할인', '전북대 학생증 제시 시 10% 추가 할인!', 13, 1);
-INSERT IGNORE INTO review (review_id, created_at, modified_at, created_by, last_modified_by, user_id, store_id, is_verified, rating, content, status, report_count, is_private, like_count) VALUES (44, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 3, 19, 1, 4, '전북대 최고 맛집! 0', 'ACTIVE', 0, 0, 0);
-INSERT IGNORE INTO review (review_id, created_at, modified_at, created_by, last_modified_by, user_id, store_id, is_verified, rating, content, status, report_count, is_private, like_count) VALUES (45, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 9, 19, 1, 5, '공강 시간에 오기 좋아요. 1', 'ACTIVE', 0, 0, 13);
-INSERT IGNORE INTO review (review_id, created_at, modified_at, created_by, last_modified_by, user_id, store_id, is_verified, rating, content, status, report_count, is_private, like_count) VALUES (46, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 8, 19, 1, 3, '공강 시간에 오기 좋아요. 2', 'ACTIVE', 0, 0, 1);
-INSERT IGNORE INTO store_news (store_news_id, created_at, modified_at, created_by, last_modified_by, store_id, title, content, like_count, comment_count) VALUES (20, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'owner', 'owner', 20, '시험기간 응원 할인', '전북대 학생증 제시 시 10% 추가 할인!', 11, 2);
-INSERT IGNORE INTO review (review_id, created_at, modified_at, created_by, last_modified_by, user_id, store_id, is_verified, rating, content, status, report_count, is_private, like_count) VALUES (47, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 7, 20, 1, 4, '가성비 최고입니다. 0', 'ACTIVE', 0, 0, 10);
-INSERT IGNORE INTO review (review_id, created_at, modified_at, created_by, last_modified_by, user_id, store_id, is_verified, rating, content, status, report_count, is_private, like_count) VALUES (48, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 2, 20, 1, 5, '전북대 최고 맛집! 1', 'ACTIVE', 0, 0, 0);
-INSERT IGNORE INTO review (review_id, created_at, modified_at, created_by, last_modified_by, user_id, store_id, is_verified, rating, content, status, report_count, is_private, like_count) VALUES (49, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 6, 20, 1, 4, '가성비 최고입니다. 2', 'ACTIVE', 0, 0, 12);
-INSERT IGNORE INTO store_news (store_news_id, created_at, modified_at, created_by, last_modified_by, store_id, title, content, like_count, comment_count) VALUES (21, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'owner', 'owner', 21, '시험기간 응원 할인', '전북대 학생증 제시 시 10% 추가 할인!', 8, 1);
-INSERT IGNORE INTO review (review_id, created_at, modified_at, created_by, last_modified_by, user_id, store_id, is_verified, rating, content, status, report_count, is_private, like_count) VALUES (50, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 2, 21, 1, 5, '전북대 최고 맛집! 0', 'ACTIVE', 0, 0, 1);
-INSERT IGNORE INTO review (review_id, created_at, modified_at, created_by, last_modified_by, user_id, store_id, is_verified, rating, content, status, report_count, is_private, like_count) VALUES (51, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 8, 21, 1, 3, '가성비 최고입니다. 1', 'ACTIVE', 0, 0, 14);
-INSERT IGNORE INTO review (review_id, created_at, modified_at, created_by, last_modified_by, user_id, store_id, is_verified, rating, content, status, report_count, is_private, like_count) VALUES (52, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 11, 21, 1, 5, '사장님이 친절해요. 2', 'ACTIVE', 0, 0, 13);
-INSERT IGNORE INTO store_news (store_news_id, created_at, modified_at, created_by, last_modified_by, store_id, title, content, like_count, comment_count) VALUES (22, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'owner', 'owner', 22, '시험기간 응원 할인', '전북대 학생증 제시 시 10% 추가 할인!', 6, 1);
-INSERT IGNORE INTO review (review_id, created_at, modified_at, created_by, last_modified_by, user_id, store_id, is_verified, rating, content, status, report_count, is_private, like_count) VALUES (53, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 9, 22, 1, 5, '가성비 최고입니다. 0', 'ACTIVE', 0, 0, 1);
-INSERT IGNORE INTO review (review_id, created_at, modified_at, created_by, last_modified_by, user_id, store_id, is_verified, rating, content, status, report_count, is_private, like_count) VALUES (54, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 11, 22, 1, 4, '가성비 최고입니다. 1', 'ACTIVE', 0, 0, 14);
-INSERT IGNORE INTO review (review_id, created_at, modified_at, created_by, last_modified_by, user_id, store_id, is_verified, rating, content, status, report_count, is_private, like_count) VALUES (55, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 5, 22, 1, 3, '공강 시간에 오기 좋아요. 2', 'ACTIVE', 0, 0, 7);
-INSERT IGNORE INTO store_news (store_news_id, created_at, modified_at, created_by, last_modified_by, store_id, title, content, like_count, comment_count) VALUES (23, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'owner', 'owner', 23, '시험기간 응원 할인', '전북대 학생증 제시 시 10% 추가 할인!', 5, 6);
-INSERT IGNORE INTO review (review_id, created_at, modified_at, created_by, last_modified_by, user_id, store_id, is_verified, rating, content, status, report_count, is_private, like_count) VALUES (56, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 7, 23, 1, 3, '가성비 최고입니다. 0', 'ACTIVE', 0, 0, 3);
-INSERT IGNORE INTO review (review_id, created_at, modified_at, created_by, last_modified_by, user_id, store_id, is_verified, rating, content, status, report_count, is_private, like_count) VALUES (57, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 11, 23, 1, 4, '사장님이 친절해요. 1', 'ACTIVE', 0, 0, 13);
-INSERT IGNORE INTO store_news (store_news_id, created_at, modified_at, created_by, last_modified_by, store_id, title, content, like_count, comment_count) VALUES (24, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'owner', 'owner', 24, '시험기간 응원 할인', '전북대 학생증 제시 시 10% 추가 할인!', 3, 9);
-INSERT IGNORE INTO review (review_id, created_at, modified_at, created_by, last_modified_by, user_id, store_id, is_verified, rating, content, status, report_count, is_private, like_count) VALUES (58, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 9, 24, 1, 4, '정말 맛있어요! 0', 'ACTIVE', 0, 0, 13);
-INSERT IGNORE INTO review (review_id, created_at, modified_at, created_by, last_modified_by, user_id, store_id, is_verified, rating, content, status, report_count, is_private, like_count) VALUES (59, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 7, 24, 1, 5, '사장님이 친절해요. 1', 'ACTIVE', 0, 0, 5);
-INSERT IGNORE INTO store_news (store_news_id, created_at, modified_at, created_by, last_modified_by, store_id, title, content, like_count, comment_count) VALUES (25, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'owner', 'owner', 25, '시험기간 응원 할인', '전북대 학생증 제시 시 10% 추가 할인!', 0, 5);
-INSERT IGNORE INTO review (review_id, created_at, modified_at, created_by, last_modified_by, user_id, store_id, is_verified, rating, content, status, report_count, is_private, like_count) VALUES (60, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 5, 25, 1, 4, '공강 시간에 오기 좋아요. 0', 'ACTIVE', 0, 0, 6);
-INSERT IGNORE INTO store_news (store_news_id, created_at, modified_at, created_by, last_modified_by, store_id, title, content, like_count, comment_count) VALUES (26, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'owner', 'owner', 26, '시험기간 응원 할인', '전북대 학생증 제시 시 10% 추가 할인!', 7, 7);
-INSERT IGNORE INTO review (review_id, created_at, modified_at, created_by, last_modified_by, user_id, store_id, is_verified, rating, content, status, report_count, is_private, like_count) VALUES (61, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 7, 26, 1, 3, '공강 시간에 오기 좋아요. 0', 'ACTIVE', 0, 0, 5);
-INSERT IGNORE INTO review (review_id, created_at, modified_at, created_by, last_modified_by, user_id, store_id, is_verified, rating, content, status, report_count, is_private, like_count) VALUES (62, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 5, 26, 1, 4, '전북대 최고 맛집! 1', 'ACTIVE', 0, 0, 3);
-INSERT IGNORE INTO store_news (store_news_id, created_at, modified_at, created_by, last_modified_by, store_id, title, content, like_count, comment_count) VALUES (27, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'owner', 'owner', 27, '시험기간 응원 할인', '전북대 학생증 제시 시 10% 추가 할인!', 22, 5);
-INSERT IGNORE INTO review (review_id, created_at, modified_at, created_by, last_modified_by, user_id, store_id, is_verified, rating, content, status, report_count, is_private, like_count) VALUES (63, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 10, 27, 1, 4, '사장님이 친절해요. 0', 'ACTIVE', 0, 0, 1);
-INSERT IGNORE INTO store_news (store_news_id, created_at, modified_at, created_by, last_modified_by, store_id, title, content, like_count, comment_count) VALUES (28, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'owner', 'owner', 28, '시험기간 응원 할인', '전북대 학생증 제시 시 10% 추가 할인!', 24, 3);
-INSERT IGNORE INTO review (review_id, created_at, modified_at, created_by, last_modified_by, user_id, store_id, is_verified, rating, content, status, report_count, is_private, like_count) VALUES (64, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 3, 28, 1, 3, '전북대 최고 맛집! 0', 'ACTIVE', 0, 0, 0);
-INSERT IGNORE INTO review (review_id, created_at, modified_at, created_by, last_modified_by, user_id, store_id, is_verified, rating, content, status, report_count, is_private, like_count) VALUES (65, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 4, 28, 1, 5, '공강 시간에 오기 좋아요. 1', 'ACTIVE', 0, 0, 6);
-INSERT IGNORE INTO store_news (store_news_id, created_at, modified_at, created_by, last_modified_by, store_id, title, content, like_count, comment_count) VALUES (29, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'owner', 'owner', 29, '시험기간 응원 할인', '전북대 학생증 제시 시 10% 추가 할인!', 16, 10);
-INSERT IGNORE INTO review (review_id, created_at, modified_at, created_by, last_modified_by, user_id, store_id, is_verified, rating, content, status, report_count, is_private, like_count) VALUES (66, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 8, 29, 1, 4, '전북대 최고 맛집! 0', 'ACTIVE', 0, 0, 15);
-INSERT IGNORE INTO review (review_id, created_at, modified_at, created_by, last_modified_by, user_id, store_id, is_verified, rating, content, status, report_count, is_private, like_count) VALUES (67, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 9, 29, 1, 3, '가성비 최고입니다. 1', 'ACTIVE', 0, 0, 4);
-INSERT IGNORE INTO store_news (store_news_id, created_at, modified_at, created_by, last_modified_by, store_id, title, content, like_count, comment_count) VALUES (30, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'owner', 'owner', 30, '시험기간 응원 할인', '전북대 학생증 제시 시 10% 추가 할인!', 30, 9);
-INSERT IGNORE INTO review (review_id, created_at, modified_at, created_by, last_modified_by, user_id, store_id, is_verified, rating, content, status, report_count, is_private, like_count) VALUES (68, '2026-03-20 15:29:59', '2026-03-20 15:29:59', 'sys', 'sys', 5, 30, 1, 4, '전북대 최고 맛집! 0', 'ACTIVE', 0, 0, 3);
+INSERT IGNORE INTO event_type (event_id, event_type) VALUES
+    (1, 'FOOD_EVENT'),
+    (1, 'STUDENT_EVENT'),
+    (2, 'SCHOOL_EVENT'),
+    (2, 'PERFORMANCE'),
+    (3, 'STUDENT_EVENT'),
+    (3, 'SCHOOL_EVENT'),
+    (4, 'FLEA_MARKET'),
+    (4, 'BRAND_POPUP'),
+    (5, 'STUDENT_EVENT'),
+    (5, 'PERFORMANCE');
+
+INSERT IGNORE INTO event_image (
+    event_image_id, created_at, modified_at, created_by, last_modified_by,
+    event_id, image_url, order_index, image_type
+) VALUES
+    (1, '2026-03-09 11:00:00', '2026-03-09 11:00:00', 'seed', 'seed', 1, 'https://cdn.looky.dev/events/1-banner.jpg', 0, 'BANNER'),
+    (2, '2026-03-09 11:01:00', '2026-03-09 11:01:00', 'seed', 'seed', 1, 'https://cdn.looky.dev/events/1-map.jpg', 1, 'GENERAL'),
+    (3, '2026-03-09 11:02:00', '2026-03-09 11:02:00', 'seed', 'seed', 2, 'https://cdn.looky.dev/events/2-banner.jpg', 0, 'BANNER'),
+    (4, '2026-03-09 11:03:00', '2026-03-09 11:03:00', 'seed', 'seed', 3, 'https://cdn.looky.dev/events/3-booth.jpg', 0, 'GENERAL'),
+    (5, '2026-03-09 11:04:00', '2026-03-09 11:04:00', 'seed', 'seed', 4, 'https://cdn.looky.dev/events/4-banner.jpg', 0, 'BANNER'),
+    (6, '2026-03-09 11:05:00', '2026-03-09 11:05:00', 'seed', 'seed', 5, 'https://cdn.looky.dev/events/5-banner.jpg', 0, 'BANNER');
+
+/* Partnerships and favorites */
+INSERT IGNORE INTO partnership (
+    partnership_id, created_at, modified_at, created_by, last_modified_by, benefit, starts_at, ends_at, store_id, organization_id
+) VALUES
+    (1, '2026-03-10 09:00:00', '2026-03-10 09:00:00', 'seed', 'seed', '공과대 학생회 제휴로 제육정식 1,000원 추가 할인', '2026-03-15', '2026-06-30', 1, 2),
+    (2, '2026-03-10 09:10:00', '2026-03-10 09:10:00', 'seed', 'seed', '중앙동아리연합회 회원 대상 음료 사이즈업 무료', '2026-03-18', '2026-05-31', 2, 4),
+    (3, '2026-03-10 09:20:00', '2026-03-10 09:20:00', 'seed', 'seed', '총학생회 행사 스태프 대상 샐러드 메뉴 15% 할인', '2026-03-20', '2026-04-30', 7, 1);
+
+INSERT IGNORE INTO favorite_store (
+    favorite_store_id, created_at, modified_at, created_by, last_modified_by, user_id, store_id
+) VALUES
+    (1, '2026-03-11 08:00:00', '2026-03-11 08:00:00', 'seed', 'seed', 2, 1),
+    (2, '2026-03-11 08:05:00', '2026-03-11 08:05:00', 'seed', 'seed', 3, 2),
+    (3, '2026-03-11 08:10:00', '2026-03-11 08:10:00', 'seed', 'seed', 5, 7),
+    (4, '2026-03-11 08:15:00', '2026-03-11 08:15:00', 'seed', 'seed', 6, 5),
+    (5, '2026-03-11 08:20:00', '2026-03-11 08:20:00', 'seed', 'seed', 7, 3),
+    (6, '2026-03-11 08:25:00', '2026-03-11 08:25:00', 'seed', 'seed', 15, 7);
+
+/* Claim and report samples */
+INSERT IGNORE INTO store_claim (
+    store_claim_request_id, created_at, modified_at, created_by, last_modified_by,
+    store_id, user_id, biz_reg_no, representative_name, store_name, store_phone,
+    license_image_url, status, reject_reason, admin_memo
+) VALUES
+    (1, '2026-03-18 09:00:00', '2026-03-18 09:00:00', 'seed', 'seed', 6, 9, '204-81-20006', '김윤서', '전북국수 정문점', '063-271-2006', 'https://cdn.looky.dev/claims/1-license.jpg', 'PENDING', NULL, '자동 등록 매장과 제출 서류의 주소 일치 여부 확인 필요'),
+    (2, '2026-03-17 14:30:00', '2026-03-19 16:00:00', 'seed', 'seed', 8, 11, '204-81-20008', '이도현', '만화카페 아지트', '02-871-2008', 'https://cdn.looky.dev/claims/2-license.jpg', 'REJECTED', '휴업 상태와 사업자 등록 주소가 일치하지 않습니다.', '추가 서류 제출 전까지 승인 보류');
+
+INSERT IGNORE INTO store_report (
+    store_report_id, created_at, modified_at, created_by, last_modified_by, detail, store_id, reporter_id
+) VALUES
+    (1, '2026-03-19 13:20:00', '2026-03-19 13:20:00', 'seed', 'seed', '지도 위치는 맞지만 실제 영업 여부가 불명확합니다.', 6, 3),
+    (2, '2026-03-19 18:40:00', '2026-03-19 18:40:00', 'seed', 'seed', '휴업 안내문이 붙어 있었고 현재 입장이 불가능했습니다.', 8, 2);
+
+INSERT IGNORE INTO store_report_reason (store_report_id, reason) VALUES
+    (1, 'LOCATION_MISMATCH'),
+    (1, 'INFO_ERROR'),
+    (2, 'CLOSED_OR_MOVED');
+
+/* Store news */
+INSERT IGNORE INTO store_news (
+    store_news_id, created_at, modified_at, created_by, last_modified_by,
+    store_id, title, content, like_count, comment_count
+) VALUES
+    (1, '2026-03-16 09:00:00', '2026-03-16 09:00:00', 'seed', 'seed', 1, '혼밥 손님 위한 1인석 확장', '점심 혼잡 시간에도 빠르게 이용할 수 있도록 창가 1인석 6좌석을 추가했습니다.', 14, 2),
+    (2, '2026-03-16 10:00:00', '2026-03-16 10:00:00', 'seed', 'seed', 2, '벚꽃 시즌 한정 딸기라떼 출시', '전북대 벚꽃 시즌 동안만 판매하는 생딸기 라떼와 크럼블 타르트를 함께 운영합니다.', 22, 1),
+    (3, '2026-03-16 11:00:00', '2026-03-16 11:00:00', 'seed', 'seed', 3, '금요일 11시까지 연장 영업', '금요일은 하이볼 주문 고객이 많아 기존보다 1시간 연장 영업합니다.', 9, 1),
+    (4, '2026-03-16 12:00:00', '2026-03-16 12:00:00', 'seed', 'seed', 4, '시험기간 학생증 인증 1시간 추가', '시험기간 한정으로 3시간권 구매 시 학생증 인증 고객에게 1시간을 추가 제공합니다.', 17, 2),
+    (5, '2026-03-16 13:00:00', '2026-03-16 13:00:00', 'seed', 'seed', 5, '민감성 피부 진정 패키지 오픈', '트러블 집중 케어와 진정팩을 묶은 학생 전용 패키지를 새로 구성했습니다.', 6, 0),
+    (6, '2026-03-16 14:00:00', '2026-03-16 14:00:00', 'seed', 'seed', 7, '비건 드레싱 2종 추가', '오리엔탈 드레싱과 레몬허브 드레싱 모두 비건 레시피로 전환했습니다.', 18, 2);
+
+INSERT IGNORE INTO store_news_image (
+    store_news_image_id, created_at, modified_at, created_by, last_modified_by, store_news_id, image_url, order_index
+) VALUES
+    (1, '2026-03-16 09:05:00', '2026-03-16 09:05:00', 'seed', 'seed', 1, 'https://cdn.looky.dev/news/1.jpg', 0),
+    (2, '2026-03-16 10:05:00', '2026-03-16 10:05:00', 'seed', 'seed', 2, 'https://cdn.looky.dev/news/2.jpg', 0),
+    (3, '2026-03-16 12:05:00', '2026-03-16 12:05:00', 'seed', 'seed', 4, 'https://cdn.looky.dev/news/4.jpg', 0),
+    (4, '2026-03-16 14:05:00', '2026-03-16 14:05:00', 'seed', 'seed', 6, 'https://cdn.looky.dev/news/6.jpg', 0);
+
+INSERT IGNORE INTO store_news_comment (
+    store_news_comment_id, created_at, modified_at, created_by, last_modified_by, store_news_id, user_id, content
+) VALUES
+    (1, '2026-03-16 09:20:00', '2026-03-16 09:20:00', 'seed', 'seed', 1, 2, '혼밥 좌석 늘어난 거 좋네요. 점심 줄이 조금 덜 길어졌으면 합니다.'),
+    (2, '2026-03-16 09:40:00', '2026-03-16 09:40:00', 'seed', 'seed', 1, 8, '창가 좌석이면 노트북 쓰기에도 괜찮을 것 같아요.'),
+    (3, '2026-03-16 10:25:00', '2026-03-16 10:25:00', 'seed', 'seed', 2, 3, '딸기라떼 당도 조절 가능한지도 궁금합니다.'),
+    (4, '2026-03-16 11:35:00', '2026-03-16 11:35:00', 'seed', 'seed', 3, 7, '금요일 늦게까지 하면 모임 잡기 편해지겠네요.'),
+    (5, '2026-03-16 12:30:00', '2026-03-16 12:30:00', 'seed', 'seed', 4, 4, '시험기간에 자주 갈 것 같아요. 자리 예약은 안 되죠?'),
+    (6, '2026-03-16 12:45:00', '2026-03-16 12:45:00', 'seed', 'seed', 4, 15, '학생증만 있으면 적용되는지 확인 부탁드립니다.'),
+    (7, '2026-03-16 14:20:00', '2026-03-16 14:20:00', 'seed', 'seed', 6, 6, '레몬허브 드레싱이면 닭가슴살 토핑이랑 잘 어울릴 것 같아요.'),
+    (8, '2026-03-16 14:35:00', '2026-03-16 14:35:00', 'seed', 'seed', 6, 15, '비건 옵션 늘어난 점이 가장 반갑습니다.');
+
+/* Reviews */
+INSERT IGNORE INTO review (
+    review_id, created_at, modified_at, created_by, last_modified_by,
+    user_id, store_id, parent_review_id, is_verified, rating, content,
+    status, report_count, is_private, like_count
+) VALUES
+    (1, '2026-03-12 12:10:00', '2026-03-12 12:10:00', 'seed', 'seed', 2, 1, NULL, 1, 5, '점심 피크타임인데도 반찬 회전이 빨라서 깔끔했습니다. 혼밥 자리도 편했습니다.', 'VERIFIED', 0, 0, 12),
+    (2, '2026-03-13 18:30:00', '2026-03-13 18:30:00', 'seed', 'seed', 3, 1, NULL, 0, 4, '양이 넉넉해서 좋았고 제육 양념이 과하게 맵지 않아 재방문 의사 있습니다.', 'PUBLISHED', 0, 0, 5),
+    (3, '2026-03-13 19:10:00', '2026-03-13 19:10:00', 'seed', 'seed', 9, 1, 2, 0, NULL, '방문 후기 감사합니다. 다음 주부터 계란말이 세트 구성도 조금 바뀔 예정입니다.', 'PUBLISHED', 0, 0, 0),
+    (4, '2026-03-14 16:20:00', '2026-03-14 16:20:00', 'seed', 'seed', 5, 2, NULL, 1, 5, '카공하기 좋고 콘센트 좌석도 넉넉합니다. 플랫화이트 밸런스가 안정적입니다.', 'PUBLISHED', 0, 0, 9),
+    (5, '2026-03-15 20:15:00', '2026-03-15 20:15:00', 'seed', 'seed', 6, 2, NULL, 0, 3, '대기 없이 들어갔지만 직원 응대가 다소 무심하게 느껴졌습니다.', 'REPORTED', 10, 0, 1),
+    (6, '2026-03-15 23:05:00', '2026-03-15 23:05:00', 'seed', 'seed', 7, 3, NULL, 1, 4, '모임하기 좋고 안주 나오는 속도가 빨랐습니다. 하이볼이 생각보다 덜 달아서 좋았습니다.', 'PUBLISHED', 0, 1, 6),
+    (7, '2026-03-16 00:10:00', '2026-03-16 00:10:00', 'seed', 'seed', 8, 3, NULL, 1, 5, '늦은 시간에도 음식 퀄리티가 유지돼서 만족했습니다. 닭발이 특히 맛있었습니다.', 'PUBLISHED', 0, 0, 10),
+    (8, '2026-03-16 14:10:00', '2026-03-16 14:10:00', 'seed', 'seed', 15, 4, NULL, 0, 4, '시험기간 이벤트가 실용적이고 방음 상태도 나쁘지 않았습니다.', 'PUBLISHED', 0, 0, 4),
+    (9, '2026-03-17 11:20:00', '2026-03-17 11:20:00', 'seed', 'seed', 2, 5, NULL, 0, 5, '피부진단 설명이 구체적이어서 좋았습니다. 학생 패키지가 부담되지 않는 가격입니다.', 'VERIFIED', 0, 0, 3),
+    (10, '2026-03-18 13:05:00', '2026-03-18 13:05:00', 'seed', 'seed', 4, 7, NULL, 1, 5, '샐러드 양이 예상보다 많고 토핑 추가 선택이 명확해서 자주 이용할 것 같습니다.', 'PUBLISHED', 0, 0, 8),
+    (11, '2026-03-18 13:40:00', '2026-03-18 13:40:00', 'seed', 'seed', 3, 7, NULL, 1, 4, '드레싱 선택 폭이 넓고 브런치 메뉴가 가볍게 먹기 좋습니다.', 'PUBLISHED', 0, 0, 2),
+    (12, '2026-03-18 18:10:00', '2026-03-18 18:10:00', 'seed', 'seed', 5, 6, NULL, 0, 3, '가격은 괜찮아 보이지만 아직 대표 메뉴 정보가 충분히 정리되진 않은 느낌입니다.', 'PUBLISHED', 0, 0, 1),
+    (13, '2026-03-18 14:10:00', '2026-03-18 14:10:00', 'seed', 'seed', 10, 7, 10, 0, NULL, '리뷰 감사합니다. 비건 토핑과 드레싱 안내 표기도 이번 주에 보강했습니다.', 'PUBLISHED', 0, 0, 0);
+
+INSERT IGNORE INTO review_image (review_image_id, review_id, image_url, order_index) VALUES
+    (1, 1, 'https://cdn.looky.dev/reviews/1-1.jpg', 0),
+    (2, 4, 'https://cdn.looky.dev/reviews/4-1.jpg', 0),
+    (3, 7, 'https://cdn.looky.dev/reviews/7-1.jpg', 0),
+    (4, 10, 'https://cdn.looky.dev/reviews/10-1.jpg', 0);
+
+INSERT IGNORE INTO review_report (
+    review_report_id, created_at, modified_at, created_by, last_modified_by, review_id, reporter_id, reason, detail
+) VALUES
+    (1, '2026-03-16 09:30:00', '2026-03-16 09:30:00', 'seed', 'seed', 5, 7, 'FRAUDULENT_REVIEW', '직접 방문 후기라기보다 경쟁 매장 비방처럼 보이는 표현이 있습니다.'),
+    (2, '2026-03-16 09:35:00', '2026-03-16 09:35:00', 'seed', 'seed', 5, 8, 'IRRELEVANT', '서비스 내용보다 다른 매장 비교가 대부분이라 신고합니다.');
 
 SET FOREIGN_KEY_CHECKS = 1;

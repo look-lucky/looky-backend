@@ -1,7 +1,3 @@
-drop database looky;
-create database looky;
-use looky;
-
 /* 외래 키 제약 조건 검사를 일시적으로 끕니다 */
 SET FOREIGN_KEY_CHECKS = 0;
 
@@ -22,7 +18,7 @@ create table user (
     last_modified_by varchar(255),
     username varchar(255) not null,
     password varchar(255),
-    gender tinyint check (gender between 0 and 2),
+    gender varchar(50),
     birth_date date,
     role varchar(50) not null,
     social_type varchar(50),
@@ -194,7 +190,9 @@ create table store_claim (
     license_image_url varchar(255) not null,
     status varchar(50) not null,
     reject_reason varchar(255),
-    admin_memo longtext
+    admin_memo longtext,
+    foreign key (store_id) references store (store_id),
+    foreign key (user_id) references user (user_id)
 );
 
 create table store_report (

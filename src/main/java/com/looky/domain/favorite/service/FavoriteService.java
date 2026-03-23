@@ -26,14 +26,13 @@ public class FavoriteService {
     private final ReviewRepository reviewRepository;
 
     @Transactional
-    public void addFavorite(User user, Long storeId) {
+    public void addFavoriteForStudent(User user, Long storeId) {
         Store store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "해당 상점을 찾을 수 없습니다."));
 
         if (!user.getRole().equals(Role.ROLE_STUDENT)) {
             throw new CustomException(ErrorCode.FORBIDDEN, "학생만 좋아요 등록이 가능합니다.");
         }
-
 
         if (favoriteRepository.existsByUserAndStore(user, store)) {
             throw new CustomException(ErrorCode.DUPLICATE_RESOURCE);
@@ -48,7 +47,7 @@ public class FavoriteService {
     }
 
     @Transactional
-    public void removeFavorite(User user, Long storeId) {
+    public void removeFavoriteForStudent(User user, Long storeId) {
         Store store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "해당 상점을 찾을 수 없습니다."));
 
@@ -62,7 +61,7 @@ public class FavoriteService {
         return favoriteRepository.countByStore(store);
     }
 
-    public Page<FavoriteStoreResponse> getMyFavorites(User user, Pageable pageable) {
+    public Page<FavoriteStoreResponse> getMyFavoritesForStudent(User user, Pageable pageable) {
         return favoriteRepository.findByUser(user, pageable)
                 .map(favoriteStore -> {
                     Store store = favoriteStore.getStore();

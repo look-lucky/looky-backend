@@ -24,6 +24,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "Favorite", description = "단골 상점(즐겨찾기) 관련 API")
+@Deprecated
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api")
@@ -44,7 +45,7 @@ public class FavoriteController {
                 @Parameter(description = "상점 ID") @PathVariable Long storeId
         )
         {
-                favoriteService.addFavorite(principalDetails.getUser(), storeId);
+                favoriteService.addFavoriteForStudent(principalDetails.getUser(), storeId);
                 return ResponseEntity.status(HttpStatus.CREATED).body(CommonResponse.success(null));
         }
 
@@ -59,7 +60,7 @@ public class FavoriteController {
                 @Parameter(description = "상점 ID") @PathVariable Long storeId
         )
         {
-                favoriteService.removeFavorite(principalDetails.getUser(), storeId);
+                favoriteService.removeFavoriteForStudent(principalDetails.getUser(), storeId);
                 return ResponseEntity.status(HttpStatus.NO_CONTENT).body(CommonResponse.success(null));
         }
 
@@ -87,7 +88,7 @@ public class FavoriteController {
                 @Parameter(description = "페이징 정보") @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
         )
         {
-                Page<FavoriteStoreResponse> favorites = favoriteService.getMyFavorites(principalDetails.getUser(), pageable);
+                Page<FavoriteStoreResponse> favorites = favoriteService.getMyFavoritesForStudent(principalDetails.getUser(), pageable);
                 return ResponseEntity.ok(CommonResponse.success(PageResponse.from(favorites)));
         }
 }

@@ -1,10 +1,11 @@
-package com.looky.domain.store.repository;
+package com.looky.domain.storeclaim.repository;
 
-import com.looky.domain.store.entity.StoreClaim;
-import com.looky.domain.store.entity.StoreClaimStatus;
+import com.looky.domain.storeclaim.entity.StoreClaim;
+import com.looky.domain.storeclaim.entity.StoreClaimStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+
 import java.util.List;
 
 public interface StoreClaimRepository extends JpaRepository<StoreClaim, Long> {

@@ -1,4 +1,4 @@
-package com.looky.domain.store.entity;
+package com.looky.domain.storeclaim.entity;
 
 import com.looky.common.entity.BaseEntity;
 import jakarta.persistence.*;

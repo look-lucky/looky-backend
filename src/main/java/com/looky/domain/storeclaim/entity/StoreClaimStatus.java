@@ -1,4 +1,4 @@
-package com.looky.domain.store.entity;
+package com.looky.domain.storeclaim.entity;
 
 public enum StoreClaimStatus {
     PENDING, // 대기

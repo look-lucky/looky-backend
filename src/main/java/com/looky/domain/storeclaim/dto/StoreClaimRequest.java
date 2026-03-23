@@ -1,6 +1,6 @@
-package com.looky.domain.store.dto;
+package com.looky.domain.storeclaim.dto;
 
-import com.looky.domain.store.entity.StoreClaim;
+import com.looky.domain.storeclaim.entity.StoreClaim;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -15,7 +15,7 @@ public class StoreClaimRequest {
 
     @NotNull(message = "가게 식별자는 필수입니다.")
     private Long storeId;
-    
+
     @NotNull(message = "사용자 식별자는 필수입니다.")
     private Long userId;
 

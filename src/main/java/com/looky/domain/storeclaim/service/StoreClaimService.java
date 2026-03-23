@@ -1,23 +1,21 @@
-package com.looky.domain.store.service;
+package com.looky.domain.storeclaim.service;
 
 import com.looky.common.exception.CustomException;
 import com.looky.common.exception.ErrorCode;
-import com.looky.domain.store.dto.BizVerificationRequest;
-import com.looky.domain.store.dto.BizVerificationResponse;
-import com.looky.domain.store.dto.StoreClaimRequest;
-import com.looky.domain.store.dto.MyStoreClaimResponse;
-import com.looky.domain.store.entity.StoreClaim;
-import com.looky.domain.store.entity.StoreClaimStatus;
-import com.looky.domain.store.repository.StoreClaimRepository;
-import com.looky.domain.store.repository.StoreRepository;
 import com.looky.domain.store.dto.StoreResponse;
+import com.looky.domain.store.repository.StoreRepository;
+import com.looky.domain.storeclaim.dto.BizValidationApiRequest;
+import com.looky.domain.storeclaim.dto.BizVerificationRequest;
+import com.looky.domain.storeclaim.dto.BizVerificationResponse;
+import com.looky.domain.storeclaim.dto.MyStoreClaimResponse;
+import com.looky.domain.storeclaim.dto.StoreClaimRequest;
+import com.looky.domain.storeclaim.entity.StoreClaim;
+import com.looky.domain.storeclaim.entity.StoreClaimStatus;
+import com.looky.domain.storeclaim.repository.StoreClaimRepository;
 import com.looky.domain.user.entity.Role;
 import com.looky.domain.user.entity.User;
 import com.looky.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -28,9 +26,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import com.looky.domain.store.dto.BizValidationApiRequest;
 import java.net.URI;
 import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -45,7 +44,7 @@ public class StoreClaimService {
     private String serviceKey;
     private static final String API_URL = "https://api.odcloud.kr/api/nts-businessman/v1/validate";
 
-    public List<StoreResponse> searchUnclaimedStores(String keyword) {
+    public List<StoreResponse> searchUnclaimedStoresForOwner(String keyword) {
         log.debug("[StoreClaimService] searchUnclaimedStores 호출 - keyword: '{}'", keyword);
         List<com.looky.domain.store.entity.Store> stores = storeRepository.findUnclaimedByNameOrAddress(keyword);
         log.debug("[StoreClaimService] DB 조회 결과 - 총 {}건", stores.size());
@@ -54,7 +53,7 @@ public class StoreClaimService {
                 .collect(Collectors.toList());
     }
 
-    public BizVerificationResponse verifyBizRegNo(BizVerificationRequest request) {
+    public BizVerificationResponse verifyBizRegNoForOwner(BizVerificationRequest request) {
         log.info("사업자등록정보 진위확인 요청: {}", request);
 
         RestTemplate restTemplate = new RestTemplate();
@@ -115,7 +114,7 @@ public class StoreClaimService {
         }
     }
 
-    public Long createStoreClaims(User user, StoreClaimRequest request) {
+    public Long createStoreClaimsForOwner(User user, StoreClaimRequest request) {
         User owner = userRepository.findById(user.getId())
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
@@ -136,7 +135,7 @@ public class StoreClaimService {
         return savedStoreClaim.getId();
     }
 
-    public List<MyStoreClaimResponse> getMyStoreClaims(User user) {
+    public List<MyStoreClaimResponse> getMyStoreClaimsForOwner(User user) {
         return storeClaimRepository.findByUserId(user.getId()).stream()
                 .map(MyStoreClaimResponse::from)
                 .collect(Collectors.toList());

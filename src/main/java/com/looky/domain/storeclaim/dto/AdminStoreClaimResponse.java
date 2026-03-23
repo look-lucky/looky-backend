@@ -1,7 +1,7 @@
-package com.looky.domain.admin.dto;
+package com.looky.domain.storeclaim.dto;
 
-import com.looky.domain.store.entity.StoreClaim;
-import com.looky.domain.store.entity.StoreClaimStatus;
+import com.looky.domain.storeclaim.entity.StoreClaim;
+import com.looky.domain.storeclaim.entity.StoreClaimStatus;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 
 @Getter
 @Builder
-public class StoreClaimResponse {
+public class AdminStoreClaimResponse {
     private Long id;
     private Long storeId;
     private Long userId;
@@ -23,8 +23,8 @@ public class StoreClaimResponse {
     private LocalDateTime createdAt;
     private String adminMemo;
 
-    public static StoreClaimResponse from(StoreClaim storeClaim, String name) {
-        return StoreClaimResponse.builder()
+    public static AdminStoreClaimResponse from(StoreClaim storeClaim, String name) {
+        return AdminStoreClaimResponse.builder()
                 .id(storeClaim.getId())
                 .storeId(storeClaim.getStoreId())
                 .userId(storeClaim.getUserId())

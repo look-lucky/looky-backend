@@ -1,4 +1,4 @@
-package com.looky.domain.store.dto;
+package com.looky.domain.storeclaim.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AccessLevel;
@@ -34,6 +34,5 @@ public class BizVerificationRequest {
 
         @JsonProperty("p_nm")
         private String pNm; // 대표자 성명
-
     }
 }

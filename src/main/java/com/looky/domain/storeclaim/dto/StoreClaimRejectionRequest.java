@@ -1,4 +1,4 @@
-package com.looky.domain.admin.dto;
+package com.looky.domain.storeclaim.dto;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;

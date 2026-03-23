@@ -1,11 +1,11 @@
-package com.looky.domain.store.dto;
+package com.looky.domain.storeclaim.dto;
 
-import com.looky.domain.store.entity.StoreClaim;
-import com.looky.domain.store.entity.StoreClaimStatus;
-import java.time.LocalDateTime;
-
+import com.looky.domain.storeclaim.entity.StoreClaim;
+import com.looky.domain.storeclaim.entity.StoreClaimStatus;
 import lombok.Builder;
 import lombok.Getter;
+
+import java.time.LocalDateTime;
 
 @Getter
 @Builder

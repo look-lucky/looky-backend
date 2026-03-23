@@ -1,26 +1,28 @@
-package com.looky.domain.store.controller;
+package com.looky.domain.storeclaim.controller;
 
 import com.looky.common.response.CommonResponse;
-import com.looky.domain.store.dto.BizVerificationRequest;
-import com.looky.domain.store.dto.BizVerificationResponse;
 import com.looky.domain.store.dto.StoreResponse;
-import com.looky.domain.store.dto.StoreClaimRequest;
-import com.looky.domain.store.dto.MyStoreClaimResponse;
-import com.looky.domain.store.service.StoreClaimService;
+import com.looky.domain.storeclaim.dto.BizVerificationRequest;
+import com.looky.domain.storeclaim.dto.BizVerificationResponse;
+import com.looky.domain.storeclaim.dto.MyStoreClaimResponse;
+import com.looky.domain.storeclaim.dto.StoreClaimRequest;
+import com.looky.domain.storeclaim.service.StoreClaimService;
 import com.looky.security.details.PrincipalDetails;
-import jakarta.validation.Valid;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import java.util.List;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @Tag(name = "StoreClaim", description = "상점 소유권 등록 API")
+@Deprecated
 @RestController
 @RequestMapping("/api")
 @RequiredArgsConstructor
@@ -35,7 +37,7 @@ public class StoreClaimController {
             @RequestParam String keyword
     ) {
         log.debug("[StoreClaimController] searchUnclaimedStores 요청 - keyword: {}", keyword);
-        List<StoreResponse> response = storeClaimService.searchUnclaimedStores(keyword);
+        List<StoreResponse> response = storeClaimService.searchUnclaimedStoresForOwner(keyword);
         log.debug("[StoreClaimController] searchUnclaimedStores 응답 - 결과 수: {}, 데이터: {}", response.size(), response);
         return ResponseEntity.ok(CommonResponse.success(response));
     }
@@ -43,7 +45,7 @@ public class StoreClaimController {
     @Operation(summary = "[점주] 사업자등록번호 유효성 검증", description = "사업자등록번호의 유효성을 검증합니다.")
     @PostMapping("/biz-reg-no/verify")
     public ResponseEntity<CommonResponse<BizVerificationResponse>> verifyBizRegNo(@RequestBody @Valid BizVerificationRequest request) {
-        BizVerificationResponse response = storeClaimService.verifyBizRegNo(request);
+        BizVerificationResponse response = storeClaimService.verifyBizRegNoForOwner(request);
         return ResponseEntity.ok(CommonResponse.success(response));
     }
 
@@ -53,7 +55,7 @@ public class StoreClaimController {
             @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,
             @RequestBody @Valid StoreClaimRequest request
     ) {
-        Long storeClaimId = storeClaimService.createStoreClaims(principalDetails.getUser(), request);
+        Long storeClaimId = storeClaimService.createStoreClaimsForOwner(principalDetails.getUser(), request);
         return ResponseEntity.status(HttpStatus.CREATED).body(CommonResponse.success(storeClaimId));
     }
 
@@ -62,7 +64,7 @@ public class StoreClaimController {
     public ResponseEntity<CommonResponse<List<MyStoreClaimResponse>>> getMyStoreClaims(
             @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails
     ) {
-        List<MyStoreClaimResponse> response = storeClaimService.getMyStoreClaims(principalDetails.getUser());
+        List<MyStoreClaimResponse> response = storeClaimService.getMyStoreClaimsForOwner(principalDetails.getUser());
         return ResponseEntity.ok(CommonResponse.success(response));
     }
 }

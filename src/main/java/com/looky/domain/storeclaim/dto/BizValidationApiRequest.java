@@ -1,4 +1,4 @@
-package com.looky.domain.store.dto;
+package com.looky.domain.storeclaim.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AccessLevel;

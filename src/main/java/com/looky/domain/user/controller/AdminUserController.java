@@ -1,11 +1,11 @@
-package com.looky.domain.admin.controller;
+package com.looky.domain.user.controller;
 
 import com.looky.common.response.CommonResponse;
 import com.looky.common.response.PageResponse;
-import com.looky.domain.admin.dto.UserResponse;
-import com.looky.domain.admin.dto.UserRoleUpdateRequest;
-import com.looky.domain.admin.service.UserManageService;
 import com.looky.common.response.SwaggerErrorResponse;
+import com.looky.domain.user.dto.AdminUserResponse;
+import com.looky.domain.user.dto.UserRoleUpdateRequest;
+import com.looky.domain.user.service.AdminUserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -20,13 +20,13 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-@Tag(name = "Admin", description = "관리자 API")
+@Tag(name = "Admin User", description = "관리자 사용자 관리 API")
 @RestController
 @RequestMapping("/api/admin/users")
 @RequiredArgsConstructor
-public class UserManageController {
+public class AdminUserController {
 
-    private final UserManageService userManageService;
+    private final AdminUserService adminUserService;
 
     @Operation(summary = "[관리자] 전체 사용자 목록 조회", description = "가입된 모든 사용자를 페이징하여 조회합니다.")
     @ApiResponses(value = {
@@ -34,11 +34,10 @@ public class UserManageController {
             @ApiResponse(responseCode = "403", description = "권한 없음", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class)))
     })
     @GetMapping
-    public ResponseEntity<CommonResponse<PageResponse<UserResponse>>> getAllUsers(
+    public ResponseEntity<CommonResponse<PageResponse<AdminUserResponse>>> getAllUsers(
             @Parameter(description = "페이징 정보") @PageableDefault(size = 10) Pageable pageable
-    )
-    {
-        PageResponse<UserResponse> response = userManageService.getAllUsers(pageable);
+    ) {
+        PageResponse<AdminUserResponse> response = adminUserService.getAllUsersForAdmin(pageable);
         return ResponseEntity.ok(CommonResponse.success(response));
     }
 
@@ -52,9 +51,8 @@ public class UserManageController {
     public ResponseEntity<CommonResponse<Void>> updateUserRole(
             @PathVariable Long userId,
             @RequestBody @Valid UserRoleUpdateRequest request
-    )
-    {
-        userManageService.updateUserRole(userId, request);
+    ) {
+        adminUserService.updateUserRoleForAdmin(userId, request);
         return ResponseEntity.ok(CommonResponse.success(null));
     }
 }

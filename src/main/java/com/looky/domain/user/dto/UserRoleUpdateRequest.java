@@ -1,4 +1,4 @@
-package com.looky.domain.admin.dto;
+package com.looky.domain.user.dto;
 
 import com.looky.domain.user.entity.Role;
 import jakarta.validation.constraints.NotNull;

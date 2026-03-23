@@ -1,4 +1,4 @@
-package com.looky.domain.admin.controller;
+package com.looky.domain.event.controller;
 
 import com.looky.common.response.CommonResponse;
 import com.looky.common.response.SwaggerErrorResponse;
@@ -36,7 +36,7 @@ public class AdminEventController {
     public ResponseEntity<CommonResponse<Long>> createEvent(
             @RequestBody @Valid CreateEventRequest request
     ) {
-        Long eventId = eventService.createEvent(request);
+        Long eventId = eventService.createEventForAdmin(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(CommonResponse.success(eventId));
     }
 
@@ -51,7 +51,7 @@ public class AdminEventController {
             @Parameter(description = "이벤트 ID") @PathVariable Long eventId,
             @RequestBody @Valid UpdateEventRequest request
     ) {
-        eventService.updateEvent(eventId, request);
+        eventService.updateEventForAdmin(eventId, request);
         return ResponseEntity.ok(CommonResponse.success(null));
     }
 
@@ -64,7 +64,7 @@ public class AdminEventController {
     @DeleteMapping("/{eventId}")
     public ResponseEntity<CommonResponse<Void>> deleteEvent(
             @Parameter(description = "이벤트 ID") @PathVariable Long eventId) {
-        eventService.deleteEvent(eventId);
+        eventService.deleteEventForAdmin(eventId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body(CommonResponse.success(null));
     }
 }

@@ -43,7 +43,7 @@ public class EventService {
     private final S3Service s3Service;
 
     @Transactional
-    public Long createEvent(CreateEventRequest request) {
+    public Long createEventForAdmin(CreateEventRequest request) {
 
         University university = null;
         if (request.getUniversityId() != null) {
@@ -93,13 +93,13 @@ public class EventService {
         return savedEvent.getId();
     }
 
-    public EventResponse getEvent(Long eventId) {
+    public EventResponse getEventForStudent(Long eventId) {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "이벤트를 찾을 수 없습니다."));
         return EventResponse.from(event);
     }
 
-    public PageResponse<EventResponse> getEvents(String keyword, List<EventType> eventTypes, EventStatus status, Long universityId, Pageable pageable) {
+    public PageResponse<EventResponse> getEventsForStudent(String keyword, List<EventType> eventTypes, EventStatus status, Long universityId, Pageable pageable) {
         Specification<Event> spec = Specification.where(EventSpecification.hasKeyword(keyword))
                 .and(EventSpecification.hasEventTypes(eventTypes))
                 .and(EventSpecification.hasStatus(status))
@@ -111,7 +111,7 @@ public class EventService {
     }
 
     @Transactional
-    public void updateEvent(Long eventId, UpdateEventRequest request) {
+    public void updateEventForAdmin(Long eventId, UpdateEventRequest request) {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "이벤트를 찾을 수 없습니다."));
 
@@ -212,7 +212,7 @@ public class EventService {
     }
 
     @Transactional
-    public void deleteEvent(Long eventId) {
+    public void deleteEventForAdmin(Long eventId) {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "이벤트를 찾을 수 없습니다."));
 

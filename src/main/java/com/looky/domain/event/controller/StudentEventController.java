@@ -22,12 +22,11 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@Tag(name = "Event", description = "이벤트 조회 API")
-@Deprecated
+@Tag(name = "Student Event", description = "학생 이벤트 조회 API")
 @RestController
-@RequestMapping("/api/events")
+@RequestMapping("/api/student/events")
 @RequiredArgsConstructor
-public class EventController {
+public class StudentEventController {
 
     private final EventService eventService;
 

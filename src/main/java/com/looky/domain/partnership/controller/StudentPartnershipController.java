@@ -4,8 +4,8 @@ import com.looky.common.response.CommonResponse;
 import com.looky.common.response.SwaggerErrorResponse;
 import com.looky.domain.partnership.dto.StudentPartnershipResponse;
 import com.looky.domain.partnership.service.PartnershipService;
-import com.looky.security.details.PrincipalDetails;
 import com.looky.domain.user.entity.User;
+import com.looky.security.details.PrincipalDetails;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -23,12 +23,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-@Tag(name = "Partnership", description = "제휴 혜택 관련 API")
-@Deprecated
+@Tag(name = "Student Partnership", description = "학생 제휴 혜택 API")
 @RestController
-@RequestMapping("/api/stores/{storeId}/partnerships")
+@RequestMapping("/api/student")
 @RequiredArgsConstructor
-public class PartnershipController {
+public class StudentPartnershipController {
 
     private final PartnershipService partnershipService;
 
@@ -37,7 +36,7 @@ public class PartnershipController {
             @ApiResponse(responseCode = "200", description = "조회 성공"),
             @ApiResponse(responseCode = "404", description = "상점 없음", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class)))
     })
-    @GetMapping
+    @GetMapping("/stores/{storeId}/partnerships")
     public ResponseEntity<CommonResponse<List<StudentPartnershipResponse>>> getStorePartnerships(
             @Parameter(description = "상점 ID") @PathVariable Long storeId,
             @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails

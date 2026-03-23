@@ -8,7 +8,7 @@ import java.time.LocalDate;
 import java.util.Objects;
 
 @Getter
-public class PartnershipResponse {
+public class AdminPartnershipResponse {
 
     private final Long id;
     private final Long organizationId;
@@ -21,7 +21,7 @@ public class PartnershipResponse {
     private final Long storeId;
     private final String storeName;
 
-    public PartnershipResponse(Partnership partnership) {
+    public AdminPartnershipResponse(Partnership partnership) {
         this.id = partnership.getId();
         this.organizationId = partnership.getOrganization().getId();
         this.organizationName = partnership.getOrganization().getName();

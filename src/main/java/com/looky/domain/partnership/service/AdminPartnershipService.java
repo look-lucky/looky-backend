@@ -1,4 +1,4 @@
-package com.looky.domain.admin.service;
+package com.looky.domain.partnership.service;
 
 import com.looky.common.exception.CustomException;
 import com.looky.common.exception.ErrorCode;
@@ -9,7 +9,7 @@ import com.looky.domain.organization.repository.OrganizationRepository;
 import com.looky.domain.organization.repository.UniversityRepository;
 import com.looky.domain.organization.repository.UserOrganizationRepository;
 import com.looky.domain.partnership.dto.CreatePartnershipRequest;
-import com.looky.domain.partnership.dto.PartnershipResponse;
+import com.looky.domain.partnership.dto.AdminPartnershipResponse;
 import com.looky.domain.partnership.dto.UpdatePartnershipRequest;
 import com.looky.domain.partnership.entity.Partnership;
 import com.looky.domain.partnership.repository.PartnershipRepository;
@@ -97,8 +97,8 @@ public class AdminPartnershipService {
                 .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "제휴 정보를 찾을 수 없습니다."));
 
         partnership.updateBenefit(
-            request.getBenefit().orElse(partnership.getBenefit()), 
-            request.getStartsAt().orElse(partnership.getStartsAt()), 
+            request.getBenefit().orElse(partnership.getBenefit()),
+            request.getStartsAt().orElse(partnership.getStartsAt()),
             request.getEndsAt().orElse(partnership.getEndsAt())
         );
     }
@@ -114,17 +114,17 @@ public class AdminPartnershipService {
     }
 
     // 대학별 제휴 목록 조회
-    public List<PartnershipResponse> getPartnershipsByUniversity(Long universityId) {
+    public List<AdminPartnershipResponse> getPartnershipsByUniversity(Long universityId) {
         return partnershipRepository.findAllByOrganizationUniversityId(universityId).stream()
-                .map(PartnershipResponse::new)
+                .map(AdminPartnershipResponse::new)
                 .collect(Collectors.toList());
     }
 
     // 조직별 제휴 목록 조회
-    public List<PartnershipResponse> getPartnershipsByOrganization(Long universityId, Long organizationId) {
+    public List<AdminPartnershipResponse> getPartnershipsByOrganization(Long universityId, Long organizationId) {
         return partnershipRepository.findAllByOrganizationIdAndOrganizationUniversityId(organizationId, universityId)
                 .stream()
-                .map(PartnershipResponse::new)
+                .map(AdminPartnershipResponse::new)
                 .collect(Collectors.toList());
     }
 
@@ -135,10 +135,10 @@ public class AdminPartnershipService {
 
         // 템플릿 엑셀 파일 이름 설정
         String domainStr = university.getEmailDomains();
-        String firstDomain = (domainStr != null && !domainStr.isEmpty()) 
-            ? domainStr.split(",")[0].trim() 
+        String firstDomain = (domainStr != null && !domainStr.isEmpty())
+            ? domainStr.split(",")[0].trim()
             : "unknown";
-            
+
         String domainPrefix = firstDomain.split("\\.")[0];
         String filename = domainPrefix + "_partnership_template.xlsx";
 

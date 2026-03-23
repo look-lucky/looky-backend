@@ -2,7 +2,7 @@ package com.looky.domain.favorite.service;
 
 import com.looky.common.exception.CustomException;
 import com.looky.common.exception.ErrorCode;
-import com.looky.domain.favorite.dto.FavoriteStoreResponse;
+import com.looky.domain.favorite.dto.StudentFavoriteStoreResponse;
 import com.looky.domain.favorite.entity.FavoriteStore;
 import com.looky.domain.favorite.repository.FavoriteRepository;
 import com.looky.domain.store.entity.Store;
@@ -61,13 +61,13 @@ public class FavoriteService {
         return favoriteRepository.countByStore(store);
     }
 
-    public Page<FavoriteStoreResponse> getMyFavoritesForStudent(User user, Pageable pageable) {
+    public Page<StudentFavoriteStoreResponse> getMyFavoritesForStudent(User user, Pageable pageable) {
         return favoriteRepository.findByUser(user, pageable)
                 .map(favoriteStore -> {
                     Store store = favoriteStore.getStore();
                     Long reviewCountLong = reviewRepository.countByStoreIdAndParentReviewIsNull(store.getId());
                     Integer reviewCount = reviewCountLong != null ? reviewCountLong.intValue() : 0;
-                    return FavoriteStoreResponse.from(favoriteStore, reviewCount);
+                    return StudentFavoriteStoreResponse.from(favoriteStore, reviewCount);
                 });
     }
 }

@@ -3,7 +3,7 @@ package com.looky.domain.favorite.controller;
 import com.looky.common.response.CommonResponse;
 import com.looky.common.response.PageResponse;
 import com.looky.common.response.SwaggerErrorResponse;
-import com.looky.domain.favorite.dto.FavoriteStoreResponse;
+import com.looky.domain.favorite.dto.StudentFavoriteStoreResponse;
 import com.looky.domain.favorite.service.FavoriteService;
 import com.looky.security.details.PrincipalDetails;
 import io.swagger.v3.oas.annotations.Operation;
@@ -82,11 +82,11 @@ public class StudentFavoriteController {
             @ApiResponse(responseCode = "403", description = "학생 권한 필요", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class)))
     })
     @GetMapping("/favorites")
-    public ResponseEntity<CommonResponse<PageResponse<FavoriteStoreResponse>>> getMyFavorites(
+    public ResponseEntity<CommonResponse<PageResponse<StudentFavoriteStoreResponse>>> getMyFavorites(
             @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,
             @Parameter(description = "페이징 정보") @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
-        Page<FavoriteStoreResponse> favorites = favoriteService.getMyFavoritesForStudent(principalDetails.getUser(), pageable);
+        Page<StudentFavoriteStoreResponse> favorites = favoriteService.getMyFavoritesForStudent(principalDetails.getUser(), pageable);
         return ResponseEntity.ok(CommonResponse.success(PageResponse.from(favorites)));
     }
 }

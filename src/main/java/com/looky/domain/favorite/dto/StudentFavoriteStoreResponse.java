@@ -16,7 +16,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class FavoriteStoreResponse {
+public class StudentFavoriteStoreResponse {
 
     private Long storeId;
     private String name;
@@ -28,9 +28,9 @@ public class FavoriteStoreResponse {
     private Integer reviewCount; // 리뷰 수
     private LocalDateTime createdAt; // 찜한 시간
 
-    public static FavoriteStoreResponse from(FavoriteStore favoriteStore, Integer reviewCount) {
+    public static StudentFavoriteStoreResponse from(FavoriteStore favoriteStore, Integer reviewCount) {
         Store store = favoriteStore.getStore();
-        return FavoriteStoreResponse.builder()
+        return StudentFavoriteStoreResponse.builder()
                 .storeId(store.getId())
                 .name(store.getName())
                 .roadAddress(store.getRoadAddress())

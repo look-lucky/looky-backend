@@ -6,14 +6,14 @@ import lombok.Getter;
 
 @Getter
 @Builder
-public class StorePartnershipResponse {
+public class StudentPartnershipResponse {
     private OrganizationCategory organizationCategory;
     private String organizationName;
     private String benefit;
     private Boolean isMyBenefit;
 
-    public static StorePartnershipResponse of(OrganizationCategory organizationCategory, String organizationName, String benefit, Boolean isMyBenefit) {
-        return StorePartnershipResponse.builder()
+    public static StudentPartnershipResponse of(OrganizationCategory organizationCategory, String organizationName, String benefit, Boolean isMyBenefit) {
+        return StudentPartnershipResponse.builder()
                 .organizationCategory(organizationCategory)
                 .organizationName(organizationName)
                 .benefit(benefit)

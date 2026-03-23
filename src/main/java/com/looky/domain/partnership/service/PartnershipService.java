@@ -4,7 +4,7 @@ import com.looky.common.exception.CustomException;
 import com.looky.common.exception.ErrorCode;
 import com.looky.domain.organization.entity.UserOrganization;
 import com.looky.domain.organization.repository.UserOrganizationRepository;
-import com.looky.domain.partnership.dto.StorePartnershipResponse;
+import com.looky.domain.partnership.dto.StudentPartnershipResponse;
 import com.looky.domain.partnership.entity.Partnership;
 import com.looky.domain.partnership.repository.PartnershipRepository;
 import com.looky.domain.store.repository.StoreRepository;
@@ -29,7 +29,7 @@ public class PartnershipService {
     private final UserOrganizationRepository userOrganizationRepository;
     private final StoreRepository storeRepository;
 
-    public List<StorePartnershipResponse> getStorePartnerships(Long storeId, User user) {
+    public List<StudentPartnershipResponse> getStorePartnershipsForStudent(Long storeId, User user) {
         if (!storeRepository.existsById(storeId)) {
             throw new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "가게를 찾을 수 없습니다.");
         }
@@ -51,7 +51,7 @@ public class PartnershipService {
         Set<Long> finalMyOrgIds = myOrganizationIds;
         
         return partnerships.stream()
-                .map(p -> StorePartnershipResponse.of(
+                .map(p -> StudentPartnershipResponse.of(
                         p.getOrganization().getCategory(),
                         p.getOrganization().getName(),
                         p.getBenefit(),

@@ -1,11 +1,11 @@
-package com.looky.domain.admin.controller;
+package com.looky.domain.partnership.controller;
 
 import com.looky.common.response.CommonResponse;
 import com.looky.common.response.SwaggerErrorResponse;
-import com.looky.domain.admin.service.AdminPartnershipService;
 import com.looky.domain.partnership.dto.CreatePartnershipRequest;
-import com.looky.domain.partnership.dto.PartnershipResponse;
+import com.looky.domain.partnership.dto.AdminPartnershipResponse;
 import com.looky.domain.partnership.dto.UpdatePartnershipRequest;
+import com.looky.domain.partnership.service.AdminPartnershipService;
 import com.looky.security.details.PrincipalDetails;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -79,19 +79,19 @@ public class AdminPartnershipController {
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body(CommonResponse.success(null));
     }
 
-    @Operation(summary = "대학별 제휴 목록 조회", description = "특정 대학의 모든 제휴를 조회합니다.")
+    @Operation(summary = "[관리자] 대학별 제휴 목록 조회", description = "특정 대학의 모든 제휴를 조회합니다.")
     @ApiResponse(responseCode = "200", description = "조회 성공")
     @GetMapping("/universities/{universityId}/partnerships")
-    public ResponseEntity<CommonResponse<List<PartnershipResponse>>> getPartnershipsByUniversity(
+    public ResponseEntity<CommonResponse<List<AdminPartnershipResponse>>> getPartnershipsByUniversity(
             @Parameter(description = "대학 ID") @PathVariable Long universityId) {
         return ResponseEntity
                 .ok(CommonResponse.success(adminPartnershipService.getPartnershipsByUniversity(universityId)));
     }
 
-    @Operation(summary = "조직별 제휴 목록 조회", description = "특정 대학의 특정 조직의 모든 제휴를 조회합니다.")
+    @Operation(summary = "[관리자] 조직별 제휴 목록 조회", description = "특정 대학의 특정 조직의 모든 제휴를 조회합니다.")
     @ApiResponse(responseCode = "200", description = "조회 성공")
     @GetMapping("/universities/{universityId}/organizations/{organizationId}/partnerships")
-    public ResponseEntity<CommonResponse<List<PartnershipResponse>>> getPartnershipsByOrganization(
+    public ResponseEntity<CommonResponse<List<AdminPartnershipResponse>>> getPartnershipsByOrganization(
             @Parameter(description = "대학 ID") @PathVariable Long universityId,
             @Parameter(description = "조직 ID") @PathVariable Long organizationId) {
         return ResponseEntity.ok(CommonResponse
@@ -115,7 +115,7 @@ public class AdminPartnershipController {
                 .body(result.content());
     }
 
-    @Operation(summary = "[학생회/관리자] 제휴 엑셀로 등록", description = "엑셀 파일을 업로드하여 제휴 정보를 일괄 등록/수정합니다.")
+    @Operation(summary = "[관리자] 제휴 엑셀로 등록", description = "엑셀 파일을 업로드하여 제휴 정보를 일괄 등록/수정합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "업로드 성공"),
             @ApiResponse(responseCode = "400", description = "데이터 검증 실패 (에러 메시지 포함)", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class))),

@@ -24,7 +24,6 @@ import java.util.stream.Collectors;
 
 import com.looky.domain.user.entity.StudentProfile;
 import com.looky.domain.user.repository.StudentProfileRepository;
-import java.time.LocalDate;
 
 @Service
 @RequiredArgsConstructor
@@ -225,9 +224,8 @@ public class CouponService {
         Long universityId = studentProfile.getUniversity().getId();
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime since = now.minusHours(24);
-        LocalDate today = LocalDate.now();
 
-        List<Coupon> coupons = couponRepository.findTodayCouponsByUniversity(universityId, since, now, today);
+        List<Coupon> coupons = couponRepository.findTodayCouponsByUniversity(universityId, since, now);
 
         List<CouponResponse> responses = coupons.stream()
                 .map(CouponResponse::from)

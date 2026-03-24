@@ -11,7 +11,7 @@ public interface OrganizationRepository extends JpaRepository<Organization, Long
     List<Organization> findByParentIdAndCategoryOrderByNameAsc(Long parentId, OrganizationCategory category);
     boolean existsByUniversityId(Long universityId);
     boolean existsByParentId(Long parentId);
-    boolean existsByUniversityIdAndName(Long universityId, String name);
+    boolean existsByUniversityIdAndNameAndCategory(Long universityId, String name, OrganizationCategory category);
     Optional<Organization> findByUniversityIdAndCategory(Long universityId, OrganizationCategory category);
     List<Organization> findByUniversityIdOrderByNameAsc(Long universityId);
 }

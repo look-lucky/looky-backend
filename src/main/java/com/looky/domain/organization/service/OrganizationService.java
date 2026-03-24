@@ -124,11 +124,11 @@ public class OrganizationService {
 
                 // 이름 변경 시 같은 카테고리 내 중복 확인
                 if (request.getName().isPresent()) {
-                    String newName = request.getName().get();
-                    OrganizationCategory targetCategory = request.getCategory().orElse(organization.getCategory());
-                    if (!organization.getName().equals(newName) && organizationRepository.existsByUniversityIdAndNameAndCategory(organization.getUniversity().getId(), newName, targetCategory)) {
-                        throw new CustomException(ErrorCode.DUPLICATE_RESOURCE, "이미 존재하는 소속 이름입니다.");
-                    }
+                        String newName = request.getName().get();
+                        OrganizationCategory targetCategory = request.getCategory().orElse(organization.getCategory());
+                        if (!organization.getName().equals(newName) && organizationRepository.existsByUniversityIdAndNameAndCategory(organization.getUniversity().getId(), newName, targetCategory)) {
+                                throw new CustomException(ErrorCode.DUPLICATE_RESOURCE, "이미 존재하는 소속 이름입니다.");
+                        }
                 }
 
                 organization.update(

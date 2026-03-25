@@ -8,33 +8,23 @@
 
     <appender name="JSON_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>./logs/looky-application.json</file>
-
         <encoder class="net.logstash.logback.encoder.LogstashEncoder">
             <timeZone>Asia/Seoul</timeZone>
         </encoder>
-
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <fileNamePattern>./logs/looky-application-%d{yyyy-MM-dd}.json</fileNamePattern>
             <maxHistory>30</maxHistory>
         </rollingPolicy>
     </appender>
 
-    <springProfile name="dev | local">
+    <springProfile name="local | dev | default">
         <root level="INFO">
             <appender-ref ref="CONSOLE" />
-        </root>
+            <appender-ref ref="JSON_FILE" /> </root>
     </springProfile>
 
     <springProfile name="prod">
         <root level="INFO">
-            <appender-ref ref="JSON_FILE" />
-        </root>
-    </springProfile>
-
-    <springProfile name="dev | local | default">
-        <root level="INFO">
-            <appender-ref ref="CONSOLE" />
-
             <appender-ref ref="JSON_FILE" />
         </root>
     </springProfile>

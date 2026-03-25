@@ -44,7 +44,7 @@ public class AppleUtil {
                 .expiration(expirationDate)
                 .audience().add("https://appleid.apple.com").and()
                 .subject(clientId)
-                .signWith(getPrivateKey(), Jwts.SIG.ES256)
+                .signWith(getPrivateKeyForTest(), Jwts.SIG.ES256)
                 .compact();
     }
 
@@ -65,5 +65,10 @@ public class AppleUtil {
             log.error("Apple Private Key Load Failed: {}", e.getMessage());
             throw new RuntimeException("Apple Login Error: 키 파일을 읽을 수 없습니다.", e);
         }
+    }
+
+    /** test override hook **/
+    protected PrivateKey getPrivateKeyForTest() {
+        return getPrivateKey();
     }
 }

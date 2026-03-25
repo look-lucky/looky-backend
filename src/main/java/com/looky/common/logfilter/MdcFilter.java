@@ -7,6 +7,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.MDC;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -21,16 +23,23 @@ public class MdcFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
-        String traceId = UUID.randomUUID().toString().substring(0, 8);   // 요청마다 고유한 ID (Trace ID) 생성
+        // 요청마다 고유한 Trace ID 생성
+        String traceId = UUID.randomUUID().toString().substring(0, 8);
 
         MDC.put("traceId", traceId);
         MDC.put("clientIp", request.getRemoteAddr());
         MDC.put("requestUri", request.getRequestURI());
 
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.isAuthenticated()) {
+            MDC.put("userId", auth.getName());
+        } else {
+            MDC.put("userId", "anonymous");
+        }
+
         try {
             filterChain.doFilter(request, response);
         } finally {
-            // 요청이 끝나면 MDC 상자 비우기
             MDC.clear();
         }
     }

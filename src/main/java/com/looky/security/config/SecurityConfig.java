@@ -93,9 +93,10 @@ public class SecurityConfig {
                         .authorizeHttpRequests((auth) -> auth
 
                                 .requestMatchers(HttpMethod.DELETE, "/api/auth/withdraw").authenticated() //todo: 제거. /api/account/withdraw로 이전
-                                
+                                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+
                                 // 공통 API (인증 불필요)
-                                .requestMatchers("/api/auth/**", "/docs", "/swagger-ui/**", "/v3/api-docs/**", "/health")
+                                .requestMatchers("/api/auth/**", "/docs", "/swagger-ui/**", "/v3/api-docs/**", "/health", "/favicon.ico")
                                 .permitAll()
 
                                 // 학생 회원가입 시 필요한 공개 조회 API

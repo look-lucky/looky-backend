@@ -15,6 +15,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 @RestControllerAdvice
 @Slf4j
@@ -203,11 +204,29 @@ public class GlobalExceptionHandler {
 
                 ErrorCode errorCode = e.getErrorCode();
 
-                log.info("커스텀 데이터 유효성 검증 실패",
+                log.warn("커스텀 데이터 유효성 검증 실패",
                         kv("url", request.getRequestURI()),
                         kv("method", request.getMethod()),
                         kv("errorCode", errorCode.name()),
                         kv("details", e.getDetails())
+                );
+
+                ErrorResponse errorResponse = ErrorResponse.of(errorCode, e.getMessage(), request.getRequestURI());
+
+                return ResponseEntity.status(errorCode.getHttpStatus()).body(CommonResponse.fail(errorResponse));
+        }
+
+        // 정적 리소스 없음 오류 처리
+        @ExceptionHandler(NoResourceFoundException.class)
+        public ResponseEntity<CommonResponse<ErrorResponse>> handleNoResourceFoundException(
+                NoResourceFoundException e,
+                HttpServletRequest request) {
+
+                ErrorCode errorCode = ErrorCode.RESOURCE_NOT_FOUND;
+
+                log.info("정적 리소스 없음",
+                        kv("url", request.getRequestURI()),
+                        kv("method", request.getMethod())
                 );
 
                 ErrorResponse errorResponse = ErrorResponse.of(errorCode, e.getMessage(), request.getRequestURI());

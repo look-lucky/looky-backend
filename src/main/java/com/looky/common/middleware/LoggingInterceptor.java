@@ -3,6 +3,9 @@ package com.looky.common.middleware;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
@@ -15,69 +18,73 @@ public class LoggingInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
 
-        // 요청 식별 고유 ID 생성
-        String requestId = UUID.randomUUID().toString().substring(0, 8);
-        request.setAttribute("requestId", requestId);
-
-        // 시작 시간 기록
+        // 단일 ID 생성 (traceId와 requestId를 하나로 통합)
+        String traceId = UUID.randomUUID().toString().substring(0, 8);
         long startTime = System.currentTimeMillis();
+        String clientIp = getClientIp(request);
+
+        request.setAttribute("traceId", traceId);
         request.setAttribute("startTime", startTime);
 
-        // 클라이언트 IP 추출
-        String clientIp = getClientIp(request);
-        request.setAttribute("clientIp", clientIp);
+        String userId = "anonymous";
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.isAuthenticated()
+                && !"anonymousUser".equals(auth.getPrincipal())) {
+            userId = auth.getName();
+        }
 
-        // 요청 로그 출력
-        log.info("[REQUEST] [{}] {} {} | IP: {}", requestId, request.getMethod(), request.getRequestURI(), clientIp);
+        // MDC 설정 (JSON 로그에 자동 포함됨)
+        MDC.put("traceId", traceId);
+        MDC.put("userId", userId);
+        MDC.put("clientIp", clientIp);
+        MDC.put("requestUri", request.getRequestURI());
+        MDC.put("method", request.getMethod());
+
+        log.info("[REQUEST] [{} {}] traceId={} userId={} ip={}",
+                request.getMethod(), request.getRequestURI(), traceId, userId, clientIp);
 
         return true;
     }
 
-    private String getClientIp(HttpServletRequest request) {
+    @Override
+    public void afterCompletion(HttpServletRequest request, HttpServletResponse response,
+                                Object handler, Exception ex) {
+        String traceId = (String) request.getAttribute("traceId");
+        long startTime = (Long) request.getAttribute("startTime");
+        long duration = System.currentTimeMillis() - startTime;
 
+        if (ex != null) {
+            log.error("[RESPONSE] [{}] status={} duration={}ms exception={}",
+                    traceId, response.getStatus(), duration, ex.getMessage());
+        } else {
+            log.info("[RESPONSE] [{}] status={} duration={}ms",
+                    traceId, response.getStatus(), duration);
+        }
+
+        MDC.clear();
+    }
+
+    private String getClientIp(HttpServletRequest request) {
         String ip = request.getHeader("X-Forwarded-For");
-        
-        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+
+        if (ip == null || ip.isBlank() || "unknown".equalsIgnoreCase(ip)) {
             ip = request.getHeader("Proxy-Client-IP");
         }
-        
-        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+        if (ip == null || ip.isBlank() || "unknown".equalsIgnoreCase(ip)) {
             ip = request.getHeader("WL-Proxy-Client-IP");
         }
-        
-        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+        if (ip == null || ip.isBlank() || "unknown".equalsIgnoreCase(ip)) {
             ip = request.getHeader("HTTP_CLIENT_IP");
         }
-        
-        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+        if (ip == null || ip.isBlank() || "unknown".equalsIgnoreCase(ip)) {
             ip = request.getHeader("HTTP_X_FORWARDED_FOR");
         }
-        
-        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+        if (ip == null || ip.isBlank() || "unknown".equalsIgnoreCase(ip)) {
             ip = request.getRemoteAddr();
         }
-        // 다중 프록시를 거칠 경우 콤마(,)로 구분되어 첫 번째 IP가 실제 클라이언트 IP임
         if (ip != null && ip.contains(",")) {
             ip = ip.split(",")[0].trim();
         }
         return ip;
-    }
-
-    @Override
-    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler,
-            Exception ex) {
-        String requestId = (String) request.getAttribute("requestId");
-        long startTime = (Long) request.getAttribute("startTime");
-        long endTime = System.currentTimeMillis();
-        long duration = endTime - startTime;
-
-        String errorInfo = "";
-        if (ex != null) {
-            errorInfo = " | Exception: " + ex.getMessage();
-        }
-
-        // 응답 로그 출력
-        log.info("[RESPONSE] [{}] {} {} | Status: {} | Time: {}ms{}",
-                requestId, request.getMethod(), request.getRequestURI(), response.getStatus(), duration, errorInfo);
     }
 }

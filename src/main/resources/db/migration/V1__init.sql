@@ -499,5 +499,22 @@ create table email_verifications (
     constraint uk_email_verifications_email unique (email)
 );
 
+/* Advertisement */
+create table advertisement (
+    advertisement_id bigint auto_increment primary key,
+    created_at datetime(6) not null,
+    modified_at datetime(6) not null,
+    created_by varchar(255),
+    last_modified_by varchar(255),
+    title varchar(255) not null,
+    advertisement_type varchar(20) not null,
+    image_url varchar(500) not null,
+    landing_url varchar(500),
+    status varchar(20) not null default 'SCHEDULED',
+    display_order int not null default 0,
+    start_at datetime(6) not null,
+    end_at datetime(6) not null
+);
+
 /* 외래 키 제약 조건 검사를 다시 켭니다 */
 SET FOREIGN_KEY_CHECKS = 1;

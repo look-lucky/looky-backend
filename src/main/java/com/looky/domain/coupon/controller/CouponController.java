@@ -103,7 +103,7 @@ public class CouponController {
                 @ApiResponse(responseCode = "404", description = "유효하지 않은 코드 또는 활성화되지 않은 쿠폰", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class))),
                 @ApiResponse(responseCode = "422", description = "만료된 쿠폰", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class)))
         })
-        @PostMapping("/stores/{storeId}/coupons/verify ")
+        @PostMapping("/stores/{storeId}/coupons/verify")
         public ResponseEntity<CommonResponse<VerifyCouponResponse>> verifyCoupon(
                 @Parameter(description = "상점 ID") @PathVariable Long storeId,
                 @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,

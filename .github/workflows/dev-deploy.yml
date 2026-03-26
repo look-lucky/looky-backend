@@ -81,6 +81,22 @@ jobs:
               --restart unless-stopped \
               ${{ secrets.DOCKERHUB_USERNAME }}/looky-backend:dev
 
+            echo "Spring Boot 헬스체크 시작..."
+            for i in $(seq 1 12); do
+              STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8081/health)
+              if [ "$STATUS" = "200" ]; then
+                echo "서버 정상 기동 확인 (시도: $i)"
+                break
+              fi
+              echo "대기 중... ($i/12) status=$STATUS"
+              sleep 5
+              if [ "$i" = "12" ]; then
+                echo "서버 기동 실패 - 헬스체크 타임아웃"
+                sudo docker logs looky-dev --tail 50
+                exit 1
+              fi
+            done
+            
             rm -f .env.dev
 
             sudo docker image prune -f

@@ -197,25 +197,6 @@ public class GlobalExceptionHandler {
                 return ResponseEntity.status(errorCode.getHttpStatus()).body(CommonResponse.fail(errorResponse));
         }
 
-        // 커스텀 유효성 검증 예외 처리
-        @ExceptionHandler(CustomValidationException.class)
-        public ResponseEntity<CommonResponse<ErrorResponse>> handleCustomValidationException(
-                CustomValidationException e, HttpServletRequest request) {
-
-                ErrorCode errorCode = e.getErrorCode();
-
-                log.warn("커스텀 데이터 유효성 검증 실패",
-                        kv("url", request.getRequestURI()),
-                        kv("method", request.getMethod()),
-                        kv("errorCode", errorCode.name()),
-                        kv("details", e.getDetails())
-                );
-
-                ErrorResponse errorResponse = ErrorResponse.of(errorCode, e.getMessage(), request.getRequestURI());
-
-                return ResponseEntity.status(errorCode.getHttpStatus()).body(CommonResponse.fail(errorResponse));
-        }
-
         // 정적 리소스 없음 오류 처리
         @ExceptionHandler(NoResourceFoundException.class)
         public ResponseEntity<CommonResponse<ErrorResponse>> handleNoResourceFoundException(

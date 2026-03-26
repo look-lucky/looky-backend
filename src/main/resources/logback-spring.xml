@@ -11,10 +11,10 @@
     <!-- JSON 파일 (운영/개발 서버 전용) -->
     <appender name="JSON_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>logs/application.log</file>
-        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
             <fileNamePattern>logs/application.%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
-            <maxFileSize>50MB</maxFileSize>   <!-- 파일 하나당 최대 크기 -->
-            <maxHistory>30</maxHistory>        <!-- 보관할 일수 (현재 최대 30일) -->
+            <maxFileSize>50MB</maxFileSize>    <!-- 파일 하나당 최대 크기 -->
+            <maxHistory>7</maxHistory>         <!-- 7일치만 보관 -->
             <totalSizeCap>700MB</totalSizeCap> <!-- 전체 로그 디렉토리 최대 용량 -->
         </rollingPolicy>
         <encoder class="net.logstash.logback.encoder.LogstashEncoder">

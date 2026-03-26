@@ -17,6 +17,8 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
+import static net.logstash.logback.argument.StructuredArguments.kv;
+
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -27,8 +29,11 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response,
             AuthenticationException authException) throws IOException, ServletException {
-        log.error("[AuthenticationEntryPoint] url: {} | message: {}", request.getRequestURI(),
-                authException.getMessage());
+
+        log.warn("인증되지 않은 접근 시도",
+                kv("url", request.getRequestURI()),
+                kv("errorMessage", authException.getMessage())
+        );
 
         ErrorCode errorCode = ErrorCode.UNAUTHORIZED;
 

@@ -20,7 +20,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 import org.springframework.data.domain.Pageable;
@@ -36,7 +35,6 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/stores")
 @RequiredArgsConstructor
-@Slf4j
 public class StoreController {
 
         private final StoreService storeService;

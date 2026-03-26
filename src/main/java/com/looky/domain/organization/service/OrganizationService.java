@@ -84,8 +84,8 @@ public class OrganizationService {
                                 .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "단과대학을 찾을 수 없습니다."));
                 }
 
-                // 같은 대학 내 이름 중복 확인
-                if (organizationRepository.existsByUniversityIdAndName(universityId, request.getName())) {
+                // 같은 대학 내 같은 카테고리에서 이름 중복 확인
+                if (organizationRepository.existsByUniversityIdAndNameAndCategory(universityId, request.getName(), request.getCategory())) {
                         throw new CustomException(ErrorCode.DUPLICATE_RESOURCE, "이미 존재하는 소속 이름입니다.");
                 }
 
@@ -122,12 +122,13 @@ public class OrganizationService {
                     }
                 }
 
-                // 이름 변경 시 중복 확인
+                // 이름 변경 시 같은 카테고리 내 중복 확인
                 if (request.getName().isPresent()) {
-                    String newName = request.getName().get();
-                    if (!organization.getName().equals(newName) && organizationRepository.existsByUniversityIdAndName(organization.getUniversity().getId(), newName)) {
-                        throw new CustomException(ErrorCode.DUPLICATE_RESOURCE, "이미 존재하는 소속 이름입니다.");
-                    }
+                        String newName = request.getName().get();
+                        OrganizationCategory targetCategory = request.getCategory().orElse(organization.getCategory());
+                        if (!organization.getName().equals(newName) && organizationRepository.existsByUniversityIdAndNameAndCategory(organization.getUniversity().getId(), newName, targetCategory)) {
+                                throw new CustomException(ErrorCode.DUPLICATE_RESOURCE, "이미 존재하는 소속 이름입니다.");
+                        }
                 }
 
                 organization.update(

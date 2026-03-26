@@ -90,11 +90,10 @@ create table organization (
     expires_at datetime(6),
     university_id bigint not null,
     parent_id bigint,
-    user_id bigint not null,
+    user_id bigint,
     foreign key (university_id) references university (university_id),
     foreign key (parent_id) references organization (organization_id),
-    foreign key (user_id) references user (user_id),
-    constraint UK_organization_university_name unique (university_id, name)
+    foreign key (user_id) references user (user_id)
 );
 
 create table user_organization (
@@ -125,7 +124,7 @@ create table store (
     check_reason varchar(255),
     introduction longtext,
     operating_hours longtext,
-    profile_image_url varchar(255)
+    profile_image_url varchar(255),
     store_status varchar(50) not null,
     is_suspended bit default 0 not null,
     clover_grade varchar(50) default 'SEED' not null,

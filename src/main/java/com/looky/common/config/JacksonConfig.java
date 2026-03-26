@@ -1,4 +1,4 @@
-package com.looky.config;
+package com.looky.common.config;
 
 import org.openapitools.jackson.nullable.JsonNullableModule;
 import org.springframework.context.annotation.Bean;

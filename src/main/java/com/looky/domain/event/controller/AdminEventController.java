@@ -1,9 +1,13 @@
 package com.looky.domain.event.controller;
 
 import com.looky.common.response.CommonResponse;
+import com.looky.common.response.PageResponse;
 import com.looky.common.response.SwaggerErrorResponse;
 import com.looky.domain.event.dto.CreateEventRequest;
+import com.looky.domain.event.dto.EventResponse;
 import com.looky.domain.event.dto.UpdateEventRequest;
+import com.looky.domain.event.entity.EventStatus;
+import com.looky.domain.event.entity.EventType;
 import com.looky.domain.event.service.EventService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -14,9 +18,13 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Tag(name = "Admin Event", description = "관리자 이벤트 관리 API")
 @RestController
@@ -38,6 +46,22 @@ public class AdminEventController {
     ) {
         Long eventId = eventService.createEventForAdmin(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(CommonResponse.success(eventId));
+    }
+
+    @Operation(summary = "[관리자] 이벤트 목록 조회", description = "이벤트 목록을 페이징하여 조회합니다. 대학 ID 미입력 시 전체 조회.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "조회 성공"),
+            @ApiResponse(responseCode = "403", description = "권한 없음", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class)))
+    })
+    @GetMapping
+    public ResponseEntity<CommonResponse<PageResponse<EventResponse>>> getEvents(
+            @Parameter(description = "검색 키워드 (제목)") @RequestParam(required = false) String keyword,
+            @Parameter(description = "이벤트 타입 필터 (복수 선택 가능)") @RequestParam(required = false) List<EventType> eventTypes,
+            @Parameter(description = "상태 필터") @RequestParam(required = false) EventStatus status,
+            @Parameter(description = "대학 ID (미입력 시 전체 조회)") @RequestParam(required = false) Long universityId,
+            @Parameter(description = "페이징 정보") @PageableDefault(size = 10) Pageable pageable) {
+        PageResponse<EventResponse> response = eventService.getEventsForAdmin(keyword, eventTypes, status, universityId, pageable);
+        return ResponseEntity.ok(CommonResponse.success(response));
     }
 
     @Operation(summary = "[관리자] 이벤트 수정", description = "이벤트 정보를 수정합니다.")

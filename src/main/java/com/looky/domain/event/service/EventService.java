@@ -16,6 +16,8 @@ import com.looky.domain.event.repository.EventRepository;
 import com.looky.domain.event.repository.EventSpecification;
 import com.looky.domain.organization.entity.University;
 import com.looky.domain.organization.repository.UniversityRepository;
+import com.looky.domain.user.entity.StudentProfile;
+import com.looky.domain.user.repository.StudentProfileRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -40,6 +42,7 @@ public class EventService {
 
     private final EventRepository eventRepository;
     private final UniversityRepository universityRepository;
+    private final StudentProfileRepository studentProfileRepository;
     private final S3Service s3Service;
 
     @Transactional
@@ -99,7 +102,23 @@ public class EventService {
         return EventResponse.from(event);
     }
 
-    public PageResponse<EventResponse> getEventsForStudent(String keyword, List<EventType> eventTypes, EventStatus status, Long universityId, Pageable pageable) {
+    public PageResponse<EventResponse> getEventsForStudent(Long userId, String keyword, List<EventType> eventTypes, EventStatus status, Pageable pageable) {
+        Long universityId = studentProfileRepository.findById(userId)
+                .map(StudentProfile::getUniversity)
+                .map(University::getId)
+                .orElse(null);
+
+        Specification<Event> spec = Specification.where(EventSpecification.hasKeyword(keyword))
+                .and(EventSpecification.hasEventTypes(eventTypes))
+                .and(EventSpecification.hasStatus(status))
+                .and(EventSpecification.hasUniversityId(universityId));
+
+        Page<Event> eventPage = eventRepository.findAll(spec, pageable);
+        Page<EventResponse> responsePage = eventPage.map(EventResponse::from);
+        return PageResponse.from(responsePage);
+    }
+
+    public PageResponse<EventResponse> getEventsForAdmin(String keyword, List<EventType> eventTypes, EventStatus status, Long universityId, Pageable pageable) {
         Specification<Event> spec = Specification.where(EventSpecification.hasKeyword(keyword))
                 .and(EventSpecification.hasEventTypes(eventTypes))
                 .and(EventSpecification.hasStatus(status))

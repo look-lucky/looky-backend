@@ -54,7 +54,7 @@ public class EventController {
             @Parameter(description = "상태 필터") @RequestParam(required = false) EventStatus status,
             @Parameter(description = "대학 ID") @RequestParam(required = false) Long universityId,
             @Parameter(description = "페이징 정보") @PageableDefault(size = 10) Pageable pageable) {
-        PageResponse<EventResponse> response = eventService.getEventsForStudent(keyword, eventTypes, status, universityId, pageable);
+        PageResponse<EventResponse> response = eventService.getEventsForAdmin(keyword, eventTypes, status, universityId, pageable);
         return ResponseEntity.ok(CommonResponse.success(response));
     }
 }

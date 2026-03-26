@@ -7,6 +7,7 @@ import com.looky.domain.event.dto.EventResponse;
 import com.looky.domain.event.entity.EventStatus;
 import com.looky.domain.event.entity.EventType;
 import com.looky.domain.event.service.EventService;
+import com.looky.security.details.PrincipalDetails;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -18,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -48,12 +50,13 @@ public class StudentEventController {
     })
     @GetMapping
     public ResponseEntity<CommonResponse<PageResponse<EventResponse>>> getEvents(
+            @Parameter(hidden = true) @AuthenticationPrincipal PrincipalDetails principalDetails,
             @Parameter(description = "검색 키워드 (제목)") @RequestParam(required = false) String keyword,
             @Parameter(description = "이벤트 타입 필터 (복수 선택 가능)") @RequestParam(required = false) List<EventType> eventTypes,
             @Parameter(description = "상태 필터") @RequestParam(required = false) EventStatus status,
-            @Parameter(description = "대학 ID") @RequestParam(required = false) Long universityId,
             @Parameter(description = "페이징 정보") @PageableDefault(size = 10) Pageable pageable) {
-        PageResponse<EventResponse> response = eventService.getEventsForStudent(keyword, eventTypes, status, universityId, pageable);
+        Long userId = principalDetails.getUser().getId();
+        PageResponse<EventResponse> response = eventService.getEventsForStudent(userId, keyword, eventTypes, status, pageable);
         return ResponseEntity.ok(CommonResponse.success(response));
     }
 }

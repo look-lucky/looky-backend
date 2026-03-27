@@ -69,6 +69,10 @@ public class Advertisement extends BaseEntity {
         this.endAt = endAt;
     }
 
+    public void updateDisplayOrder(Integer displayOrder) {
+        this.displayOrder = displayOrder;
+    }
+
     public void updateStatus(AdvertisementStatus status) {
         this.status = status;
     }

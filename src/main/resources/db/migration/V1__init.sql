@@ -512,7 +512,8 @@ create table advertisement (
     status varchar(20) not null default 'SCHEDULED',
     display_order int not null default 0,
     start_at datetime(6) not null,
-    end_at datetime(6) not null
+    end_at datetime(6) not null,
+    constraint uk_advertisement_type_display_order unique (advertisement_type, display_order)
 );
 
 /* 외래 키 제약 조건 검사를 다시 켭니다 */

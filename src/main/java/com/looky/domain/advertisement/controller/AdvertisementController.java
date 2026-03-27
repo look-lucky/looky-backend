@@ -23,13 +23,13 @@ public class AdvertisementController {
 
     private final AdvertisementService advertisementService;
 
-    @Operation(summary = "[공통] 팝업 광고 조회", description = "현재 노출 중인 팝업 광고 1건을 조회합니다. 광고가 없으면 data가 null로 반환됩니다.")
+    @Operation(summary = "[공통] 팝업 광고 목록 조회", description = "현재 노출 중인 팝업 광고 목록을 노출 순서대로 조회합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "조회 성공")
     })
     @GetMapping("/popup")
-    public ResponseEntity<CommonResponse<AdvertisementResponse>> getPopupAdvertisement() {
-        AdvertisementResponse response = advertisementService.getActivePopupAdvertisement().orElse(null);
+    public ResponseEntity<CommonResponse<List<AdvertisementResponse>>> getPopupAdvertisements() {
+        List<AdvertisementResponse> response = advertisementService.getActivePopupAdvertisements();
         return ResponseEntity.ok(CommonResponse.success(response));
     }
 

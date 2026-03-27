@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import org.openapitools.jackson.nullable.JsonNullable;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @NoArgsConstructor
@@ -35,11 +36,11 @@ public class UpdateAdvertisementRequest {
     @Schema(description = "광고 상태 (ACTIVE / INACTIVE만 직접 변경 가능)", example = "INACTIVE")
     private JsonNullable<AdvertisementStatus> status = JsonNullable.undefined();
 
-    @Schema(description = "타겟 대학 ID (null 전송 시 타겟 제거)", nullable = true)
-    private JsonNullable<Long> targetUniversityId = JsonNullable.undefined();
+    @Schema(description = "타겟 대학 ID 목록 (null 전송 시 타겟 전체 제거, 빈 배열도 전체 제거)", nullable = true)
+    private JsonNullable<List<Long>> targetUniversityIds = JsonNullable.undefined();
 
-    @Schema(description = "타겟 단과대 ID (null 전송 시 타겟 제거)", nullable = true)
-    private JsonNullable<Long> targetOrganizationId = JsonNullable.undefined();
+    @Schema(description = "타겟 단과대 ID 목록 (null 전송 시 타겟 전체 제거, 빈 배열도 전체 제거)", nullable = true)
+    private JsonNullable<List<Long>> targetOrganizationIds = JsonNullable.undefined();
 
     @Schema(description = "타겟 성별 (null 전송 시 타겟 제거)", nullable = true)
     private JsonNullable<Gender> targetGender = JsonNullable.undefined();

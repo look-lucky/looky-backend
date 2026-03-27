@@ -33,6 +33,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -47,7 +49,8 @@ public class AdvertisementService {
     private final StudentProfileRepository studentProfileRepository;
     private final UserOrganizationRepository userOrganizationRepository;
 
-    // 팝업 광고 조회
+    // --- 공개 API ---
+
     public List<AdvertisementResponse> getActivePopupAdvertisements(User user) {
         UserTarget target = resolveUserTarget(user);
         return advertisementRepository
@@ -58,7 +61,6 @@ public class AdvertisementService {
                 .toList();
     }
 
-    // 배너 광고 조회
     public List<AdvertisementResponse> getActiveBannerAdvertisements(User user) {
         UserTarget target = resolveUserTarget(user);
         return advertisementRepository
@@ -69,7 +71,6 @@ public class AdvertisementService {
                 .toList();
     }
 
-    // 플로팅 광고 조회
     public List<AdvertisementResponse> getActiveFloatingAdvertisements(User user) {
         UserTarget target = resolveUserTarget(user);
         return advertisementRepository
@@ -80,7 +81,8 @@ public class AdvertisementService {
                 .toList();
     }
 
-    // 전체 광고 조회 (관리자용)
+    // --- 관리자 API ---
+
     public PageResponse<AdminAdvertisementResponse> getAdvertisements(AdvertisementType type, AdvertisementStatus status, Pageable pageable) {
         Specification<Advertisement> spec = Specification
                 .where(AdvertisementSpecification.hasType(type))
@@ -98,13 +100,14 @@ public class AdvertisementService {
             throw new CustomException(ErrorCode.BAD_REQUEST, "종료일은 시작일 이후여야 합니다.");
         }
 
+        List<Long> targetUniversityIds = request.getTargetUniversityIds();
+        List<Long> targetOrganizationIds = request.getTargetOrganizationIds();
+        validateOrganizationTargets(targetOrganizationIds, targetUniversityIds);
+
         LocalDateTime now = LocalDateTime.now();
         AdvertisementStatus initialStatus = (!now.isBefore(request.getStartAt()) && !now.isAfter(request.getEndAt()))
                 ? AdvertisementStatus.ACTIVE
                 : AdvertisementStatus.SCHEDULED;
-
-        University targetUniversity = resolveTargetUniversity(request.getTargetUniversityId());
-        Organization targetOrganization = resolveTargetOrganization(request.getTargetOrganizationId(), targetUniversity);
 
         List<Advertisement> advertisements = advertisementRepository.findAllByAdvertisementTypeOrderByDisplayOrderAscIdAsc(request.getAdvertisementType());
         int targetOrder = normalizeTargetOrder(request.getDisplayOrder(), advertisements.size());
@@ -120,12 +123,15 @@ public class AdvertisementService {
                 .displayOrder(targetOrder)
                 .startAt(request.getStartAt())
                 .endAt(request.getEndAt())
-                .targetUniversity(targetUniversity)
-                .targetOrganization(targetOrganization)
                 .targetGender(request.getTargetGender())
                 .build();
 
-        return advertisementRepository.save(advertisement).getId();
+        Advertisement savedAdvertisement = advertisementRepository.save(advertisement);
+
+        applyTargetUniversities(savedAdvertisement, targetUniversityIds);
+        applyTargetOrganizations(savedAdvertisement, targetOrganizationIds, targetUniversityIds);
+
+        return savedAdvertisement.getId();
     }
 
     // 광고 수정
@@ -157,13 +163,6 @@ public class AdvertisementService {
         Integer updatedDisplayOrder = request.getDisplayOrder().orElse(advertisement.getDisplayOrder());
         LocalDateTime updatedStartAt = request.getStartAt().orElse(advertisement.getStartAt());
         LocalDateTime updatedEndAt = request.getEndAt().orElse(advertisement.getEndAt());
-
-        University updatedTargetUniversity = request.getTargetUniversityId().isPresent()
-                ? resolveTargetUniversity(request.getTargetUniversityId().get())
-                : advertisement.getTargetUniversity();
-        Organization updatedTargetOrganization = request.getTargetOrganizationId().isPresent()
-                ? resolveTargetOrganization(request.getTargetOrganizationId().get(), updatedTargetUniversity)
-                : advertisement.getTargetOrganization();
         Gender updatedTargetGender = request.getTargetGender().isPresent()
                 ? request.getTargetGender().get()
                 : advertisement.getTargetGender();
@@ -185,17 +184,27 @@ public class AdvertisementService {
             updatedDisplayOrder = targetOrder;
         }
 
-        advertisement.update(
-                updatedTitle,
-                updatedImageUrl,
-                updatedLandingUrl,
-                updatedDisplayOrder,
-                updatedStartAt,
-                updatedEndAt,
-                updatedTargetUniversity,
-                updatedTargetOrganization,
-                updatedTargetGender
-        );
+        advertisement.update(updatedTitle, updatedImageUrl, updatedLandingUrl, updatedDisplayOrder, updatedStartAt, updatedEndAt, updatedTargetGender);
+
+        if (request.getTargetUniversityIds().isPresent() || request.getTargetOrganizationIds().isPresent()) {
+            List<Long> updatedUniversityIds = request.getTargetUniversityIds().isPresent()
+                    ? request.getTargetUniversityIds().get()
+                    : advertisement.getTargetUniversities().stream()
+                            .map(tu -> tu.getUniversity().getId()).toList();
+            List<Long> updatedOrganizationIds = request.getTargetOrganizationIds().isPresent()
+                    ? request.getTargetOrganizationIds().get()
+                    : advertisement.getTargetOrganizations().stream()
+                            .map(to -> to.getOrganization().getId()).toList();
+
+            validateOrganizationTargets(updatedOrganizationIds, updatedUniversityIds);
+
+            advertisement.clearTargetUniversities();
+            advertisement.clearTargetOrganizations();
+            advertisementRepository.flush();
+
+            applyTargetUniversities(advertisement, updatedUniversityIds);
+            applyTargetOrganizations(advertisement, updatedOrganizationIds, updatedUniversityIds);
+        }
     }
 
     // 광고 삭제
@@ -213,6 +222,8 @@ public class AdvertisementService {
         advertisements.removeIf(target -> target.getId().equals(advertisementId));
         reassignSequentialOrders(advertisements);
     }
+
+    // --- 스케줄러 ---
 
     // 스케줄러: SCHEDULED 광고 활성화
     @Transactional
@@ -232,7 +243,7 @@ public class AdvertisementService {
         log.info("[Scheduler] 광고 만료 처리 {}건 완료", targets.size());
     }
 
-    private record UserTarget(Long universityId, Long collegeId, Gender gender) {}
+    // --- 내부 메서드 ---
 
     // 광고 ID로 조회 (없으면 예외)
     private Advertisement findAdvertisementById(Long advertisementId) {
@@ -240,28 +251,41 @@ public class AdvertisementService {
                 .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "광고를 찾을 수 없습니다."));
     }
 
-    // 타겟 대학 조회
-    private University resolveTargetUniversity(Long universityId) {
-        if (universityId == null) return null;
-        return universityRepository.findById(universityId)
-                .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "타겟 대학을 찾을 수 없습니다."));
-    }
-
-    // 타겟 단과대 조회 및 검증 (대학 타겟 필수, COLLEGE 카테고리 확인)
-    private Organization resolveTargetOrganization(Long organizationId, University targetUniversity) {
-        if (organizationId == null) return null;
-        if (targetUniversity == null) {
+    // 단과대 타겟 지정 시 대학 타겟 필수 및 소속 검증
+    private void validateOrganizationTargets(List<Long> organizationIds, List<Long> universityIds) {
+        if (organizationIds == null || organizationIds.isEmpty()) return;
+        if (universityIds == null || universityIds.isEmpty()) {
             throw new CustomException(ErrorCode.BAD_REQUEST, "단과대 타겟을 지정하려면 대학 타겟이 필요합니다.");
         }
-        Organization organization = organizationRepository.findById(organizationId)
-                .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "타겟 단과대를 찾을 수 없습니다."));
-        if (organization.getCategory() != OrganizationCategory.COLLEGE) {
-            throw new CustomException(ErrorCode.BAD_REQUEST, "타겟 조직은 단과대(COLLEGE)여야 합니다.");
+        Set<Long> universityIdSet = universityIds.stream().collect(Collectors.toSet());
+        for (Long organizationId : organizationIds) {
+            Organization organization = organizationRepository.findById(organizationId)
+                    .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND, "타겟 단과대를 찾을 수 없습니다."));
+            if (organization.getCategory() != OrganizationCategory.COLLEGE) {
+                throw new CustomException(ErrorCode.BAD_REQUEST, "타겟 조직은 단과대(COLLEGE)여야 합니다.");
+            }
+            if (!universityIdSet.contains(organization.getUniversity().getId())) {
+                throw new CustomException(ErrorCode.BAD_REQUEST, "해당 단과대는 지정된 대학에 속하지 않습니다.");
+            }
         }
-        if (!organization.getUniversity().getId().equals(targetUniversity.getId())) {
-            throw new CustomException(ErrorCode.BAD_REQUEST, "해당 단과대는 지정된 대학에 속하지 않습니다.");
+    }
+
+    // 타겟 대학 목록 적용
+    private void applyTargetUniversities(Advertisement advertisement, List<Long> universityIds) {
+        if (universityIds == null) return;
+        for (Long universityId : universityIds) {
+            universityRepository.findById(universityId)
+                    .ifPresent(advertisement::addTargetUniversity);
         }
-        return organization;
+    }
+
+    // 타겟 단과대 목록 적용
+    private void applyTargetOrganizations(Advertisement advertisement, List<Long> organizationIds, List<Long> universityIds) {
+        if (organizationIds == null) return;
+        for (Long organizationId : organizationIds) {
+            organizationRepository.findById(organizationId)
+                    .ifPresent(advertisement::addTargetOrganization);
+        }
     }
 
     // 유저의 타겟 정보 조회 (대학, 단과대, 성별)
@@ -283,15 +307,17 @@ public class AdvertisementService {
 
     // 광고 타겟과 유저 정보 매칭 여부 확인
     private boolean matchesTarget(Advertisement ad, UserTarget target) {
-        if (ad.getTargetUniversity() != null) {
-            if (target.universityId() == null || !ad.getTargetUniversity().getId().equals(target.universityId())) {
-                return false;
-            }
-            if (ad.getTargetOrganization() != null) {
-                if (target.collegeId() == null || !ad.getTargetOrganization().getId().equals(target.collegeId())) {
-                    return false;
-                }
-            }
+        if (!ad.getTargetUniversities().isEmpty()) {
+            if (target.universityId() == null) return false;
+            boolean universityMatches = ad.getTargetUniversities().stream()
+                    .anyMatch(tu -> tu.getUniversity().getId().equals(target.universityId()));
+            if (!universityMatches) return false;
+        }
+        if (!ad.getTargetOrganizations().isEmpty()) {
+            if (target.collegeId() == null) return false;
+            boolean organizationMatches = ad.getTargetOrganizations().stream()
+                    .anyMatch(to -> to.getOrganization().getId().equals(target.collegeId()));
+            if (!organizationMatches) return false;
         }
         if (ad.getTargetGender() != null) {
             return target.gender() != null && ad.getTargetGender().equals(target.gender());
@@ -355,4 +381,6 @@ public class AdvertisementService {
         }
         advertisementRepository.flush();
     }
+
+    private record UserTarget(Long universityId, Long collegeId, Gender gender) {}
 }

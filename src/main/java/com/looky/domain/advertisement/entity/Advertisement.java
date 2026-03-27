@@ -11,6 +11,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -49,22 +51,20 @@ public class Advertisement extends BaseEntity {
     @Column(name = "end_at", nullable = false)
     private LocalDateTime endAt;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "target_university_id")
-    private University targetUniversity;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "target_organization_id")
-    private Organization targetOrganization;
-
     @Enumerated(EnumType.STRING)
     @Column(name = "target_gender")
     private Gender targetGender;
 
+    @OneToMany(mappedBy = "advertisement", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<AdvertisementUniversity> targetUniversities = new ArrayList<>();
+
+    @OneToMany(mappedBy = "advertisement", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<AdvertisementOrganization> targetOrganizations = new ArrayList<>();
+
     @Builder
     public Advertisement(String title, AdvertisementType advertisementType, String imageUrl, String landingUrl,
                          AdvertisementStatus status, Integer displayOrder, LocalDateTime startAt, LocalDateTime endAt,
-                         University targetUniversity, Organization targetOrganization, Gender targetGender) {
+                         Gender targetGender) {
         this.title = title;
         this.advertisementType = advertisementType;
         this.imageUrl = imageUrl;
@@ -73,23 +73,49 @@ public class Advertisement extends BaseEntity {
         this.displayOrder = displayOrder;
         this.startAt = startAt;
         this.endAt = endAt;
-        this.targetUniversity = targetUniversity;
-        this.targetOrganization = targetOrganization;
         this.targetGender = targetGender;
     }
 
     public void update(String title, String imageUrl, String landingUrl,
                        Integer displayOrder, LocalDateTime startAt, LocalDateTime endAt,
-                       University targetUniversity, Organization targetOrganization, Gender targetGender) {
+                       Gender targetGender) {
         this.title = title;
         this.imageUrl = imageUrl;
         this.landingUrl = landingUrl;
         this.displayOrder = displayOrder;
         this.startAt = startAt;
         this.endAt = endAt;
-        this.targetUniversity = targetUniversity;
-        this.targetOrganization = targetOrganization;
         this.targetGender = targetGender;
+    }
+
+    public void addTargetUniversity(University university) {
+        boolean exists = this.targetUniversities.stream()
+                .anyMatch(tu -> tu.getUniversity().getId().equals(university.getId()));
+        if (!exists) {
+            this.targetUniversities.add(AdvertisementUniversity.builder()
+                    .advertisement(this)
+                    .university(university)
+                    .build());
+        }
+    }
+
+    public void addTargetOrganization(Organization organization) {
+        boolean exists = this.targetOrganizations.stream()
+                .anyMatch(to -> to.getOrganization().getId().equals(organization.getId()));
+        if (!exists) {
+            this.targetOrganizations.add(AdvertisementOrganization.builder()
+                    .advertisement(this)
+                    .organization(organization)
+                    .build());
+        }
+    }
+
+    public void clearTargetUniversities() {
+        this.targetUniversities.clear();
+    }
+
+    public void clearTargetOrganizations() {
+        this.targetOrganizations.clear();
     }
 
     public void updateDisplayOrder(Integer displayOrder) {

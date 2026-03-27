@@ -7,6 +7,7 @@ import com.looky.domain.user.entity.Gender;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 public class AdminAdvertisementResponse {
@@ -21,10 +22,8 @@ public class AdminAdvertisementResponse {
     private LocalDateTime startAt;
     private LocalDateTime endAt;
     private LocalDateTime createdAt;
-    private Long targetUniversityId;
-    private String targetUniversityName;
-    private Long targetOrganizationId;
-    private String targetOrganizationName;
+    private List<TargetUniversityInfo> targetUniversities;
+    private List<TargetOrganizationInfo> targetOrganizations;
     private Gender targetGender;
 
     private AdminAdvertisementResponse(Advertisement advertisement) {
@@ -38,18 +37,20 @@ public class AdminAdvertisementResponse {
         this.startAt = advertisement.getStartAt();
         this.endAt = advertisement.getEndAt();
         this.createdAt = advertisement.getCreatedAt();
-        if (advertisement.getTargetUniversity() != null) {
-            this.targetUniversityId = advertisement.getTargetUniversity().getId();
-            this.targetUniversityName = advertisement.getTargetUniversity().getName();
-        }
-        if (advertisement.getTargetOrganization() != null) {
-            this.targetOrganizationId = advertisement.getTargetOrganization().getId();
-            this.targetOrganizationName = advertisement.getTargetOrganization().getName();
-        }
+        this.targetUniversities = advertisement.getTargetUniversities().stream()
+                .map(tu -> new TargetUniversityInfo(tu.getUniversity().getId(), tu.getUniversity().getName()))
+                .toList();
+        this.targetOrganizations = advertisement.getTargetOrganizations().stream()
+                .map(to -> new TargetOrganizationInfo(to.getOrganization().getId(), to.getOrganization().getName()))
+                .toList();
         this.targetGender = advertisement.getTargetGender();
     }
 
     public static AdminAdvertisementResponse from(Advertisement advertisement) {
         return new AdminAdvertisementResponse(advertisement);
     }
+
+    public record TargetUniversityInfo(Long id, String name) {}
+
+    public record TargetOrganizationInfo(Long id, String name) {}
 }

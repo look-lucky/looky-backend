@@ -513,7 +513,12 @@ create table advertisement (
     display_order int not null default 0,
     start_at datetime(6) not null,
     end_at datetime(6) not null,
-    constraint uk_advertisement_type_display_order unique (advertisement_type, display_order)
+    target_university_id bigint,
+    target_organization_id bigint,
+    target_gender varchar(10),
+    constraint uk_advertisement_type_display_order unique (advertisement_type, display_order),
+    constraint fk_advertisement_target_university foreign key (target_university_id) references university (university_id),
+    constraint fk_advertisement_target_organization foreign key (target_organization_id) references organization (organization_id)
 );
 
 /* 외래 키 제약 조건 검사를 다시 켭니다 */

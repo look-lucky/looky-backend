@@ -1,6 +1,7 @@
 package com.looky.domain.advertisement.dto;
 
 import com.looky.domain.advertisement.entity.AdvertisementStatus;
+import com.looky.domain.user.entity.Gender;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -33,4 +34,13 @@ public class UpdateAdvertisementRequest {
 
     @Schema(description = "광고 상태 (ACTIVE / INACTIVE만 직접 변경 가능)", example = "INACTIVE")
     private JsonNullable<AdvertisementStatus> status = JsonNullable.undefined();
+
+    @Schema(description = "타겟 대학 ID (null 전송 시 타겟 제거)", nullable = true)
+    private JsonNullable<Long> targetUniversityId = JsonNullable.undefined();
+
+    @Schema(description = "타겟 단과대 ID (null 전송 시 타겟 제거)", nullable = true)
+    private JsonNullable<Long> targetOrganizationId = JsonNullable.undefined();
+
+    @Schema(description = "타겟 성별 (null 전송 시 타겟 제거)", nullable = true)
+    private JsonNullable<Gender> targetGender = JsonNullable.undefined();
 }

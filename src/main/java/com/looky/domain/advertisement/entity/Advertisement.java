@@ -1,6 +1,9 @@
 package com.looky.domain.advertisement.entity;
 
 import com.looky.common.entity.BaseEntity;
+import com.looky.domain.organization.entity.Organization;
+import com.looky.domain.organization.entity.University;
+import com.looky.domain.user.entity.Gender;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -46,9 +49,22 @@ public class Advertisement extends BaseEntity {
     @Column(name = "end_at", nullable = false)
     private LocalDateTime endAt;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "target_university_id")
+    private University targetUniversity;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "target_organization_id")
+    private Organization targetOrganization;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "target_gender")
+    private Gender targetGender;
+
     @Builder
     public Advertisement(String title, AdvertisementType advertisementType, String imageUrl, String landingUrl,
-                         AdvertisementStatus status, Integer displayOrder, LocalDateTime startAt, LocalDateTime endAt) {
+                         AdvertisementStatus status, Integer displayOrder, LocalDateTime startAt, LocalDateTime endAt,
+                         University targetUniversity, Organization targetOrganization, Gender targetGender) {
         this.title = title;
         this.advertisementType = advertisementType;
         this.imageUrl = imageUrl;
@@ -57,16 +73,23 @@ public class Advertisement extends BaseEntity {
         this.displayOrder = displayOrder;
         this.startAt = startAt;
         this.endAt = endAt;
+        this.targetUniversity = targetUniversity;
+        this.targetOrganization = targetOrganization;
+        this.targetGender = targetGender;
     }
 
     public void update(String title, String imageUrl, String landingUrl,
-                       Integer displayOrder, LocalDateTime startAt, LocalDateTime endAt) {
+                       Integer displayOrder, LocalDateTime startAt, LocalDateTime endAt,
+                       University targetUniversity, Organization targetOrganization, Gender targetGender) {
         this.title = title;
         this.imageUrl = imageUrl;
         this.landingUrl = landingUrl;
         this.displayOrder = displayOrder;
         this.startAt = startAt;
         this.endAt = endAt;
+        this.targetUniversity = targetUniversity;
+        this.targetOrganization = targetOrganization;
+        this.targetGender = targetGender;
     }
 
     public void updateDisplayOrder(Integer displayOrder) {

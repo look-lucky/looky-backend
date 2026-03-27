@@ -3,6 +3,7 @@ package com.looky.domain.advertisement.dto;
 import com.looky.domain.advertisement.entity.Advertisement;
 import com.looky.domain.advertisement.entity.AdvertisementStatus;
 import com.looky.domain.advertisement.entity.AdvertisementType;
+import com.looky.domain.user.entity.Gender;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
@@ -20,6 +21,11 @@ public class AdminAdvertisementResponse {
     private LocalDateTime startAt;
     private LocalDateTime endAt;
     private LocalDateTime createdAt;
+    private Long targetUniversityId;
+    private String targetUniversityName;
+    private Long targetOrganizationId;
+    private String targetOrganizationName;
+    private Gender targetGender;
 
     private AdminAdvertisementResponse(Advertisement advertisement) {
         this.id = advertisement.getId();
@@ -32,6 +38,15 @@ public class AdminAdvertisementResponse {
         this.startAt = advertisement.getStartAt();
         this.endAt = advertisement.getEndAt();
         this.createdAt = advertisement.getCreatedAt();
+        if (advertisement.getTargetUniversity() != null) {
+            this.targetUniversityId = advertisement.getTargetUniversity().getId();
+            this.targetUniversityName = advertisement.getTargetUniversity().getName();
+        }
+        if (advertisement.getTargetOrganization() != null) {
+            this.targetOrganizationId = advertisement.getTargetOrganization().getId();
+            this.targetOrganizationName = advertisement.getTargetOrganization().getName();
+        }
+        this.targetGender = advertisement.getTargetGender();
     }
 
     public static AdminAdvertisementResponse from(Advertisement advertisement) {

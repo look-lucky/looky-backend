@@ -3,12 +3,14 @@ package com.looky.domain.advertisement.controller;
 import com.looky.common.response.CommonResponse;
 import com.looky.domain.advertisement.dto.AdvertisementResponse;
 import com.looky.domain.advertisement.service.AdvertisementService;
+import com.looky.security.details.PrincipalDetails;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -28,8 +30,9 @@ public class AdvertisementController {
             @ApiResponse(responseCode = "200", description = "조회 성공")
     })
     @GetMapping("/popup")
-    public ResponseEntity<CommonResponse<List<AdvertisementResponse>>> getPopupAdvertisements() {
-        List<AdvertisementResponse> response = advertisementService.getActivePopupAdvertisements();
+    public ResponseEntity<CommonResponse<List<AdvertisementResponse>>> getPopupAdvertisements(
+            @AuthenticationPrincipal PrincipalDetails principalDetails) {
+        List<AdvertisementResponse> response = advertisementService.getActivePopupAdvertisements(principalDetails.getUser());
         return ResponseEntity.ok(CommonResponse.success(response));
     }
 
@@ -38,8 +41,9 @@ public class AdvertisementController {
             @ApiResponse(responseCode = "200", description = "조회 성공")
     })
     @GetMapping("/banner")
-    public ResponseEntity<CommonResponse<List<AdvertisementResponse>>> getBannerAdvertisements() {
-        List<AdvertisementResponse> response = advertisementService.getActiveBannerAdvertisements();
+    public ResponseEntity<CommonResponse<List<AdvertisementResponse>>> getBannerAdvertisements(
+            @AuthenticationPrincipal PrincipalDetails principalDetails) {
+        List<AdvertisementResponse> response = advertisementService.getActiveBannerAdvertisements(principalDetails.getUser());
         return ResponseEntity.ok(CommonResponse.success(response));
     }
 
@@ -48,8 +52,9 @@ public class AdvertisementController {
             @ApiResponse(responseCode = "200", description = "조회 성공")
     })
     @GetMapping("/floating")
-    public ResponseEntity<CommonResponse<List<AdvertisementResponse>>> getFloatingAdvertisements() {
-        List<AdvertisementResponse> response = advertisementService.getActiveFloatingAdvertisements();
+    public ResponseEntity<CommonResponse<List<AdvertisementResponse>>> getFloatingAdvertisements(
+            @AuthenticationPrincipal PrincipalDetails principalDetails) {
+        List<AdvertisementResponse> response = advertisementService.getActiveFloatingAdvertisements(principalDetails.getUser());
         return ResponseEntity.ok(CommonResponse.success(response));
     }
 }

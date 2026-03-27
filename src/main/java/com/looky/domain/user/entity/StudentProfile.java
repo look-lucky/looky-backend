@@ -25,7 +25,6 @@ public class StudentProfile {
     @JoinColumn(name = "university_id")
     private University university;
 
-
     @Column
     private Boolean isClubMember;
 

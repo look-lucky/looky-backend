@@ -1,6 +1,7 @@
 package com.looky.domain.advertisement.dto;
 
 import com.looky.domain.advertisement.entity.AdvertisementType;
+import com.looky.domain.user.entity.Gender;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -42,4 +43,13 @@ public class CreateAdvertisementRequest {
     @NotNull(message = "노출 종료일은 필수입니다.")
     @Schema(description = "노출 종료일시", example = "2026-04-30T23:59:59")
     private LocalDateTime endAt;
+
+    @Schema(description = "타겟 대학 ID (없으면 전체 대학 대상)", nullable = true)
+    private Long targetUniversityId;
+
+    @Schema(description = "타겟 단과대 ID (없으면 전체 단과대학 대상, 반드시 대학 ID도 함께 지정해야 함)", nullable = true)
+    private Long targetOrganizationId;
+
+    @Schema(description = "타겟 성별 (없으면 전체 성별 대상, MALE / FEMALE / UNKNOWN)", nullable = true)
+    private Gender targetGender;
 }

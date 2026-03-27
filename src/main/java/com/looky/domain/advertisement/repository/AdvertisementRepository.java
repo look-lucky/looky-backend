@@ -7,6 +7,8 @@ import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -15,7 +17,8 @@ public interface AdvertisementRepository extends JpaRepository<Advertisement, Lo
     List<Advertisement> findAllByAdvertisementTypeAndStatusOrderByDisplayOrderAscIdAsc(AdvertisementType type, AdvertisementStatus status);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    List<Advertisement> findAllByAdvertisementTypeOrderByDisplayOrderAscIdAsc(AdvertisementType type);
+    @Query("SELECT a FROM Advertisement a WHERE a.advertisementType = :type AND a.status = 'ACTIVE' ORDER BY a.displayOrder ASC, a.id ASC")
+    List<Advertisement> findActiveByTypeWithLock(@Param("type") AdvertisementType type);
 
     List<Advertisement> findAllByStatusAndStartAtLessThanEqual(AdvertisementStatus status, LocalDateTime now);
 

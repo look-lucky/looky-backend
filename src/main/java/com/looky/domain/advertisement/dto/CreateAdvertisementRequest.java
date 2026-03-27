@@ -32,9 +32,8 @@ public class CreateAdvertisementRequest {
     @Schema(description = "랜딩 URL (없으면 클릭 불가)", example = "https://event.looky.com/summer", nullable = true)
     private String landingUrl;
 
-    @NotNull(message = "노출 순서는 필수입니다.")
     @Min(value = 0, message = "노출 순서는 0 이상이어야 합니다.")
-    @Schema(description = "노출 순서 (낮을수록 우선 노출)", example = "0")
+    @Schema(description = "노출 순서 (낮을수록 우선 노출, ACTIVE 시작 시만 적용 / 미입력 시 마지막 순서)", example = "0", nullable = true)
     private Integer displayOrder;
 
     @NotNull(message = "노출 시작일은 필수입니다.")
@@ -48,7 +47,7 @@ public class CreateAdvertisementRequest {
     @Schema(description = "타겟 대학 ID 목록 (없으면 전체 대학 대상)", nullable = true)
     private List<Long> targetUniversityIds;
 
-    @Schema(description = "타겟 단과대 ID 목록 (반드시 대학 ID도 함께 지정해야 함)", nullable = true)
+    @Schema(description = "타겟 단과대 ID 목록 (없으면 전체 단과대 대상, 반드시 대학 ID도 함께 지정해야 함)", nullable = true)
     private List<Long> targetOrganizationIds;
 
     @Schema(description = "타겟 성별 (없으면 전체 성별 대상, MALE / FEMALE / UNKNOWN)", nullable = true)

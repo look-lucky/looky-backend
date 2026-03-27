@@ -510,7 +510,7 @@ create table advertisement (
     image_url varchar(500) not null,
     landing_url varchar(500),
     status varchar(20) not null default 'SCHEDULED',
-    display_order int not null default 0,
+    display_order int null,
     start_at datetime(6) not null,
     end_at datetime(6) not null,
     target_gender varchar(10),

@@ -42,7 +42,7 @@ public class Advertisement extends BaseEntity {
     @Column(nullable = false)
     private AdvertisementStatus status;
 
-    @Column(name = "display_order", nullable = false)
+    @Column(name = "display_order")
     private Integer displayOrder;
 
     @Column(name = "start_at", nullable = false)

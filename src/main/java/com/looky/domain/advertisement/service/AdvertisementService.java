@@ -15,7 +15,6 @@ import com.looky.domain.advertisement.repository.AdvertisementRepository;
 import com.looky.domain.advertisement.repository.AdvertisementSpecification;
 import com.looky.domain.organization.entity.Organization;
 import com.looky.domain.organization.entity.OrganizationCategory;
-import com.looky.domain.organization.entity.University;
 import com.looky.domain.organization.repository.OrganizationRepository;
 import com.looky.domain.organization.repository.UniversityRepository;
 import com.looky.domain.organization.repository.UserOrganizationRepository;
@@ -33,6 +32,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -109,10 +109,15 @@ public class AdvertisementService {
                 ? AdvertisementStatus.ACTIVE
                 : AdvertisementStatus.SCHEDULED;
 
-        List<Advertisement> advertisements = advertisementRepository.findAllByAdvertisementTypeOrderByDisplayOrderAscIdAsc(request.getAdvertisementType());
-        int targetOrder = normalizeTargetOrder(request.getDisplayOrder(), advertisements.size());
-
-        shiftOrdersForInsert(advertisements, targetOrder);
+        Integer displayOrder = null;
+        if (initialStatus == AdvertisementStatus.ACTIVE) {
+            List<Advertisement> activeAds = advertisementRepository.findActiveByTypeWithLock(request.getAdvertisementType());
+            int targetOrder = request.getDisplayOrder() != null
+                    ? normalizeTargetOrder(request.getDisplayOrder(), activeAds.size())
+                    : activeAds.size();
+            shiftOrdersForInsert(activeAds, targetOrder);
+            displayOrder = targetOrder;
+        }
 
         Advertisement advertisement = Advertisement.builder()
                 .title(request.getTitle())
@@ -120,7 +125,7 @@ public class AdvertisementService {
                 .imageUrl(request.getImageUrl())
                 .landingUrl(request.getLandingUrl())
                 .status(initialStatus)
-                .displayOrder(targetOrder)
+                .displayOrder(displayOrder)
                 .startAt(request.getStartAt())
                 .endAt(request.getEndAt())
                 .targetGender(request.getTargetGender())
@@ -138,29 +143,53 @@ public class AdvertisementService {
     @Transactional
     public void updateAdvertisement(Long advertisementId, UpdateAdvertisementRequest request) {
         Advertisement advertisement = findAdvertisementById(advertisementId);
+        AdvertisementStatus currentStatus = advertisement.getStatus();
 
+        // 상태 변경 처리 (+ 순서 부여/제거)
+        AdvertisementStatus newStatus = currentStatus;
         if (request.getStatus().isPresent() && request.getStatus().get() != null) {
-            AdvertisementStatus newStatus = request.getStatus().get();
+            newStatus = request.getStatus().get();
             if (newStatus == AdvertisementStatus.SCHEDULED || newStatus == AdvertisementStatus.ENDED) {
                 throw new CustomException(ErrorCode.BAD_REQUEST, "광고 상태는 ACTIVE 또는 INACTIVE만 직접 변경할 수 있습니다.");
+            }
+
+            if (currentStatus == AdvertisementStatus.ACTIVE && newStatus == AdvertisementStatus.INACTIVE) {
+                // ACTIVE → INACTIVE: 순서 제거 후 나머지 재정렬
+                List<Advertisement> activeAds = new ArrayList<>(
+                        advertisementRepository.findActiveByTypeWithLock(advertisement.getAdvertisementType())
+                );
+                advertisement.updateDisplayOrder(null);
+                advertisementRepository.flush();
+                activeAds.removeIf(ad -> ad.getId().equals(advertisementId));
+                reassignSequentialOrders(activeAds);
+            } else if (currentStatus != AdvertisementStatus.ACTIVE && newStatus == AdvertisementStatus.ACTIVE) {
+                // 비활성 → ACTIVE: 순서 부여
+                List<Advertisement> activeAds = advertisementRepository.findActiveByTypeWithLock(advertisement.getAdvertisementType());
+                Integer requestedOrder = request.getDisplayOrder().isPresent() ? request.getDisplayOrder().get() : null;
+                int targetOrder = requestedOrder != null
+                        ? normalizeTargetOrder(requestedOrder, activeAds.size())
+                        : activeAds.size();
+                shiftOrdersForInsert(activeAds, targetOrder);
+                advertisement.updateDisplayOrder(targetOrder);
             }
             advertisement.updateStatus(newStatus);
         }
 
-        if (request.getDisplayOrder().isPresent()) {
-            Integer displayOrder = request.getDisplayOrder().get();
-            if (displayOrder == null) {
-                throw new CustomException(ErrorCode.BAD_REQUEST, "노출 순서는 필수입니다.");
-            }
-            if (displayOrder < 0) {
+        // displayOrder 변경 처리 (ACTIVE 유지 시만 적용)
+        if (currentStatus == AdvertisementStatus.ACTIVE && newStatus == AdvertisementStatus.ACTIVE
+                && request.getDisplayOrder().isPresent() && request.getDisplayOrder().get() != null) {
+            int requestedOrder = request.getDisplayOrder().get();
+            if (requestedOrder < 0) {
                 throw new CustomException(ErrorCode.BAD_REQUEST, "노출 순서는 0 이상이어야 합니다.");
             }
+            List<Advertisement> activeAds = advertisementRepository.findActiveByTypeWithLock(advertisement.getAdvertisementType());
+            int targetOrder = normalizeTargetOrder(requestedOrder, activeAds.size() - 1);
+            reorderAdvertisement(activeAds, advertisement, targetOrder);
         }
 
         String updatedTitle = request.getTitle().orElse(advertisement.getTitle());
         String updatedImageUrl = request.getImageUrl().orElse(advertisement.getImageUrl());
         String updatedLandingUrl = request.getLandingUrl().orElse(advertisement.getLandingUrl());
-        Integer updatedDisplayOrder = request.getDisplayOrder().orElse(advertisement.getDisplayOrder());
         LocalDateTime updatedStartAt = request.getStartAt().orElse(advertisement.getStartAt());
         LocalDateTime updatedEndAt = request.getEndAt().orElse(advertisement.getEndAt());
         Gender updatedTargetGender = request.getTargetGender().isPresent()
@@ -176,15 +205,7 @@ public class AdvertisementService {
             s3Service.deleteFile(advertisement.getImageUrl());
         }
 
-        if (request.getDisplayOrder().isPresent()) {
-            List<Advertisement> advertisements = advertisementRepository
-                    .findAllByAdvertisementTypeOrderByDisplayOrderAscIdAsc(advertisement.getAdvertisementType());
-            int targetOrder = normalizeTargetOrder(updatedDisplayOrder, advertisements.size() - 1);
-            reorderAdvertisement(advertisements, advertisement, targetOrder);
-            updatedDisplayOrder = targetOrder;
-        }
-
-        advertisement.update(updatedTitle, updatedImageUrl, updatedLandingUrl, updatedDisplayOrder, updatedStartAt, updatedEndAt, updatedTargetGender);
+        advertisement.update(updatedTitle, updatedImageUrl, updatedLandingUrl, advertisement.getDisplayOrder(), updatedStartAt, updatedEndAt, updatedTargetGender);
 
         if (request.getTargetUniversityIds().isPresent() || request.getTargetOrganizationIds().isPresent()) {
             List<Long> updatedUniversityIds = request.getTargetUniversityIds().isPresent()
@@ -211,16 +232,20 @@ public class AdvertisementService {
     @Transactional
     public void deleteAdvertisement(Long advertisementId) {
         Advertisement advertisement = findAdvertisementById(advertisementId);
-        List<Advertisement> advertisements = new ArrayList<>(
-                advertisementRepository.findAllByAdvertisementTypeOrderByDisplayOrderAscIdAsc(advertisement.getAdvertisementType())
-        );
+        boolean wasActive = advertisement.getStatus() == AdvertisementStatus.ACTIVE;
+
+        List<Advertisement> activeAds = wasActive
+                ? new ArrayList<>(advertisementRepository.findActiveByTypeWithLock(advertisement.getAdvertisementType()))
+                : null;
 
         s3Service.deleteFile(advertisement.getImageUrl());
         advertisementRepository.delete(advertisement);
         advertisementRepository.flush();
 
-        advertisements.removeIf(target -> target.getId().equals(advertisementId));
-        reassignSequentialOrders(advertisements);
+        if (wasActive) {
+            activeAds.removeIf(ad -> ad.getId().equals(advertisementId));
+            reassignSequentialOrders(activeAds);
+        }
     }
 
     // --- 스케줄러 ---
@@ -230,7 +255,20 @@ public class AdvertisementService {
     public void activateScheduledAdvertisements() {
         List<Advertisement> targets = advertisementRepository
                 .findAllByStatusAndStartAtLessThanEqual(AdvertisementStatus.SCHEDULED, LocalDateTime.now());
-        targets.forEach(advertisement -> advertisement.updateStatus(AdvertisementStatus.ACTIVE));
+        if (targets.isEmpty()) return;
+
+        Map<AdvertisementType, List<Advertisement>> byType = targets.stream()
+                .collect(Collectors.groupingBy(Advertisement::getAdvertisementType));
+
+        for (Map.Entry<AdvertisementType, List<Advertisement>> entry : byType.entrySet()) {
+            List<Advertisement> activeAds = advertisementRepository.findActiveByTypeWithLock(entry.getKey());
+            int startOrder = activeAds.size();
+            List<Advertisement> toActivate = entry.getValue();
+            for (int i = 0; i < toActivate.size(); i++) {
+                toActivate.get(i).updateDisplayOrder(startOrder + i);
+                toActivate.get(i).updateStatus(AdvertisementStatus.ACTIVE);
+            }
+        }
         log.info("[Scheduler] 광고 활성화 {}건 완료", targets.size());
     }
 
@@ -239,7 +277,22 @@ public class AdvertisementService {
     public void endExpiredAdvertisements() {
         List<Advertisement> targets = advertisementRepository
                 .findAllByStatusAndEndAtLessThan(AdvertisementStatus.ACTIVE, LocalDateTime.now());
-        targets.forEach(advertisement -> advertisement.updateStatus(AdvertisementStatus.ENDED));
+        if (targets.isEmpty()) return;
+
+        Set<AdvertisementType> affectedTypes = targets.stream()
+                .map(Advertisement::getAdvertisementType)
+                .collect(Collectors.toSet());
+
+        targets.forEach(ad -> {
+            ad.updateDisplayOrder(null);
+            ad.updateStatus(AdvertisementStatus.ENDED);
+        });
+        advertisementRepository.flush();
+
+        for (AdvertisementType type : affectedTypes) {
+            List<Advertisement> remainingActiveAds = advertisementRepository.findActiveByTypeWithLock(type);
+            reassignSequentialOrders(remainingActiveAds);
+        }
         log.info("[Scheduler] 광고 만료 처리 {}건 완료", targets.size());
     }
 

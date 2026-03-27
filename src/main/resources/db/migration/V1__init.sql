@@ -517,20 +517,20 @@ create table advertisement (
     constraint uk_advertisement_type_display_order unique (advertisement_type, display_order)
 );
 
-create table advertisement_target_university (
+create table advertisement_university (
     id bigint auto_increment primary key,
     advertisement_id bigint not null,
     university_id bigint not null,
-    constraint fk_adv_target_university_adv foreign key (advertisement_id) references advertisement (advertisement_id),
-    constraint fk_adv_target_university_univ foreign key (university_id) references university (university_id)
+    constraint fk_adv_university_adv foreign key (advertisement_id) references advertisement (advertisement_id),
+    constraint fk_adv_university_univ foreign key (university_id) references university (university_id)
 );
 
-create table advertisement_target_organization (
+create table advertisement_organization (
     id bigint auto_increment primary key,
     advertisement_id bigint not null,
     organization_id bigint not null,
-    constraint fk_adv_target_org_adv foreign key (advertisement_id) references advertisement (advertisement_id),
-    constraint fk_adv_target_org_org foreign key (organization_id) references organization (organization_id)
+    constraint fk_adv_organization_adv foreign key (advertisement_id) references advertisement (advertisement_id),
+    constraint fk_adv_organization_org foreign key (organization_id) references organization (organization_id)
 );
 
 /* 외래 키 제약 조건 검사를 다시 켭니다 */

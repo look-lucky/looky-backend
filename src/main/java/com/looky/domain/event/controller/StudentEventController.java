@@ -7,7 +7,6 @@ import com.looky.domain.event.dto.EventResponse;
 import com.looky.domain.event.entity.EventStatus;
 import com.looky.domain.event.entity.EventType;
 import com.looky.domain.event.service.EventService;
-import com.looky.domain.user.entity.Role;
 import com.looky.security.details.PrincipalDetails;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -25,15 +24,15 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@Tag(name = "Event", description = "이벤트 조회 API")
+@Tag(name = "Student Event", description = "학생 이벤트 조회 API")
 @RestController
-@RequestMapping("/api/events")
+@RequestMapping("/api/student/events")
 @RequiredArgsConstructor
-public class EventController {
+public class StudentEventController {
 
     private final EventService eventService;
 
-    @Operation(summary = "[공통] 이벤트 단건 조회", description = "이벤트 ID로 상세 정보를 조회합니다.")
+    @Operation(summary = "[학생] 이벤트 단건 조회", description = "이벤트 ID로 상세 정보를 조회합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "조회 성공"),
             @ApiResponse(responseCode = "404", description = "이벤트 없음", content = @Content(schema = @Schema(implementation = SwaggerErrorResponse.class)))
@@ -45,7 +44,7 @@ public class EventController {
         return ResponseEntity.ok(CommonResponse.success(response));
     }
 
-    @Operation(summary = "[공통] 이벤트 목록 조회", description = "이벤트 목록을 페이징하여 조회합니다. 이벤트 타입 복수선택 가능.")
+    @Operation(summary = "[학생] 이벤트 목록 조회", description = "소속 대학 기준으로 이벤트 목록을 조회합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "조회 성공")
     })
@@ -55,15 +54,9 @@ public class EventController {
             @Parameter(description = "검색 키워드 (제목)") @RequestParam(required = false) String keyword,
             @Parameter(description = "이벤트 타입 필터 (복수 선택 가능)") @RequestParam(required = false) List<EventType> eventTypes,
             @Parameter(description = "상태 필터") @RequestParam(required = false) EventStatus status,
-            @Parameter(description = "대학 ID") @RequestParam(required = false) Long universityId,
             @Parameter(description = "페이징 정보") @PageableDefault(size = 10) Pageable pageable) {
-        // 임시 코드. dev 브랜치 병합 후 제거
-        if (principalDetails != null && principalDetails.getUser().getRole() == Role.ROLE_STUDENT) {
-            Long userId = principalDetails.getUser().getId();
-            PageResponse<EventResponse> response = eventService.getEventsForStudent(userId, keyword, eventTypes, status, pageable);
-            return ResponseEntity.ok(CommonResponse.success(response));
-        }
-        PageResponse<EventResponse> response = eventService.getEvents(keyword, eventTypes, status, universityId, pageable);
+        Long userId = principalDetails.getUser().getId();
+        PageResponse<EventResponse> response = eventService.getEventsForStudent(userId, keyword, eventTypes, status, pageable);
         return ResponseEntity.ok(CommonResponse.success(response));
     }
 }
